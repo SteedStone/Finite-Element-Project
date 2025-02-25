@@ -92,7 +92,7 @@ void geoMeshGenerate() {
             
             int points[6], innerPoints[6];
             for (int k = 0; k < 6; k++) {
-                double angle = M_PI / 3 * k;
+                double angle = M_PI / 3 * k + M_PI / 6;
                 double px = x + hexRadius * cos(angle);
                 double py = y + hexRadius * sin(angle);
                 points[k] = gmshModelOccAddPoint(px, py, 0, meshSize, -1, &ierr);
@@ -123,41 +123,52 @@ void geoMeshGenerate() {
     }
     
     
-    // Création d'un grand rectangle englobant la structure
-    int rectPoints[4];
-    rectPoints[0] = gmshModelOccAddPoint(-hexRadius, -hexRadius, 0, meshSize, -1, &ierr);
-    rectPoints[1] = gmshModelOccAddPoint(numHexX * 1.5 * hexRadius, -hexRadius, 0, meshSize, -1, &ierr);
-    rectPoints[2] = gmshModelOccAddPoint(numHexX * 1.5 * hexRadius, numHexY * sqrt(3) * hexRadius, 0, meshSize, -1, &ierr);
-    rectPoints[3] = gmshModelOccAddPoint(-hexRadius, numHexY * sqrt(3) * hexRadius, 0, meshSize, -1, &ierr);
-    
-    int rectLines[4];
-    for (int k = 0; k < 4; k++) {
-        rectLines[k] = gmshModelOccAddLine(rectPoints[k], rectPoints[(k + 1) % 4], -1, &ierr);
-        ErrorGmsh(ierr);
-    }
-    
-    int rectWire = gmshModelOccAddWire(rectLines, 4, -1, 1, &ierr);
-    ErrorGmsh(ierr);
-    
-    // Fusionner tous les contours (grande plaque - petits hexagones)
-    int allWires[200];
-    int totalWires = 0;
-    
-    // Ajouter la plaque principale
-    for (int i = 0; i < wireCount; i++)
-        allWires[totalWires++] = mainWireTags[i];
-
-    // Ajouter les petits hexagones à soustraire
-    for (int i = 0; i < innerWireCount; i++)
-        allWires[totalWires++] = innerWireTags[i];
-
-    // Création de la surface principale avec les trous hexagonaux
-    int surface = gmshModelOccAddPlaneSurface(allWires, totalWires, rectWire, &ierr);
-    ErrorGmsh(ierr);
-    
+        // Synchronisation de la géométrie avant de créer les surfaces
+        // Synchronisation avant d'ajouter les surfaces
+    // Synchronisation avant de créer les surfaces
     gmshModelOccSynchronize(&ierr);
-    gmshOptionSetNumber("Mesh.SaveAll", 1, &ierr);
+    ErrorGmsh(ierr);
+
+    // Création d'un tableau contenant tous les contours et les trous
+    int allWireTags[wireCount + innerWireCount];
+
+    // Premier élément : le contour extérieur
+    for (int i = 0; i < wireCount; i++) {
+        allWireTags[i] = mainWireTags[i];
+    }
+
+    // Ajout des trous (en négatif)
+    for (int i = 0; i < innerWireCount; i++) {
+        allWireTags[wireCount + i] = innerWireTags[i];  // Déjà négatif si défini ainsi
+    }
+
+    // Création de la surface plane
+    int surfaceTag;
+    gmshModelOccAddPlaneSurface(allWireTags, wireCount + innerWireCount, -1, &ierr);
+    ErrorGmsh(ierr);
+
+    // Synchronisation après ajout des surfaces
+    gmshModelOccSynchronize(&ierr);
+    ErrorGmsh(ierr);
+
+    // Génération du maillage
     gmshModelMeshGenerate(2, &ierr);
+    ErrorGmsh(ierr);
+
+    // Affichage dans Gmsh
+    gmshFltkRun(&ierr);
+    ErrorGmsh(ierr);
+
+    // Sauvegarde du fichier maillé
+    gmshWrite("hexagons.msh", &ierr);
+    ErrorGmsh(ierr);
+
+
+
+        
+    // gmshModelOccSynchronize(&ierr);
+    // gmshOptionSetNumber("Mesh.SaveAll", 1, &ierr);
+    // gmshModelMeshGenerate(2, &ierr);
 //
 //  -2- D�finition de la fonction callback pour la taille de r�f�rence
 //      Synchronisation de OpenCascade avec gmsh

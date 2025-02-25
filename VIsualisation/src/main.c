@@ -52,20 +52,20 @@ int main(void)
     geoMeshGenerate();
     geoMeshImport();
     
-    geoSetDomainName(0,"Outer Disk");
-    geoSetDomainName(1,"Bottom");
-    geoSetDomainName(2,"Left");
-    geoSetDomainName(3,"Right");
-    geoSetDomainName(4,"Top");
-    geoSetDomainName(5,"Inner Disk");
+    // geoSetDomainName(0,"Outer Disk");
+    // geoSetDomainName(1,"Bottom");
+    // geoSetDomainName(2,"Left");
+    // geoSetDomainName(3,"Right");
+    // geoSetDomainName(4,"Top");
+    // geoSetDomainName(5,"Inner Disk");
     
 
 //
 //  -2- Creation du fichier du maillage
 //
     
-    char filename[] = "data/mesh.txt";
-    geoMeshWrite(filename);
+    // char filename[] = "data/mesh.txt";
+    // geoMeshWrite(filename);
 
 //
 //  -3- Champ de la taille de r�f�rence du maillage
