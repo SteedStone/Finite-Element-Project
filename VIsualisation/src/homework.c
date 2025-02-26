@@ -156,6 +156,11 @@ void geoMeshGenerate() {
     int surfaceBar = gmshModelOccAddPlaneSurface(&wireBar, 1, -1, &ierr);
     ErrorGmsh(ierr);
 
+    int idPlate = gmshModelOccAddRectangle(-hexRadius,-hexRadius*1.2 , 0.0,(xMax - xMin ) , hBar, -1, 0,&ierr);   
+    ErrorGmsh(ierr);
+
+
+
     // Synchronisation après ajout de la plaque
     gmshModelOccSynchronize(&ierr);
     ErrorGmsh(ierr);
