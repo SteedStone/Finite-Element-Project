@@ -76,8 +76,8 @@ void geoMeshGenerate() {
     femGeo* theGeometry = geoGetGeometry();
 
     double hexRadius = theGeometry->hexRadius;  // Rayon de l'hexagone
-    int numHexX = 5;  // Nombre d'hexagones en largeur
-    int numHexY = 5;  // Nombre d'hexagones en hauteur
+    int numHexX = 10;  // Nombre d'hexagones en largeur
+    int numHexY = 10;  // Nombre d'hexagones en hauteur
     int ierr;
     double meshSize = 0.1;
 
@@ -125,8 +125,8 @@ void geoMeshGenerate() {
     // Création d'un grand rectangle englobant la structure
     int rectPoints[4];
     rectPoints[0] = gmshModelOccAddPoint(-hexRadius, -hexRadius, 0, meshSize, -1, &ierr);
-    rectPoints[1] = gmshModelOccAddPoint(numHexX * 1.5 * hexRadius, -hexRadius, 0, meshSize, -1, &ierr);
-    rectPoints[2] = gmshModelOccAddPoint(numHexX * 1.5 * hexRadius, numHexY * sqrt(3) * hexRadius, 0, meshSize, -1, &ierr);
+    rectPoints[1] = gmshModelOccAddPoint((numHexX -1)* 1.5* hexRadius + hexRadius, -hexRadius, 0, meshSize, -1, &ierr);
+    rectPoints[2] = gmshModelOccAddPoint((numHexX -1 ) * 1.5 * hexRadius + hexRadius, numHexY * sqrt(3) * hexRadius, 0, meshSize, -1, &ierr);
     rectPoints[3] = gmshModelOccAddPoint(-hexRadius, numHexY * sqrt(3) * hexRadius, 0, meshSize, -1, &ierr);
 
     int rectLines[4];
