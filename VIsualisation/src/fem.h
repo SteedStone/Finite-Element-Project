@@ -47,6 +47,7 @@ typedef struct {
 } femDomain;
 
 
+
 typedef struct {
     double xPlate, yPlate, LxPlate, LyPlate;
     double xHole, yHole, rHole, hHole, dHole;
@@ -59,6 +60,8 @@ typedef struct {
     femMesh  *theEdges;
     int nDomains;
     femDomain **theDomains;
+    double triBase;   // Base des triangles
+    double triHeight;
 } femGeo;
 
 void                geoInitialize();

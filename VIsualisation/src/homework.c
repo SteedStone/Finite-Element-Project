@@ -76,8 +76,8 @@ void geoMeshGenerate() {
     femGeo* theGeometry = geoGetGeometry();
     
     double hexRadius = theGeometry->hexRadius;  // Rayon de l'hexagone
-    int numHexX = 5;  // Nombre d'hexagones en largeur
-    int numHexY = 5;  // Nombre d'hexagones en hauteur
+    int numHexX = 10;  // Nombre d'hexagones en largeur
+    int numHexY = 10;  // Nombre d'hexagones en hauteur
     int ierr;
     double meshSize = 0.1;
     
@@ -92,7 +92,7 @@ void geoMeshGenerate() {
             
             int points[6], innerPoints[6];
             for (int k = 0; k < 6; k++) {
-                double angle = M_PI / 3 * k + M_PI / 6;
+                double angle = M_PI / 3 * k ;
                 double px = x + hexRadius * cos(angle);
                 double py = y + hexRadius * sin(angle);
                 points[k] = gmshModelOccAddPoint(px, py, 0, meshSize, -1, &ierr);
@@ -122,12 +122,49 @@ void geoMeshGenerate() {
         }
     }
     
-    
-        // Synchronisation de la géométrie avant de créer les surfaces
-        // Synchronisation avant d'ajouter les surfaces
-    // Synchronisation avant de créer les surfaces
+        // Définition de la hauteur de la barre supérieure
+    double hBar = hexRadius/3;  // Hauteur égale au rayon d'un hexagone (modifiable)
+    double yMax = numHexY * sqrt(3) * hexRadius;  
+    double xMin = -hexRadius;
+    double xMax = (numHexX - 1) * 1.5 * hexRadius + hexRadius;
+
+    // Ajout des quatre points du rectangle
+    int pointBL = gmshModelOccAddPoint(xMin, yMax, 0, meshSize, -1, &ierr);  // Bas-gauche
+    ErrorGmsh(ierr);
+    int pointBR = gmshModelOccAddPoint(xMax, yMax, 0, meshSize, -1, &ierr);  // Bas-droit
+    ErrorGmsh(ierr);
+    int pointTL = gmshModelOccAddPoint(xMin, yMax + hBar, 0, meshSize, -1, &ierr);  // Haut-gauche
+    ErrorGmsh(ierr);
+    int pointTR = gmshModelOccAddPoint(xMax, yMax + hBar, 0, meshSize, -1, &ierr);  // Haut-droit
+    ErrorGmsh(ierr);
+        
+        // Création des segments du rectangle
+    int lineBottom = gmshModelOccAddLine(pointBL, pointBR, -1, &ierr);
+    ErrorGmsh(ierr);
+    int lineRight = gmshModelOccAddLine(pointBR, pointTR, -1, &ierr);
+    ErrorGmsh(ierr);
+    int lineTop = gmshModelOccAddLine(pointTR, pointTL, -1, &ierr);
+    ErrorGmsh(ierr);
+    int lineLeft = gmshModelOccAddLine(pointTL, pointBL, -1, &ierr);
+    ErrorGmsh(ierr);
+
+        // Création d'un contour fermé (Wire) pour la surface
+    int wireBar = gmshModelOccAddWire((int[]){lineBottom, lineRight, lineTop, lineLeft}, 4, -1, 1, &ierr);
+    ErrorGmsh(ierr);
+
+    // Création de la surface rectangulaire
+    int surfaceBar = gmshModelOccAddPlaneSurface(&wireBar, 1, -1, &ierr);
+    ErrorGmsh(ierr);
+
+    // Synchronisation après ajout de la plaque
     gmshModelOccSynchronize(&ierr);
     ErrorGmsh(ierr);
+
+    // Génération du maillage
+    gmshModelMeshGenerate(2, &ierr);
+    ErrorGmsh(ierr);
+
+
 
     // Création d'un tableau contenant tous les contours et les trous
     int allWireTags[wireCount + innerWireCount];
@@ -143,13 +180,28 @@ void geoMeshGenerate() {
     }
 
     // Création de la surface plane
-    int surfaceTag;
-    gmshModelOccAddPlaneSurface(allWireTags, wireCount + innerWireCount, -1, &ierr);
-    ErrorGmsh(ierr);
+
+    
+
+
+    int surfaceTags[wireCount];
+
+    for (int i = 0; i < wireCount; i++) {
+        int singleWire[2] = {mainWireTags[i], innerWireTags[i]}; // Associe chaque hexagone à son trou
+        surfaceTags[i] = gmshModelOccAddPlaneSurface(singleWire, 2, -1, &ierr);
+        ErrorGmsh(ierr);
+    }
+    
+    
 
     // Synchronisation après ajout des surfaces
     gmshModelOccSynchronize(&ierr);
     ErrorGmsh(ierr);
+
+
+
+
+    
 
     // Génération du maillage
     gmshModelMeshGenerate(2, &ierr);
@@ -195,3 +247,6 @@ void geoMeshGenerate() {
 
     
 }
+
+
+
