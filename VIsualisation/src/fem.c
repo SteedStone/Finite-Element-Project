@@ -279,3 +279,462 @@ void femWarning(char *text, int line, char *file)
     printf("\n  Warning in %s at line %d : \n  %s\n", file, line, text);
     printf("--------------------------------------------------------------------- Yek Yek !! \n\n");                                              
 }
+
+void trianglePlot(double x, double y) {
+   
+  
+
+
+
+
+
+
+    femGeo* theGeometry = geoGetGeometry();
+
+    double hexRadius = theGeometry->hexRadius;
+    int numHexX = 20;
+    int numHexY = 10;
+    int ierr;
+    double meshSize = 0.1;
+    double distance = hexRadius*1.1; // Distance entre les lignes
+    int mainWireTags[1000];
+    int innerWireTags[1000];
+    int wireCount = 0, innerWireCount = 0;
+
+    for (int i = 0; i < numHexX; i++) {
+        for (int j = 0; j < numHexY; j++) {
+            double x = i * 1.3 * hexRadius;
+            double y = j * distance - hexRadius;
+
+            int innerPoints[3];
+
+            if (i % 2 == 0) {
+                innerPoints[0] = gmshModelOccAddPoint(x, y, 0, meshSize, -1, &ierr);
+                innerPoints[1] = gmshModelOccAddPoint(x + hexRadius, y + sqrt(3) * hexRadius / 2, 0, meshSize, -1, &ierr);
+                innerPoints[2] = gmshModelOccAddPoint(x - hexRadius, y + sqrt(3) * hexRadius / 2, 0, meshSize, -1, &ierr);
+            } else {
+                innerPoints[0] = gmshModelOccAddPoint(x, y + sqrt(3) * hexRadius / 2, 0, meshSize, -1, &ierr);
+                innerPoints[1] = gmshModelOccAddPoint(x + hexRadius, y, 0, meshSize, -1, &ierr);
+                innerPoints[2] = gmshModelOccAddPoint(x - hexRadius, y, 0, meshSize, -1, &ierr);
+            }
+
+            ErrorGmsh(ierr);
+
+            int innerLines[3];
+            for (int k = 0; k < 3; k++) {
+                innerLines[k] = gmshModelOccAddLine(innerPoints[k], innerPoints[(k + 1) % 3], -1, &ierr);
+                ErrorGmsh(ierr);
+            }
+
+            int innerWire = gmshModelOccAddWire(innerLines, 3, -1, 1, &ierr);
+            ErrorGmsh(ierr);
+
+            innerWireTags[innerWireCount++] = innerWire;
+        }
+    }
+
+    int rectPoints[4];
+    rectPoints[0] = gmshModelOccAddPoint(0, 0, 0, meshSize, -1, &ierr);
+    rectPoints[1] = gmshModelOccAddPoint(numHexX * 1.3 * hexRadius - (1.5)*hexRadius, 0, 0, meshSize, -1, &ierr);
+    rectPoints[2] = gmshModelOccAddPoint(numHexX * 1.3 * hexRadius - (1.5)*hexRadius, numHexY * distance - hexRadius, 0, meshSize, -1, &ierr);
+    rectPoints[3] = gmshModelOccAddPoint(0, numHexY * distance - hexRadius, 0, meshSize, -1, &ierr);
+
+    int rectLines[4];
+    for (int k = 0; k < 4; k++) {
+        rectLines[k] = gmshModelOccAddLine(rectPoints[k], rectPoints[(k + 1) % 4], -1, &ierr);
+        ErrorGmsh(ierr);
+    }
+
+    int rectWire = gmshModelOccAddWire(rectLines, 4, -1, 1, &ierr);
+    ErrorGmsh(ierr);
+
+    int plateSurface = gmshModelOccAddPlaneSurface(&rectWire, 1, -1, &ierr);
+    ErrorGmsh(ierr);
+
+    int triSurfaces[100];
+    for (int i = 0; i < innerWireCount; i++) {
+        triSurfaces[i] = gmshModelOccAddPlaneSurface(&innerWireTags[i], 1, -1, &ierr);
+        ErrorGmsh(ierr);
+    }
+
+    int notch[innerWireCount][2];
+    for (int i = 0; i < innerWireCount; i++) {
+        notch[i][0] = 2;
+        notch[i][1] = triSurfaces[i];
+    }
+
+    int plate[2] = {2, plateSurface};
+    gmshModelOccCut(plate, 2, (int *)notch, 2 * innerWireCount, NULL, NULL, NULL, NULL, NULL, -1, 1, 1, &ierr);
+    ErrorGmsh(ierr);
+
+    gmshModelOccSynchronize(&ierr);
+    ErrorGmsh(ierr);
+
+    gmshModelMeshGenerate(2, &ierr);
+    ErrorGmsh(ierr);
+
+    gmshFltkRun(&ierr);
+    ErrorGmsh(ierr);
+}
+
+void HexagonPlot(double x, double y){
+
+//
+//  -1- Construction de la g�om�trie avec OpenCascade
+//      On cr�e le rectangle
+//      On cr�e les deux cercles
+//      On soustrait les cercles du rectangle :-)
+//
+    
+    femGeo* theGeometry = geoGetGeometry();
+
+    double hexRadius = theGeometry->hexRadius;  // Rayon de l'hexagone
+    int numHexX = 5;  // Nombre d'hexagones en largeur
+    int numHexY = 5;  // Nombre d'hexagones en hauteur
+    int ierr;
+    double meshSize = 0.1;
+
+    int mainWireTags[100]; // Contient tous les hexagones extérieurs
+    int innerWireTags[100]; // Contient les petits hexagones à soustraire
+    int trianglecoteTags[100]; // Contient les triangles à soustraire
+    int quadrilatèreTags[100]; // Contient les quadrilatères à soustraire
+    int losangeTags[100]; // Contient les losanges à soustraire
+    
+
+    int wireCount = 0, innerWireCount = 0, triangleWireCount = 0, quadrilatèreWireCount = 0, losangeWireCount = 0;
+
+    for (int i = 0; i < numHexX; i++) {
+        for (int j = 0; j < numHexY; j++) {
+            double x = i * 1.5 * hexRadius;
+            double y = j * sqrt(3) * hexRadius + (i % 2) * sqrt(3) * hexRadius / 2;
+            int trianglecotePoints[3], trianglecoteLines[3], previoustrianglepoints[numHexY];
+            if (j == 0 && i == 0) {
+                for (int k = 0; k < 2; k++)
+                {
+                    double angle = M_PI / 3 * (k+3);
+                    double px = x + hexRadius * cos(angle);
+                    double py = y + hexRadius * sin(angle);
+                    trianglecotePoints[k] = gmshModelOccAddPoint(px, py, 0, meshSize, -1, &ierr);
+                    ErrorGmsh(ierr);
+                }
+                trianglecotePoints[2] = gmshModelOccAddPoint(-hexRadius, -hexRadius*sqrt(3)/2, 0, meshSize, -1, &ierr);
+                previoustrianglepoints[0] = gmshModelOccAddPoint(hexRadius * cos(M_PI), hexRadius*sin(M_PI), 0, meshSize, -1, &ierr);
+                ErrorGmsh(ierr);
+                for (int k = 0; k < 3; k++)
+                {
+                    trianglecoteLines[k] = gmshModelOccAddLine(trianglecotePoints[k], trianglecotePoints[(k+1)%3], -1, &ierr);
+                    ErrorGmsh(ierr);
+                }
+                
+            }
+            if(i == 0 && j > 0 ) {
+                for (int k = 0; k < 2; k++)
+                {
+                    double angle = M_PI / 3 * (k+3);
+                    double px = x + hexRadius * cos(angle);
+                    double py = y + hexRadius * sin(angle);
+                    trianglecotePoints[k] = gmshModelOccAddPoint(px, py, 0, meshSize, -1, &ierr);
+                    ErrorGmsh(ierr);
+                }
+                trianglecotePoints[2] = previoustrianglepoints[j-1];
+                previoustrianglepoints[j] = gmshModelOccAddPoint(hexRadius * cos(M_PI) + x, hexRadius*sin(M_PI)+ y, 0, meshSize, -1, &ierr);
+                ErrorGmsh(ierr);
+                for (int k = 0; k < 3; k++)
+                {
+                    trianglecoteLines[k] = gmshModelOccAddLine(trianglecotePoints[k], trianglecotePoints[(k+1)%3], -1, &ierr);
+                    ErrorGmsh(ierr);
+                }
+            }
+            if(i == numHexX-1 && j == 0) {
+                for (int k = 0; k < 2; k++)
+                {
+                    double angle = -M_PI / 3 * (k);
+                    double px = x + hexRadius * cos(angle);
+                    double py = y + hexRadius * sin(angle);
+                    trianglecotePoints[k] = gmshModelOccAddPoint(px, py, 0, meshSize, -1, &ierr);
+                    ErrorGmsh(ierr);
+                }
+                trianglecotePoints[2] = gmshModelOccAddPoint((numHexX -1)* 1.5* hexRadius + hexRadius, -hexRadius*sqrt(3)/2, 0, meshSize, -1, &ierr);
+                previoustrianglepoints[0] = gmshModelOccAddPoint(hexRadius * cos(0)+ x, hexRadius*sin(0), 0, meshSize, -1, &ierr);
+                ErrorGmsh(ierr);
+                for (int k = 0; k < 3; k++)
+                {
+                    trianglecoteLines[k] = gmshModelOccAddLine(trianglecotePoints[k], trianglecotePoints[(k+1)%3], -1, &ierr);
+                    ErrorGmsh(ierr);
+                }
+            }
+            if(i == numHexX-1 && j > 0 ) {
+                for (int k = 0; k < 2; k++)
+                {
+                    double angle = -M_PI / 3 * (k);
+                    double px = x + hexRadius * cos(angle);
+                    double py = y + hexRadius * sin(angle);
+                    trianglecotePoints[k] = gmshModelOccAddPoint(px, py, 0, meshSize, -1, &ierr);
+                    ErrorGmsh(ierr);
+                }
+                trianglecotePoints[2] = previoustrianglepoints[j-1];
+                previoustrianglepoints[j] = gmshModelOccAddPoint(hexRadius * cos(0) + x, hexRadius*sin(0)+ y, 0, meshSize, -1, &ierr);
+                ErrorGmsh(ierr);
+                for (int k = 0; k < 3; k++)
+                {
+                    trianglecoteLines[k] = gmshModelOccAddLine(trianglecotePoints[k], trianglecotePoints[(k+1)%3], -1, &ierr);
+                    ErrorGmsh(ierr);
+                }
+            }
+            int quadrilaterePoints[5], quadrilatereLines[5];
+            if( i == 0 && j == numHexY - 1) {
+                for (int k = 0; k < 3; k++)
+                {
+                    double angle = M_PI / 3 * (k+1);
+                    double px = x + hexRadius * cos(angle);
+                    double py = y + hexRadius * sin(angle);
+                    quadrilaterePoints[k] = gmshModelOccAddPoint(px, py, 0, meshSize, -1, &ierr);
+                    ErrorGmsh(ierr);
+                }
+                quadrilaterePoints[3] = gmshModelOccAddPoint(-hexRadius, numHexY * sqrt(3) * hexRadius, 0, meshSize, -1, &ierr);
+                quadrilaterePoints[4] = gmshModelOccAddPoint(1 * 1.5 * hexRadius + hexRadius * cos(M_PI/3 * 2), j * sqrt(3) * hexRadius + (1 % 2) * sqrt(3) * hexRadius / 2 + hexRadius * sin(M_PI/3 * 2), 0, meshSize, -1, &ierr);
+                ErrorGmsh(ierr);
+                for (int k = 0; k < 5; k++)
+                {
+                    quadrilatereLines[k] = gmshModelOccAddLine(quadrilaterePoints[k], quadrilaterePoints[(k+1)%5], -1, &ierr);
+                    ErrorGmsh(ierr);
+                }
+            }
+            if( i == numHexX - 1 && j == numHexY - 1 ){
+                for (int k = 0; k < 3; k++)
+                {
+                    double angle = M_PI / 3 * (k);
+                    double px = x + hexRadius * cos(angle);
+                    double py = y + hexRadius * sin(angle);
+                    quadrilaterePoints[k] = gmshModelOccAddPoint(px, py, 0, meshSize, -1, &ierr);
+                    ErrorGmsh(ierr);
+                }
+                quadrilaterePoints[4] = gmshModelOccAddPoint((numHexX -1 ) * 1.5 * hexRadius + hexRadius, numHexY * sqrt(3) * hexRadius, 0, meshSize, -1, &ierr);
+                quadrilaterePoints[3] = gmshModelOccAddPoint((numHexX - 2) * 1.5 * hexRadius + hexRadius * cos(M_PI/3 ), j * sqrt(3) * hexRadius + ((numHexX - 2) % 2) * sqrt(3) * hexRadius / 2 + hexRadius * sin(M_PI/3 ), 0, meshSize, -1, &ierr);
+                ErrorGmsh(ierr);
+                for (int k = 0; k < 5; k++)
+                {
+                    quadrilatereLines[k] = gmshModelOccAddLine(quadrilaterePoints[k], quadrilaterePoints[(k+1)%5], -1, &ierr);
+                    ErrorGmsh(ierr);
+                }
+            }
+            int losangePoints[4], losangeLines[4];
+            if(i % 2 != 0 && j == 0) {
+                for (int k = 1; k < 3; k++) {
+                    double angle = -M_PI / 3 * (k);
+                    double px = x + hexRadius * cos(angle);
+                    double py = y + hexRadius * sin(angle);
+                    losangePoints[k] = gmshModelOccAddPoint(px, py, 0, meshSize, -1, &ierr);
+                    ErrorGmsh(ierr);
+                }
+                losangePoints[3] = gmshModelOccAddPoint((i - 1) * 1.5 * hexRadius + hexRadius * cos(-M_PI/3 ), j * sqrt(3) * hexRadius + ((i- 1) % 2) * sqrt(3) * hexRadius / 2 + hexRadius * sin(-M_PI/3 ), 0, meshSize, -1, &ierr);
+                losangePoints[0] = gmshModelOccAddPoint((i + 1) * 1.5 * hexRadius + hexRadius * cos(-M_PI/3 *2), j * sqrt(3) * hexRadius + ((i+ 1) % 2) * sqrt(3) * hexRadius / 2 + hexRadius * sin(-M_PI/3 *2), 0, meshSize, -1, &ierr);
+                for (int k = 0; k < 4; k++) {
+                    losangeLines[k] = gmshModelOccAddLine(losangePoints[k], losangePoints[(k + 1) % 4], -1, &ierr);
+                    ErrorGmsh(ierr);
+                }
+                int losangeWire = gmshModelOccAddWire(losangeLines, 4, -1, 1, &ierr);
+                ErrorGmsh(ierr);
+                losangeTags[losangeWireCount++] = losangeWire;
+            }
+            if( i % 2 == 0 && j == numHexY - 1 && i != 0 && i != numHexX - 1) {
+                for (int k = 1; k < 3; k++) {
+                    double angle = M_PI / 3 * (k);
+                    double px = x + hexRadius * cos(angle);
+                    double py = y + hexRadius * sin(angle);
+                    losangePoints[k] = gmshModelOccAddPoint(px, py, 0, meshSize, -1, &ierr);
+                    ErrorGmsh(ierr);
+                }
+                losangePoints[3] = gmshModelOccAddPoint((i - 1) * 1.5 * hexRadius + hexRadius * cos(M_PI/3 ), j * sqrt(3) * hexRadius + ((i- 1) % 2) * sqrt(3) * hexRadius / 2 + hexRadius * sin(M_PI/3 ), 0, meshSize, -1, &ierr);
+                losangePoints[0] = gmshModelOccAddPoint((i + 1) * 1.5 * hexRadius + hexRadius * cos(M_PI/3 *2), j * sqrt(3) * hexRadius + ((i+ 1) % 2) * sqrt(3) * hexRadius / 2 + hexRadius * sin(M_PI/3 *2), 0, meshSize, -1, &ierr);
+                for (int k = 0; k < 4; k++) {
+                    losangeLines[k] = gmshModelOccAddLine(losangePoints[k], losangePoints[(k + 1) % 4], -1, &ierr);
+                    ErrorGmsh(ierr);
+                }
+                int losangeWire = gmshModelOccAddWire(losangeLines, 4, -1, 1, &ierr);
+                ErrorGmsh(ierr);
+                losangeTags[losangeWireCount++] = losangeWire;
+            }
+        
+           
+            // triangle interne 
+            int points[6], innerPoints[6];
+            for (int k = 0; k < 6; k++) {
+                double angle = M_PI / 3 * k;
+                double px = x + hexRadius * cos(angle);
+                double py = y + hexRadius * sin(angle);
+                points[k] = gmshModelOccAddPoint(px, py, 0, meshSize, -1, &ierr);
+                ErrorGmsh(ierr);
+
+                double innerPx = x + (hexRadius * 0.8) * cos(angle);
+                double innerPy = y + (hexRadius * 0.8) * sin(angle);
+                innerPoints[k] = gmshModelOccAddPoint(innerPx, innerPy, 0, meshSize, -1, &ierr);
+                ErrorGmsh(ierr);
+            }
+
+            int lines[6], innerLines[6];
+            for (int k = 0; k < 6; k++) {
+                lines[k] = gmshModelOccAddLine(points[k], points[(k + 1) % 6], -1, &ierr);
+                ErrorGmsh(ierr);
+                innerLines[k] = gmshModelOccAddLine(innerPoints[k], innerPoints[(k + 1) % 6], -1, &ierr);
+                ErrorGmsh(ierr);
+            }
+
+            int wire = gmshModelOccAddWire(lines, 6, -1, 1, &ierr);
+            ErrorGmsh(ierr);
+            int innerWire = gmshModelOccAddWire(innerLines, 6, -1, 1, &ierr);
+            ErrorGmsh(ierr);
+
+            mainWireTags[wireCount++] = wire;
+            innerWireTags[innerWireCount++] = innerWire;
+            if (j == 0 && i==0) {
+                int trianglecoteWire = gmshModelOccAddWire(trianglecoteLines, 3, -1, 1, &ierr);
+                ErrorGmsh(ierr);
+                trianglecoteTags[triangleWireCount++] = trianglecoteWire;
+            }
+            if(i == 0 && j > 0 ) {
+                int trianglecoteWire = gmshModelOccAddWire(trianglecoteLines, 3, -1, 1, &ierr);
+                ErrorGmsh(ierr);
+                trianglecoteTags[triangleWireCount++] = trianglecoteWire;
+            }
+            if(i == numHexX-1 && j == 0) {
+                int trianglecoteWire = gmshModelOccAddWire(trianglecoteLines, 3, -1, 1, &ierr);
+                ErrorGmsh(ierr);
+                trianglecoteTags[triangleWireCount++] = trianglecoteWire;
+            }
+            if(i == numHexX-1 && j > 0) {
+                int trianglecoteWire = gmshModelOccAddWire(trianglecoteLines, 3, -1, 1, &ierr);
+                ErrorGmsh(ierr);
+                trianglecoteTags[triangleWireCount++] = trianglecoteWire;
+            }
+            if( i == 0 && j == numHexY - 1) {
+                int quadrilatereWire = gmshModelOccAddWire(quadrilatereLines, 5, -1, 1, &ierr);
+                ErrorGmsh(ierr);
+                quadrilatèreTags[0] = quadrilatereWire;
+            }
+            if( i == numHexX - 1 && j == numHexY - 1) {
+                int quadrilatereWire = gmshModelOccAddWire(quadrilatereLines, 5, -1, 1, &ierr);
+                ErrorGmsh(ierr);
+                quadrilatèreTags[1] = quadrilatereWire;
+            }
+            
+            
+        }
+    }
+
+    // Création d'un grand rectangle englobant la structure
+    int rectPoints[4];
+    rectPoints[0] = gmshModelOccAddPoint(-hexRadius, -hexRadius*sqrt(3)/2 - hexRadius/3, 0, meshSize, -1, &ierr);
+    rectPoints[1] = gmshModelOccAddPoint((numHexX -1)* 1.5* hexRadius + hexRadius, -hexRadius*sqrt(3)/2 - hexRadius/3, 0, meshSize, -1, &ierr);
+    rectPoints[2] = gmshModelOccAddPoint((numHexX -1 ) * 1.5 * hexRadius + hexRadius, numHexY * sqrt(3) * hexRadius+ hexRadius/3, 0, meshSize, -1, &ierr);
+    rectPoints[3] = gmshModelOccAddPoint(-hexRadius, numHexY * sqrt(3) * hexRadius+ hexRadius/3, 0, meshSize, -1, &ierr);
+
+    int newRectPoints[4];
+    newRectPoints[0] = gmshModelOccAddPoint(-hexRadius, -hexRadius*sqrt(3)/2 , 0, meshSize, -1, &ierr);
+    newRectPoints[1] = gmshModelOccAddPoint((numHexX -1)* 1.5* hexRadius + hexRadius, -hexRadius*sqrt(3)/2 , 0, meshSize, -1, &ierr);
+    newRectPoints[2] = gmshModelOccAddPoint((numHexX -1 ) * 1.5 * hexRadius + hexRadius, numHexY * sqrt(3) * hexRadius, 0, meshSize, -1, &ierr);
+    newRectPoints[3] = gmshModelOccAddPoint(-hexRadius, numHexY * sqrt(3) * hexRadius, 0, meshSize, -1, &ierr);
+    
+
+    int rectLines[4];
+    for (int k = 0; k < 4; k++) {
+        rectLines[k] = gmshModelOccAddLine(rectPoints[k], rectPoints[(k + 1) % 4], -1, &ierr);
+        ErrorGmsh(ierr);
+    }
+
+    int newRectLines[4];
+    for (int k = 0; k < 4; k++) {
+        newRectLines[k] = gmshModelOccAddLine(newRectPoints[k], newRectPoints[(k + 1) % 4], -1, &ierr);
+        ErrorGmsh(ierr);
+    }
+
+
+    int rectWire = gmshModelOccAddWire(rectLines, 4, -1, 1, &ierr);
+    ErrorGmsh(ierr);
+
+    
+
+    // Création de la surface principale
+    int plateSurface = gmshModelOccAddPlaneSurface(&rectWire, 1, -1, &ierr);
+    ErrorGmsh(ierr);
+
+    // Création des surfaces hexagonales
+    int hexSurfaces[100];
+    for (int i = 0; i < innerWireCount; i++) {
+        hexSurfaces[i] = gmshModelOccAddPlaneSurface(&innerWireTags[i], 1, -1, &ierr);
+        ErrorGmsh(ierr);
+    }
+
+    // Création des surfaces triangulaires
+    int triangleSurfaces[100];
+    for (int i = 0; i < triangleWireCount; i++) {
+        triangleSurfaces[i] = gmshModelOccAddPlaneSurface(&trianglecoteTags[i], 1, -1, &ierr);
+        ErrorGmsh(ierr);
+
+
+    }
+    // Creation des surfaces quadrilatères
+    int quadrilatèreSurfaces[2];
+    for (int i = 0; i < 2; i++) {
+        quadrilatèreSurfaces[i] = gmshModelOccAddPlaneSurface(&quadrilatèreTags[i], 1, -1, &ierr);
+        ErrorGmsh(ierr);
+    }
+    int plate[2] = {2, plateSurface};
+    // // Découper les quadrilatères
+    int notchquadrilatère[2][2];
+    for (int i = 0; i < 2; i++) {
+        notchquadrilatère[i][0] = 2 ;
+        notchquadrilatère[i][1] = quadrilatèreSurfaces[i] ;
+    }
+    gmshModelOccCut(plate, 2, (int *)notchquadrilatère, 2*2  ,NULL, NULL, NULL, NULL, NULL, -1, 1, 1, &ierr);
+    gmshModelOccSynchronize(&ierr);
+
+    // Creation des surfaces losanges
+    int losangeSurfaces[100];
+    for (int i = 0; i < losangeWireCount; i++) {
+        losangeSurfaces[i] = gmshModelOccAddPlaneSurface(&losangeTags[i], 1, -1, &ierr);
+        ErrorGmsh(ierr);
+    }
+    // Découper les losanges
+    int notchlosange[losangeWireCount][2];
+    for (int i = 0; i < losangeWireCount; i++) {
+        notchlosange[i][0] = 2 ;
+        notchlosange[i][1] = losangeSurfaces[i] ;
+    }
+    gmshModelOccCut(plate, 2, (int *)notchlosange, 2*losangeWireCount  ,NULL, NULL, NULL, NULL, NULL, -1, 1, 1, &ierr);
+    gmshModelOccSynchronize(&ierr);
+
+    // Découper les triangles 
+    int notchtriangle[triangleWireCount][2];
+    for (int i = 0; i < triangleWireCount; i++) {
+        notchtriangle[i][0] = 2 ;
+        notchtriangle[i][1] = triangleSurfaces[i] ;
+    }
+    gmshModelOccCut(plate, 2, (int *)notchtriangle, 2*triangleWireCount  ,NULL, NULL, NULL, NULL, NULL, -1, 1, 1, &ierr);
+    gmshModelOccSynchronize(&ierr);
+
+    // Découper les hexagones de la plaque
+    int notch[innerWireCount][2];
+    for (int i = 0; i < innerWireCount; i++) {
+        notch[i][0] = 2;
+        notch[i][1] = hexSurfaces[i];
+    }
+
+    gmshModelOccCut(plate, 2, (int *)notch, 2*innerWireCount, NULL, NULL, NULL, NULL, NULL, -1, 1, 1, &ierr);
+    ErrorGmsh(ierr);
+
+    // Synchronisation après ajout des surfaces
+    gmshModelOccSynchronize(&ierr);
+    ErrorGmsh(ierr);
+
+    // Génération du maillage
+    gmshModelMeshGenerate(2, &ierr);
+    ErrorGmsh(ierr);
+
+    // Affichage dans Gmsh
+    gmshFltkRun(&ierr);
+    ErrorGmsh(ierr);
+
+
+
+}

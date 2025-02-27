@@ -17,6 +17,9 @@
 #include <string.h>
 #include "gmshc.h"
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 
 #define ErrorScan(a)   femErrorScan(a,__LINE__,__FILE__)
 #define ErrorGmsh(a)   femErrorGmsh(a,__LINE__,__FILE__)
@@ -81,6 +84,11 @@ void                femError(char *text, int line, char *file);
 void                femErrorScan(int test, int line, char *file);
 void                femErrorGmsh(int test, int line, char *file);
 void                femWarning(char *text, int line, char *file);
+
+// Fonctions de visualisation 
+void               trianglePlot(double x, double y);
+void               HexagonPlot(double x, double y);
+
 
 
 #endif
