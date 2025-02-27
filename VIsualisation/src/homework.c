@@ -196,14 +196,51 @@ void geoMeshGenerate() {
                     quadrilaterePoints[k] = gmshModelOccAddPoint(px, py, 0, meshSize, -1, &ierr);
                     ErrorGmsh(ierr);
                 }
-                quadrilaterePoints[3] = gmshModelOccAddPoint((numHexX -1 ) * 1.5 * hexRadius + hexRadius, numHexY * sqrt(3) * hexRadius, 0, meshSize, -1, &ierr);
-                quadrilaterePoints[4] = gmshModelOccAddPoint((numHexX - 1) * 1.5 * hexRadius + hexRadius * cos(-M_PI/3 * 2), j * sqrt(3) * hexRadius + ((numHexX - 1) % 2) * sqrt(3) * hexRadius / 2 + hexRadius * sin(-M_PI/3 * 2), 0, meshSize, -1, &ierr);
+                quadrilaterePoints[4] = gmshModelOccAddPoint((numHexX -1 ) * 1.5 * hexRadius + hexRadius, numHexY * sqrt(3) * hexRadius, 0, meshSize, -1, &ierr);
+                quadrilaterePoints[3] = gmshModelOccAddPoint((numHexX - 2) * 1.5 * hexRadius + hexRadius * cos(M_PI/3 ), j * sqrt(3) * hexRadius + ((numHexX - 2) % 2) * sqrt(3) * hexRadius / 2 + hexRadius * sin(M_PI/3 ), 0, meshSize, -1, &ierr);
                 ErrorGmsh(ierr);
                 for (int k = 0; k < 5; k++)
                 {
                     quadrilatereLines[k] = gmshModelOccAddLine(quadrilaterePoints[k], quadrilaterePoints[(k+1)%5], -1, &ierr);
                     ErrorGmsh(ierr);
                 }
+            }
+            int losangePoints[4], losangeLines[4];
+            if(i % 2 != 0 && j == 0) {
+                for (int k = 1; k < 3; k++) {
+                    double angle = -M_PI / 3 * (k);
+                    double px = x + hexRadius * cos(angle);
+                    double py = y + hexRadius * sin(angle);
+                    losangePoints[k] = gmshModelOccAddPoint(px, py, 0, meshSize, -1, &ierr);
+                    ErrorGmsh(ierr);
+                }
+                losangePoints[3] = gmshModelOccAddPoint((i - 1) * 1.5 * hexRadius + hexRadius * cos(-M_PI/3 ), j * sqrt(3) * hexRadius + ((i- 1) % 2) * sqrt(3) * hexRadius / 2 + hexRadius * sin(-M_PI/3 ), 0, meshSize, -1, &ierr);
+                losangePoints[0] = gmshModelOccAddPoint((i + 1) * 1.5 * hexRadius + hexRadius * cos(-M_PI/3 *2), j * sqrt(3) * hexRadius + ((i+ 1) % 2) * sqrt(3) * hexRadius / 2 + hexRadius * sin(-M_PI/3 *2), 0, meshSize, -1, &ierr);
+                for (int k = 0; k < 4; k++) {
+                    losangeLines[k] = gmshModelOccAddLine(losangePoints[k], losangePoints[(k + 1) % 4], -1, &ierr);
+                    ErrorGmsh(ierr);
+                }
+                int losangeWire = gmshModelOccAddWire(losangeLines, 4, -1, 1, &ierr);
+                ErrorGmsh(ierr);
+                losangeTags[losangeWireCount++] = losangeWire;
+            }
+            if( i % 2 == 0 && j == numHexY - 1 && i != 0 && i != numHexX - 1) {
+                for (int k = 1; k < 3; k++) {
+                    double angle = M_PI / 3 * (k);
+                    double px = x + hexRadius * cos(angle);
+                    double py = y + hexRadius * sin(angle);
+                    losangePoints[k] = gmshModelOccAddPoint(px, py, 0, meshSize, -1, &ierr);
+                    ErrorGmsh(ierr);
+                }
+                losangePoints[3] = gmshModelOccAddPoint((i - 1) * 1.5 * hexRadius + hexRadius * cos(M_PI/3 ), j * sqrt(3) * hexRadius + ((i- 1) % 2) * sqrt(3) * hexRadius / 2 + hexRadius * sin(M_PI/3 ), 0, meshSize, -1, &ierr);
+                losangePoints[0] = gmshModelOccAddPoint((i + 1) * 1.5 * hexRadius + hexRadius * cos(M_PI/3 *2), j * sqrt(3) * hexRadius + ((i+ 1) % 2) * sqrt(3) * hexRadius / 2 + hexRadius * sin(M_PI/3 *2), 0, meshSize, -1, &ierr);
+                for (int k = 0; k < 4; k++) {
+                    losangeLines[k] = gmshModelOccAddLine(losangePoints[k], losangePoints[(k + 1) % 4], -1, &ierr);
+                    ErrorGmsh(ierr);
+                }
+                int losangeWire = gmshModelOccAddWire(losangeLines, 4, -1, 1, &ierr);
+                ErrorGmsh(ierr);
+                losangeTags[losangeWireCount++] = losangeWire;
             }
         
            
@@ -262,6 +299,12 @@ void geoMeshGenerate() {
                 ErrorGmsh(ierr);
                 quadrilatèreTags[0] = quadrilatereWire;
             }
+            if( i == numHexX - 1 && j == numHexY - 1) {
+                int quadrilatereWire = gmshModelOccAddWire(quadrilatereLines, 5, -1, 1, &ierr);
+                ErrorGmsh(ierr);
+                quadrilatèreTags[1] = quadrilatereWire;
+            }
+            
             
         }
     }
@@ -319,19 +362,35 @@ void geoMeshGenerate() {
     }
     // Creation des surfaces quadrilatères
     int quadrilatèreSurfaces[2];
-    for (int i = 0; i < 1; i++) {
+    for (int i = 0; i < 2; i++) {
         quadrilatèreSurfaces[i] = gmshModelOccAddPlaneSurface(&quadrilatèreTags[i], 1, -1, &ierr);
         ErrorGmsh(ierr);
     }
     int plate[2] = {2, plateSurface};
     // // Découper les quadrilatères
     int notchquadrilatère[2][2];
-    for (int i = 0; i < 1; i++) {
+    for (int i = 0; i < 2; i++) {
         notchquadrilatère[i][0] = 2 ;
         notchquadrilatère[i][1] = quadrilatèreSurfaces[i] ;
     }
-    gmshModelOccCut(plate, 2, (int *)notchquadrilatère, 2*1  ,NULL, NULL, NULL, NULL, NULL, -1, 1, 1, &ierr);
+    gmshModelOccCut(plate, 2, (int *)notchquadrilatère, 2*2  ,NULL, NULL, NULL, NULL, NULL, -1, 1, 1, &ierr);
     gmshModelOccSynchronize(&ierr);
+
+    // Creation des surfaces losanges
+    int losangeSurfaces[100];
+    for (int i = 0; i < losangeWireCount; i++) {
+        losangeSurfaces[i] = gmshModelOccAddPlaneSurface(&losangeTags[i], 1, -1, &ierr);
+        ErrorGmsh(ierr);
+    }
+    // Découper les losanges
+    int notchlosange[losangeWireCount][2];
+    for (int i = 0; i < losangeWireCount; i++) {
+        notchlosange[i][0] = 2 ;
+        notchlosange[i][1] = losangeSurfaces[i] ;
+    }
+    gmshModelOccCut(plate, 2, (int *)notchlosange, 2*losangeWireCount  ,NULL, NULL, NULL, NULL, NULL, -1, 1, 1, &ierr);
+    gmshModelOccSynchronize(&ierr);
+
     // Découper les triangles 
     int notchtriangle[triangleWireCount][2];
     for (int i = 0; i < triangleWireCount; i++) {
