@@ -66,7 +66,7 @@ void geoMeshGenerate() {
 
     
     trianglePlot(0,0) ;
-    // HexagonPlot(0,0);
+    HexagonPlot(0,0);
 //
 //  -1- Construction de la g�om�trie avec OpenCascade
 //      On cr�e le rectangle
