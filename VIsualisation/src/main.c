@@ -29,24 +29,14 @@ int main(void)
     
     geoInitialize();
     femGeo* theGeometry = geoGetGeometry();
-    
-    theGeometry->LxPlate =  Lx;
-    theGeometry->LyPlate =  Ly;
-    theGeometry->xPlate  =  0.0;
-    theGeometry->yPlate  =  0.0;
-    theGeometry->xHole   =  Lx / 4.0;
-    theGeometry->yHole   =  Ly / 4.0;
-    theGeometry->rHole   =  Lx / 8.0;
-    theGeometry->xNotch  = -Lx / 2.0;
-    theGeometry->yNotch  = -Ly / 2.0;
-    theGeometry->rNotch  =  Lx / 2.0;
-    
-    theGeometry->h       =  Lx * 0.1;    // 0.1 c'est plus joli :-)
-    theGeometry->hHole   =  theGeometry->h * 0.2;
-    theGeometry->hNotch  =  theGeometry->h * 0.05; // C'est quoi ça ? 
-    theGeometry->dHole   =  theGeometry->h * 1.0;
-    theGeometry->dNotch  =  theGeometry->h * 4.0;
+    theGeometry->h = 11;
+    theGeometry->NumberOfHexagonsInX = 9;
+    theGeometry->NumberOfHexagonsInY = 9;
+    theGeometry->NumberOfTrianglesInX = 20;
+    theGeometry->NumberOfTrianglesInY = 10;
     theGeometry->hexRadius = 9.0;
+    theGeometry->MiddleX = (theGeometry->NumberOfHexagonsInX -1 ) * 1.5 * theGeometry->hexRadius + theGeometry->hexRadius - (-theGeometry->hexRadius) ; 
+    theGeometry->MiddleY = theGeometry->NumberOfHexagonsInY * sqrt(3) * theGeometry->hexRadius - (-theGeometry->hexRadius*sqrt(3)/2) ;
 
    
     geoMeshGenerate();
@@ -64,8 +54,8 @@ int main(void)
 //  -2- Creation du fichier du maillage
 //
     
-    // char filename[] = "data/mesh.txt";
-    // geoMeshWrite(filename);
+    char filename[] = "data/mesh.txt";
+    geoMeshWrite(filename);
 
 //
 //  -3- Champ de la taille de r�f�rence du maillage

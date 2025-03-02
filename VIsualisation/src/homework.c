@@ -8,32 +8,51 @@ void chk(int ierr) {
         exit(1);
     }
 }
-double hermiteInterpolation(double d, double dStar, double h0, double hStar) {
-    if (d <= 0) return h0;
-    if (d >= dStar) return hStar;
-    double t = d / dStar;
-    double t2 = t * t;
-    double t3 = t2 * t;
-    return h0 * (2 * t3 - 3 * t2 + 1) + hStar * (3 * t2 - 2 * t3);
-}
+// double hermiteInterpolation(double d, double dStar, double h0, double hStar) {
+//     if (d <= 0) return h0;
+//     if (d >= dStar) return hStar;
+//     double t = d / dStar;
+//     double t2 = t * t;
+//     double t3 = t2 * t;
+//     return h0 * (2 * t3 - 3 * t2 + 1) + hStar * (3 * t2 - 2 * t3);
+// }
 
-double geoSize(double x, double y){
-
+double geoSize(double x, double y) {
     femGeo* theGeometry = geoGetGeometry();
     
-    double h = theGeometry->h;
-    double x0 = theGeometry->xNotch;
-    double y0 = theGeometry->yNotch;
-    double r0 = theGeometry->rNotch;
-    double h0 = theGeometry->hNotch;
-    double d0 = theGeometry->dNotch;
+    double h_max = theGeometry->h;       
+    double h_min = h_max * 0.1;  // Ajuste ce facteur pour un effet plus visible
+    double y_min = -theGeometry->MiddleY + theGeometry->MiddleY ;  
+    double y_max = theGeometry->MiddleY  * theGeometry->hexRadius;  
+
+    // Éviter une division par zéro
+    if (y_max == y_min) return h_max;
+
+    // Progression linéaire de la taille de maille entre h_min et h_max
+    double t = (y - y_min) / (y_max - y_min);
+    t = fmax(0.0, fmin(1.0, t)); // S'assurer que t reste dans [0,1]
+    
+    double h = h_min + (h_max - h_min) * t; // Progression linéaire
+    
+    return h;
+
+
+
+
+
+
+    // double x0 = theGeometry->xNotch;
+    // double y0 = theGeometry->yNotch;
+    // double r0 = theGeometry->rNotch;
+    // double h0 = theGeometry->hNotch;
+    // double d0 = theGeometry->dNotch;
   
     
-    double x1 = theGeometry->xHole;
-    double y1 = theGeometry->yHole;
-    double r1 = theGeometry->rHole;
-    double h1 = theGeometry->hHole;
-    double d1 = theGeometry->dHole;
+    // double x1 = theGeometry->xHole;
+    // double y1 = theGeometry->yHole;
+    // double r1 = theGeometry->rHole;
+    // double h1 = theGeometry->hHole;
+    // double d1 = theGeometry->dHole;
 
 
 //
@@ -42,15 +61,15 @@ double geoSize(double x, double y){
 // Your contribution starts here ....
 //
     
-    double distNotch = sqrt((x - x0) * (x - x0) + (y - y0) * (y - y0)) - r0;
-    double distHole = sqrt((x - x1) * (x - x1) + (y - y1) * (y - y1)) - r1;
+    // double distNotch = sqrt((x - x0) * (x - x0) + (y - y0) * (y - y0)) - r0;
+    // double distHole = sqrt((x - x1) * (x - x1) + (y - y1) * (y - y1)) - r1;
 
-    // Interpolation Hermite pour chaque zone
-    double sizeNotch = hermiteInterpolation(distNotch, d0, h0, h);
-    double sizeHole = hermiteInterpolation(distHole, d1, h1, h);
+    // // Interpolation Hermite pour chaque zone
+    // double sizeNotch = hermiteInterpolation(distNotch, d0, h0, h);
+    // double sizeHole = hermiteInterpolation(distHole, d1, h1, h);
 
     // Prendre la taille minimale pour un meilleur raffinement
-    return fmin(sizeNotch, sizeHole);
+    // return fmin(sizeNotch, sizeHole);
     
 //   
 // Your contribution ends here :-)
@@ -65,8 +84,21 @@ void geoMeshGenerate() {
 
 
     
-    trianglePlot(0,0) ;
-    HexagonPlot(0,0);
+    // trianglePlot() ;
+    HexagonPlot();
+
+    geoSetSizeCallback(geoSize);
+
+    int ierr;
+    gmshModelOccSynchronize(&ierr);
+    gmshOptionSetNumber("Mesh.SaveAll", 1, &ierr);
+    gmshModelMeshGenerate(2, &ierr);
+    if (ierr != 0) {
+        printf("Erreur lors de la génération du maillage: %d\n", ierr);
+        exit(1);
+}
+
+
 //
 //  -1- Construction de la g�om�trie avec OpenCascade
 //      On cr�e le rectangle

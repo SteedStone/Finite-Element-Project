@@ -52,11 +52,12 @@ typedef struct {
 
 
 typedef struct {
-    double xPlate, yPlate, LxPlate, LyPlate;
-    double xHole, yHole, rHole, hHole, dHole;
-    double xNotch, yNotch, rNotch, hNotch, dNotch;
+    int NumberOfHexagonsInX, NumberOfHexagonsInY;
+    int NumberOfTrianglesInX, NumberOfTrianglesInY;
     double hexRadius;
     double h;
+    double MiddleX;
+    double MiddleY;
     double (*geoSize)(double x, double y);
     femNodes *theNodes;
     femMesh  *theElements;
@@ -86,8 +87,8 @@ void                femErrorGmsh(int test, int line, char *file);
 void                femWarning(char *text, int line, char *file);
 
 // Fonctions de visualisation 
-void               trianglePlot(double x, double y);
-void               HexagonPlot(double x, double y);
+void               trianglePlot();
+void               HexagonPlot();
 
 
 

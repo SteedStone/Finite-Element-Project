@@ -281,11 +281,11 @@ void femWarning(char *text, int line, char *file)
 }
 
 
-void trianglePlot(double x, double y) {
+void trianglePlot() {
     femGeo* theGeometry = geoGetGeometry();
     double hexRadius = theGeometry->hexRadius;
-    int numHexX = 20;
-    int numHexY = 10;
+    int numHexX = theGeometry->NumberOfTrianglesInX;
+    int numHexY = theGeometry->NumberOfTrianglesInY;
     int ierr;
 
     // Définition des tailles de maillage variables
@@ -380,7 +380,7 @@ void trianglePlot(double x, double y) {
 
 
 
-void HexagonPlot(double x, double y){
+void HexagonPlot(){
 
 //
 //  -1- Construction de la g�om�trie avec OpenCascade
@@ -392,8 +392,8 @@ void HexagonPlot(double x, double y){
     femGeo* theGeometry = geoGetGeometry();
 
     double hexRadius = theGeometry->hexRadius;  // Rayon de l'hexagone
-    int numHexX = 9;  // Nombre d'hexagones en largeur
-    int numHexY = 9;  // Nombre d'hexagones en hauteur
+    int numHexX = theGeometry->NumberOfHexagonsInX;  // Nombre d'hexagones en largeur
+    int numHexY = theGeometry->NumberOfTrianglesInY;  // Nombre d'hexagones en hauteur
     int ierr;
     double meshSizeMin = 0.01;  // Taille de maille en haut (fine)
     double meshSizeMax = 0.3;   // Taille de maille en bas (grossière)
@@ -733,12 +733,12 @@ void HexagonPlot(double x, double y){
     ErrorGmsh(ierr);
 
     // Génération du maillage
-    gmshModelMeshGenerate(2, &ierr);
-    ErrorGmsh(ierr);
+    // gmshModelMeshGenerate(2, &ierr);
+    // ErrorGmsh(ierr);
 
     // Affichage dans Gmsh
-    gmshFltkRun(&ierr);
-    ErrorGmsh(ierr);
+    // gmshFltkRun(&ierr);
+    // ErrorGmsh(ierr);
 
 
 
