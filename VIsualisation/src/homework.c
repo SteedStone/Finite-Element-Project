@@ -84,7 +84,7 @@ void geoMeshGenerate() {
 
 
     
-    // trianglePlot() ;
+    trianglePlot() ;
     HexagonPlot();
 
     geoSetSizeCallback(geoSize);

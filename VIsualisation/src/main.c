@@ -31,8 +31,8 @@ int main(void)
     femGeo* theGeometry = geoGetGeometry();
     theGeometry->h = 11;
     theGeometry->NumberOfHexagonsInX = 9;
-    theGeometry->NumberOfHexagonsInY = 9;
-    theGeometry->NumberOfTrianglesInX = 20;
+    theGeometry->NumberOfHexagonsInY = 5;
+    theGeometry->NumberOfTrianglesInX = 12;
     theGeometry->NumberOfTrianglesInY = 10;
     theGeometry->hexRadius = 9.0;
     theGeometry->MiddleX = (theGeometry->NumberOfHexagonsInX -1 ) * 1.5 * theGeometry->hexRadius + theGeometry->hexRadius - (-theGeometry->hexRadius) ; 
