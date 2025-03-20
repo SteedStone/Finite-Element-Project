@@ -184,7 +184,8 @@ void                femWarning(char *text, int line, char *file);
 // Fonctions de visualisation 
 void               trianglePlot();
 void               HexagonPlot();
-void femFindBoundaryNodes(femGeo *theProblem, double targetY, double epsilon) ;
+void femFindBoundaryNodes(femGeo *theProblem, double targetY, double epsilon , char *name) ;
+
 
 
 
