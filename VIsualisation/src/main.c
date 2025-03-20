@@ -22,8 +22,7 @@ int main(void)
     // Puis deux petits cercles au bout de chaque côté du rectangle de rayon 0.1 et 0.2 
     // et enfin deux rectangle dans les cercles. 
  
-    double Lx = 1.0;
-    double Ly = 2.0;
+   
       
     int ierr;
     
@@ -37,11 +36,16 @@ int main(void)
     theGeometry->hexRadius = 9.0;
     theGeometry->MiddleX = (theGeometry->NumberOfHexagonsInX -1 ) * 1.5 * theGeometry->hexRadius + theGeometry->hexRadius - (-theGeometry->hexRadius) ; 
     theGeometry->MiddleY = theGeometry->NumberOfHexagonsInY * sqrt(3) * theGeometry->hexRadius - (-theGeometry->hexRadius*sqrt(3)/2) ;
-
-   
+    theGeometry->elementType = FEM_TRIANGLE;
+    theGeometry->hexa_triangles = 1 ;
+    
+    
     geoMeshGenerate();
     geoMeshImport();
-    
+    femFindBoundaryNodes(theGeometry, 0 , 10e-6);
+    femFindBoundaryNodes(theGeometry, 90 , 10e-6);
+
+
     // geoSetDomainName(0,"Outer Disk");
     // geoSetDomainName(1,"Bottom");
     // geoSetDomainName(2,"Left");
@@ -56,6 +60,7 @@ int main(void)
     
     char filename[] = "data/mesh.txt";
     geoMeshWrite(filename);
+
 
 //
 //  -3- Champ de la taille de r�f�rence du maillage
