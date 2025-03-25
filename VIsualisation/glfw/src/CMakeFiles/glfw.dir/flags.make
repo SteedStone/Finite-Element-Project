@@ -6,7 +6,7 @@ C_DEFINES = -D_GLFW_USE_CONFIG_H
 
 C_INCLUDES = -I"/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/glfw/include" -I"/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/glfw/src"
 
-C_FLAGS = -fPIC -Wall
+C_FLAGS = -g -fPIC -Wall
 
 # Custom flags: glfw/src/CMakeFiles/glfw.dir/context.c.o_FLAGS = -Wdeclaration-after-statement
 

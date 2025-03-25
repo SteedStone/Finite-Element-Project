@@ -25,7 +25,7 @@ for line in lines:
         current_section = "nodes"
     elif "Number of edges" in line:
         current_section = "edges"
-    elif "Number of triangles" in line:
+    elif "Number of tiangles" in line:
         current_section = "triangles"
     elif "Domain" in line:
         current_section = "domains"
@@ -52,7 +52,7 @@ for line in lines:
             n_edges.append((n1, n2))
     elif current_section == "triangles" and ":" in line:
         parts = line.split(":")
-        n1, n2, n3 = map(int, parts[1].split())
+        n1, n2, n3  = map(int, parts[1].split())
         triangles.append((n1, n2, n3))
 
 # Création du graphe

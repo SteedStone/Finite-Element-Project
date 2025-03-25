@@ -21,7 +21,7 @@ double geoSize(double x, double y) {
     femGeo* theGeometry = geoGetGeometry();
     
     double h_max = theGeometry->h;       
-    double h_min = h_max * 0.1;  // Ajuste ce facteur pour un effet plus visible
+    double h_min = h_max * 0.5;  // Ajuste ce facteur pour un effet plus visible
     double y_min = -theGeometry->MiddleY + theGeometry->MiddleY ;  
     double y_max = theGeometry->MiddleY  * theGeometry->hexRadius;  
 

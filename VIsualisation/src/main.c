@@ -21,8 +21,9 @@ int main(void)
     printf("    D : Domains \n");
     printf("    N : Next domain highlighted\n");
 
-    int show_visualisation_maillage = 0 ;
-    int type = TRIANGLE ;
+    int show_visualisation_maillage = 1 ;
+    int type = TRIANGLE;
+    int simple = 0 ;
     
 
 
@@ -33,54 +34,77 @@ int main(void)
    
       
     int ierr;
-    
-    geoInitialize();
-    femGeo* theGeometry = geoGetGeometry();
-    theGeometry->h = 11;
-    theGeometry->NumberOfHexagonsInX = 9;
-    theGeometry->NumberOfHexagonsInY = 5;
-    theGeometry->NumberOfTrianglesInX = 12;
-    theGeometry->NumberOfTrianglesInY = 10;
-    theGeometry->hexRadius = 9.0;
-    theGeometry->MiddleX = (theGeometry->NumberOfHexagonsInX -1 ) * 1.5 * theGeometry->hexRadius + theGeometry->hexRadius - (-theGeometry->hexRadius) ; 
-    theGeometry->MiddleY = theGeometry->NumberOfHexagonsInY * sqrt(3) * theGeometry->hexRadius - (-theGeometry->hexRadius*sqrt(3)/2) ;
-    theGeometry->elementType = FEM_TRIANGLE;
-    theGeometry->hexa_triangles = type ;
-    
-    
-    geoMeshGenerate();
-    geoMeshImport();
-    printf("hexa_triangles: %d\n", theGeometry->hexa_triangles);
-    if (theGeometry->hexa_triangles == 1) {
-        femFindBoundaryNodes(theGeometry, 0 , 10e-6 , "Bottom"); // numéro 
-        femFindBoundaryNodes(theGeometry, 90 , 10e-6 , "Top");
-    } else {
-        femFindBoundaryNodes(theGeometry, -1.0794229e+01  , 10e-6 , "Bottom");
-        femFindBoundaryNodes(theGeometry, 8.0942286e+01  , 10e-6 , "Top");
+    femGeo* theGeometry ;
+    if(!simple){
+        geoInitialize();
+        theGeometry = geoGetGeometry();
+        theGeometry->h = 11;
+        theGeometry->NumberOfHexagonsInX = 9;
+        theGeometry->NumberOfHexagonsInY = 5;
+        theGeometry->NumberOfTrianglesInX = 12;
+        theGeometry->NumberOfTrianglesInY = 10;
+        theGeometry->hexRadius = 9.0;
+        theGeometry->MiddleX = (theGeometry->NumberOfHexagonsInX -1 ) * 1.5 * theGeometry->hexRadius + theGeometry->hexRadius - (-theGeometry->hexRadius) ; 
+        theGeometry->MiddleY = theGeometry->NumberOfHexagonsInY * sqrt(3) * theGeometry->hexRadius - (-theGeometry->hexRadius*sqrt(3)/2) ;
+        theGeometry->elementType = FEM_QUAD;
+        theGeometry->hexa_triangles = type ;
+        
+        // Appel nos fonctions pour créer notre maillage avec soit les hexagones soit les triangles avec la librairie gsmh 
+        geoMeshGenerate();
+        // On remplit la structure TheGeometry avec les noeuds, edges ect depuis gsmh vers notre programme 
+        geoMeshImport();
+        // On trouve créer les différents domaines ou on va venir appliquer nos forces celon si on apllique sur les hexagones ou les triangles.
+        if (theGeometry->hexa_triangles == 1) {
+            femFindBoundaryNodes(theGeometry, 0 , 10e-6 , "Bottom"); // numéro 
+            femFindBoundaryNodes(theGeometry, 90 , 10e-6 , "Top");
+        } else {
+            femFindBoundaryNodes(theGeometry, -1.0794229e+01  , 10e-6 , "Bottom");
+            femFindBoundaryNodes(theGeometry, 8.0942286e+01  , 10e-6 , "Top");
+        }
     }
+    else {
+        double Lx = 1.0;
+        double Ly = 1.0;
+        
+        geoInitialize();
+        theGeometry = geoGetGeometry();
+        
+        theGeometry->LxPlate     =  Lx;
+        theGeometry->LyPlate     =  Ly;     
+        theGeometry->h           =  Lx * 0.075;    
+        theGeometry->elementType = FEM_QUAD;
+        theGeometry->hexa_triangles = 3;
 
+        geoMeshGenerate();
+        geoMeshImport();
+        geoSetDomainName(0,"Symmetry");
+        geoSetDomainName(7,"Bottom");
+        geoSetDomainName(1,"Top");
 
+        geoMeshWrite("data/elasticity.txt");
+    }
+    
+    
+    
 
+    // EXemple plus simple 
+    
 
-    // geoSetDomainName(0,"Outer Disk");
-    // geoSetDomainName(1,"Bottom");
-    // geoSetDomainName(2,"Left");
-    // geoSetDomainName(3,"Right");
-    // geoSetDomainName(4,"Top");
-    // geoSetDomainName(5,"Inner Disk");
     
 
 //
 //  -2- Creation du fichier du maillage
 //
-    
+    if(!simple){
     char filename[] = "data/mesh.txt";
     geoMeshWrite(filename);
-
+    }
+    
 
 //
 //  -3- Visualisation du maillage
 //  
+    // On a rajouté une option pour voir si on veut l'afficher ou pas 
     if(show_visualisation_maillage) {
         double *meshSizeField = malloc(theGeometry->theNodes->nNodes*sizeof(double));
         femNodes *theNodes = theGeometry->theNodes;
@@ -154,23 +178,34 @@ int main(void)
         // Check if the ESC key was pressed or the window was closed
 
         free(meshSizeField);  
-        geoFinalize();
-        glfwTerminate(); 
     }
             
     //
     //  -4- Creation probleme 
     //
+    if (!simple) {
+        geoMeshRead("data/mesh.txt");
+    }else {
+        geoMeshRead("data/elasticity.txt") ;
+    }
+
     
     double E   = 211.e9;
     double nu  = 0.3;
     double rho = 7.85e3; 
     double g   = 9.81;
-    femProblem* theProblem = femElasticityCreate(theGeometry,E,nu,rho,g,PLANAR_STRAIN);
-    // femElasticityAddBoundaryCondition(theProblem,"Bottom",DIRICHLET_Y,0.0);
-    // femElasticityAddBoundaryCondition(theProblem,"Top",NEUMANN_Y,-1e4);
-    femElasticityPrint(theProblem);
+    // Initialisation du problème avec les conditions aux bords
+    // ON remplit juste la structure theProblem avec les valeurs de E, nu, rho, g et le type de problème qu'on veut résoudre
+    femProblem* theProblem = femElasticityCreate(theGeometry,E,nu,rho,g,PLANAR_STRAIN , FEM_FULL , FEM_NO);
+    // femElasticityAddBoundaryCondition(theProblem,"Symmetry",DIRICHLET_X,0.0);
 
+    femElasticityAddBoundaryCondition(theProblem,"Bottom",DIRICHLET_X,0.0);
+    femElasticityAddBoundaryCondition(theProblem,"Bottom",DIRICHLET_Y,0.0);
+
+    femElasticityAddBoundaryCondition(theProblem,"Top",NEUMANN_Y,-1e6);
+
+    femElasticityPrint(theProblem);
+    
     
     //  -3- Resolution du probleme et calcul des forces
     
@@ -179,6 +214,8 @@ int main(void)
     printf("fin de force") ;
 
     double *theForces = femElasticityForces(theProblem);
+    
+    
     double area = femElasticityIntegrate(theProblem, fun);   
 
     //
@@ -187,7 +224,7 @@ int main(void)
     //
 
     femNodes *theNodes = theGeometry->theNodes;
-    double deformationFactor = 1e5;
+    double deformationFactor = 1e3;
     double *normDisplacement = malloc(theNodes->nNodes * sizeof(double));
     double *forcesX = malloc(theNodes->nNodes * sizeof(double));
     double *forcesY = malloc(theNodes->nNodes * sizeof(double));

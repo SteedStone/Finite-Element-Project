@@ -13,7 +13,7 @@ femGeo theGeometry;
 
 femGeo *geoGetGeometry()                        { return &theGeometry; }
 
-double geoSizeDefault(double x, double y)       { return 1.0; }
+double geoSizeDefault(double x, double y)       { return theGeometry.h; }
 
 double geoGmshSize(int dim, int tag, double x, double y, double z, double lc, void *data)
                                                 { return theGeometry.geoSize(x,y);    }
@@ -36,7 +36,7 @@ void geoFinalize() {
     if (theGeometry.theNodes) {
         free(theGeometry.theNodes->X);
         free(theGeometry.theNodes->Y);
-        free(theGeometry.theNodes); }
+        free(theGeometry.theNodes); }   
     if (theGeometry.theElements) {
         free(theGeometry.theElements->elem);
         free(theGeometry.theElements); }
@@ -59,14 +59,15 @@ static int cmp_size_t(const void *a, const void *b){
     return (int) (*(const size_t*) a - * (const size_t*) b);
 }
 
-void geoMeshImport() {
+
+void geoMeshImport() 
+{
     int ierr;
     
     /* Importing nodes */
     
     size_t nNode,n,m,*node;
     double *xyz,*trash;
- //   gmshModelMeshRenumberNodes(&ierr);                        ErrorGmsh(ierr);
     gmshModelMeshGetNodes(&node,&nNode,&xyz,&n,
                          &trash,&m,-1,-1,0,0,&ierr);          ErrorGmsh(ierr);                         
     femNodes *theNodes = malloc(sizeof(femNodes));
@@ -83,6 +84,7 @@ void geoMeshImport() {
     printf("Geo     : Importing %d nodes \n",theGeometry.theNodes->nNodes);
        
     /* Importing elements */
+    /* Pas super joli : a ameliorer pour eviter la triple copie */
         
     size_t nElem, *elem;
     gmshModelMeshGetElementsByType(1,&elem,&nElem,
@@ -103,18 +105,40 @@ void geoMeshImport() {
   
     gmshModelMeshGetElementsByType(2,&elem,&nElem,
                                &node,&nNode,-1,0,1,&ierr);    ErrorGmsh(ierr);
-    femMesh *theElements = malloc(sizeof(femMesh));
-    theElements->nLocalNode = 3;
-    theElements->nodes = theNodes;
-    theElements->nElem = nElem;  
-    theElements->elem = malloc(sizeof(int)*3*theElements->nElem);
-    for (int i = 0; i < theElements->nElem; i++)
-        for (int j = 0; j < theElements->nLocalNode; j++)
-            theElements->elem[3*i+j] = node[3*i+j]-1;  
-    theGeometry.theElements = theElements;
-    gmshFree(node);
-    gmshFree(elem);
-    printf("Geo     : Importing %d elements \n",theElements->nElem);
+    if (nElem != 0) {
+      femMesh *theElements = malloc(sizeof(femMesh));
+      theElements->nLocalNode = 3;
+      theElements->nodes = theNodes;
+      theElements->nElem = nElem;  
+      theElements->elem = malloc(sizeof(int)*3*theElements->nElem);
+      for (int i = 0; i < theElements->nElem; i++)
+          for (int j = 0; j < theElements->nLocalNode; j++)
+              theElements->elem[3*i+j] = node[3*i+j]-1;  
+      theGeometry.theElements = theElements;
+      gmshFree(node);
+      gmshFree(elem);
+      printf("Geo     : Importing %d triangles \n",theElements->nElem); }
+    
+    int nElemTriangles = nElem;
+    gmshModelMeshGetElementsByType(3,&elem,&nElem,
+                               &node,&nNode,-1,0,1,&ierr);    ErrorGmsh(ierr);
+    if (nElem != 0 && nElemTriangles != 0)  
+      Error("Cannot consider hybrid geometry with triangles and quads :-(");                       
+                               
+    if (nElem != 0) {
+      femMesh *theElements = malloc(sizeof(femMesh));
+      theElements->nLocalNode = 4;
+      theElements->nodes = theNodes;
+      theElements->nElem = nElem;  
+      theElements->elem = malloc(sizeof(int)*4*theElements->nElem);
+      for (int i = 0; i < theElements->nElem; i++)
+          for (int j = 0; j < theElements->nLocalNode; j++)
+              theElements->elem[4*i+j] = node[4*i+j]-1;  
+      theGeometry.theElements = theElements;
+      gmshFree(node);
+      gmshFree(elem);
+      printf("Geo     : Importing %d quads \n",theElements->nElem); }
+
     
     /* Importing 1D entities */
   
@@ -151,22 +175,31 @@ void geoMeshImport() {
 
 }
 
-void geoMeshPrint() {
+void geoMeshPrint() 
+{
    femNodes *theNodes = theGeometry.theNodes;
-   printf("Number of nodes %d \n", theNodes->nNodes);
-   for (int i = 0; i < theNodes->nNodes; i++) {
-      printf("%6d : %14.7e %14.7e \n",i,theNodes->X[i],theNodes->Y[i]); }
+   if (theNodes != NULL) {
+      printf("Number of nodes %d \n", theNodes->nNodes);
+      for (int i = 0; i < theNodes->nNodes; i++) {
+        printf("%6d : %14.7e %14.7e \n",i,theNodes->X[i],theNodes->Y[i]); }}
    femMesh *theEdges = theGeometry.theEdges;
-   printf("Number of edges %d \n", theEdges->nElem);
-   int *elem = theEdges->elem;
-   for (int i = 0; i < theEdges->nElem; i++) {
-      printf("%6d : %6d %6d \n",i,elem[2*i],elem[2*i+1]); }
+   if (theEdges != NULL) {
+     printf("Number of edges %d \n", theEdges->nElem);
+     int *elem = theEdges->elem;
+     for (int i = 0; i < theEdges->nElem; i++) {
+        printf("%6d : %6d %6d \n",i,elem[2*i],elem[2*i+1]); }}
    femMesh *theElements = theGeometry.theElements;
-   printf("Number of triangles %d \n", theElements->nElem);
-   elem = theElements->elem;
-   for (int i = 0; i < theElements->nElem; i++) {
-      printf("%6d : %6d %6d %6d\n",i,elem[3*i],elem[3*i+1],elem[3*i+2]); }
- 
+   if (theElements != NULL) {
+     if (theElements->nLocalNode == 3) {
+        printf("Number of triangles %d \n", theElements->nElem);
+        int *elem = theElements->elem;
+        for (int i = 0; i < theElements->nElem; i++) {
+            printf("%6d : %6d %6d %6d\n",i,elem[3*i],elem[3*i+1],elem[3*i+2]); }}
+     if (theElements->nLocalNode == 4) {
+        printf("Number of quads %d \n", theElements->nElem);
+        int *elem = theElements->elem;
+        for (int i = 0; i < theElements->nElem; i++) {
+            printf("%6d : %6d %6d %6d %6d\n",i,elem[4*i],elem[4*i+1],elem[4*i+2],elem[4*i+3]); }}}
    int nDomains = theGeometry.nDomains;
    printf("Number of domains %d\n", nDomains);
    for (int iDomain = 0; iDomain < nDomains; iDomain++) {
@@ -184,7 +217,8 @@ void geoMeshPrint() {
 }
 
 
-void geoMeshWrite(const char *filename) {
+void geoMeshWrite(const char *filename) 
+{
    FILE* file = fopen(filename,"w");
  
    femNodes *theNodes = theGeometry.theNodes;
@@ -199,18 +233,24 @@ void geoMeshWrite(const char *filename) {
       fprintf(file,"%6d : %6d %6d \n",i,elem[2*i],elem[2*i+1]); }
       
    femMesh *theElements = theGeometry.theElements;
-   fprintf(file,"Number of triangles %d \n", theElements->nElem);
-   elem = theElements->elem;
-   for (int i = 0; i < theElements->nElem; i++) {
-      fprintf(file,"%6d : %6d %6d %6d\n",i,elem[3*i],elem[3*i+1],elem[3*i+2]); }
+   if (theElements->nLocalNode == 3) {
+      fprintf(file,"Number of triangles %d \n", theElements->nElem);
+      elem = theElements->elem;
+      for (int i = 0; i < theElements->nElem; i++) {
+          fprintf(file,"%6d : %6d %6d %6d\n",i,elem[3*i],elem[3*i+1],elem[3*i+2]); }}
+   if (theElements->nLocalNode == 4) {
+      fprintf(file,"Number of quads %d \n", theElements->nElem);
+      elem = theElements->elem;
+      for (int i = 0; i < theElements->nElem; i++) {
+          fprintf(file,"%6d : %6d %6d %6d %6d\n",i,elem[4*i],elem[4*i+1],elem[4*i+2],elem[4*i+3]); }}
      
    int nDomains = theGeometry.nDomains;
-   fprintf(file, "Number of domains %d\n", nDomains);
+   fprintf(file,"Number of domains %d\n", nDomains);
    for (int iDomain = 0; iDomain < nDomains; iDomain++) {
       femDomain *theDomain = theGeometry.theDomains[iDomain];
-      fprintf(file, "  Domain : %6d \n", iDomain);
-      fprintf(file, "  Name : %s\n", theDomain->name);
-      fprintf(file, "  Number of elements : %6d\n", theDomain->nElem);
+      fprintf(file,"  Domain : %6d \n", iDomain);
+      fprintf(file,"  Name : %s\n", theDomain->name);
+      fprintf(file,"  Number of elements : %6d\n", theDomain->nElem);
       for (int i=0; i < theDomain->nElem; i++){
           fprintf(file,"%6d",theDomain->elem[i]);
           if ((i+1) != theDomain->nElem  && (i+1) % 10 == 0) fprintf(file,"\n"); }
@@ -218,12 +258,6 @@ void geoMeshWrite(const char *filename) {
     
    fclose(file);
 }
-
-
-void geoSetDomainName(int iDomain, char *name) {
-  if (iDomain >= theGeometry.nDomains)  Error("Illegal domain number");
-  sprintf(theGeometry.theDomains[iDomain]->name,"%s",name);
-} 
 
 void geoMeshRead(const char *filename) 
 {
@@ -287,6 +321,13 @@ void geoMeshRead(const char *filename)
     
    fclose(file);
 }
+
+void geoSetDomainName(int iDomain, char *name) 
+{
+    if (iDomain >= theGeometry.nDomains)  Error("Illegal domain number");
+    if (geoGetDomain(name) != -1)         Error("Cannot use the same name for two domains");
+    sprintf(theGeometry.theDomains[iDomain]->name,"%s",name);
+} 
 
 int geoGetDomain(char *name)
 {
@@ -506,7 +547,6 @@ void femDiscretePrint(femDiscrete *mySpace)
                 printf("   dphideta(%d)=%+.1f \n", j, dphideta[j]); }
             printf(" \n"); }}   
 }
-
 femFullSystem *femFullSystemCreate(int size)
 {
     femFullSystem *theSystem = malloc(sizeof(femFullSystem));
@@ -558,38 +598,183 @@ void femFullSystemPrint(femFullSystem *mySystem)
         printf(" :  %+.1e \n",B[i]); }
 }
 
-double* femFullSystemEliminate(femFullSystem *mySystem)
-{
-    double  **A, *B, factor;
-    int     i, j, k, size;
+// double* femFullSystemEliminate(femFullSystem *mySystem)
+// {
+//     double  **A, *B, factor;
+//     int     i, j, k, size;
     
-    A    = mySystem->A;
-    B    = mySystem->B;
-    size = mySystem->size;
+//     A    = mySystem->A;
+//     B    = mySystem->B;
+//     size = mySystem->size;
     
-    /* Gauss elimination */
+//     /* Gauss elimination */
     
-    for (k=0; k < size; k++) {
-        if ( fabs(A[k][k]) <= 1e-16 ) {
-            printf("Pivot index %d  ",k);
-            printf("Pivot value %e  ",A[k][k]);
-            Error("Cannot eliminate with such a pivot"); }
-        for (i = k+1 ; i <  size; i++) {
-            factor = A[i][k] / A[k][k];
-            for (j = k+1 ; j < size; j++) 
-                A[i][j] = A[i][j] - A[k][j] * factor;
-            B[i] = B[i] - B[k] * factor; }}
+//     for (k=0; k < size; k++) {
+//         if ( fabs(A[k][k]) <= 1e-16 ) {
+//             printf("Pivot index %d  ",k);
+//             printf("Pivot value %e  ",A[k][k]);
+//             Error("Cannot eliminate with such a pivot"); }
+//         for (i = k+1 ; i <  size; i++) {
+//             factor = A[i][k] / A[k][k];
+//             for (j = k+1 ; j < size; j++) 
+//                 A[i][j] = A[i][j] - A[k][j] * factor;
+//             B[i] = B[i] - B[k] * factor; }}
     
-    /* Back-substitution */
+//     /* Back-substitution */
     
-    for (i = size-1; i >= 0 ; i--) {
-        factor = 0;
-        for (j = i+1 ; j < size; j++)
-            factor += A[i][j] * B[j];
-        B[i] = ( B[i] - factor)/A[i][i]; }
+//     for (i = size-1; i >= 0 ; i--) {
+//         factor = 0;
+//         for (j = i+1 ; j < size; j++)
+//             factor += A[i][j] * B[j];
+//         B[i] = ( B[i] - factor)/A[i][i]; }
     
-    return(mySystem->B);    
+//     return(mySystem->B);    
+// }
+void luDecomposition(double **A, int *P, int size) {
+    for (int k = 0; k < size; k++) {
+        int maxIndex = k;
+        for (int i = k + 1; i < size; i++) {
+            if (fabs(A[i][k]) > fabs(A[maxIndex][k])) {
+                maxIndex = i;
+            }
+        }
+        
+        if (fabs(A[maxIndex][k]) < 1e-16) {
+            printf("Singular matrix detected at column %d\n", k);
+            exit(EXIT_FAILURE);
+        }
+        
+        if (maxIndex != k) {
+            double *tempRow = A[k];
+            A[k] = A[maxIndex];
+            A[maxIndex] = tempRow;
+            int tempP = P[k];
+            P[k] = P[maxIndex];
+            P[maxIndex] = tempP;
+        }
+        
+        for (int i = k + 1; i < size; i++) {
+            A[i][k] /= A[k][k];
+            for (int j = k + 1; j < size; j++) {
+                A[i][j] -= A[i][k] * A[k][j];
+            }
+        }
+    }
 }
+
+void luSolve(double **A, int *P, double *B, int size) {
+    double *Y = (double *)malloc(size * sizeof(double));
+    
+    for (int i = 0; i < size; i++) {
+        Y[i] = B[P[i]];
+        for (int j = 0; j < i; j++) {
+            Y[i] -= A[i][j] * Y[j];
+        }
+    }
+    
+    for (int i = size - 1; i >= 0; i--) {
+        for (int j = i + 1; j < size; j++) {
+            Y[i] -= A[i][j] * B[j];
+        }
+        B[i] = Y[i] / A[i][i];
+    }
+    
+    free(Y);
+}
+
+double* femFullSystemEliminate(femFullSystem *mySystem) {
+    double **A = mySystem->A;
+    double *B = mySystem->B;
+    int size = mySystem->size;
+    
+    int *P = (int *)malloc(size * sizeof(int));
+    for (int i = 0; i < size; i++) P[i] = i;
+    
+    luDecomposition(A, P, size);
+    for (int i = 0; i < 30; i++)
+    {
+        printf("%d", i);
+    }
+    
+    luSolve(A, P, B, size);
+    
+    free(P);
+    return B;
+}
+// #define TOL 1e-6      // Tolérance d'arrêt
+// #define MAX_ITER 1000
+
+// void mat_vec_mult(double **A, double *x, double *result, int size) {
+//     for (int i = 0; i < size; i++) {
+//         result[i] = 0.0;
+//         for (int j = 0; j < size; j++) {
+//             result[i] += A[i][j] * x[j];
+//         }
+//     }
+// }
+
+// // Produit scalaire de deux vecteurs
+// double dot_product(double *v1, double *v2, int size) {
+//     double sum = 0.0;
+//     for (int i = 0; i < size; i++) {
+//         sum += v1[i] * v2[i];
+//     }
+//     return sum;
+// }
+
+// // Méthode du Gradient Conjugué
+// double* femFullSystemEliminate(femFullSystem *mySystem) {
+//     int size = mySystem->size;
+//     double **A = mySystem->A;
+//     double *B = mySystem->B;
+
+//     double *x = (double*)calloc(size, sizeof(double)); // Solution initialisée à 0
+//     double *r = (double*)malloc(size * sizeof(double));
+//     double *p = (double*)malloc(size * sizeof(double));
+//     double *Ap = (double*)malloc(size * sizeof(double));
+
+//     if (!x || !r || !p || !Ap) {
+//         printf("Erreur d'allocation mémoire.\n");
+//         exit(1);
+//     }
+
+//     // Initialisation r0 = B - Ax0 (x0 = 0)
+//     mat_vec_mult(A, x, r, size);
+//     for (int i = 0; i < size; i++) {
+//         r[i] = B[i] - r[i];
+//         p[i] = r[i];
+//     }
+
+//     double rs_old = dot_product(r, r, size);
+//     double alpha, beta, rs_new;
+
+//     for (int iter = 0; iter < MAX_ITER; iter++) {
+//         mat_vec_mult(A, p, Ap, size);
+//         printf("iter = %d\n", iter);
+//         alpha = rs_old / dot_product(p, Ap, size);
+
+//         for (int i = 0; i < size; i++) {
+//             x[i] += alpha * p[i];
+//             r[i] -= alpha * Ap[i];
+//         }
+
+//         rs_new = dot_product(r, r, size);
+//         if (sqrt(rs_new) < TOL) break; // Convergence
+
+//         beta = rs_new / rs_old;
+//         for (int i = 0; i < size; i++) {
+//             p[i] = r[i] + beta * p[i];
+//         }
+
+//         rs_old = rs_new;
+//     }
+
+//     free(r);
+//     free(p);
+//     free(Ap);
+
+//     return x; // Retourne le vecteur solution x
+// }
 
 void  femFullSystemConstrain(femFullSystem *mySystem, 
                              int myNode, double myValue) 
@@ -614,8 +799,8 @@ void  femFullSystemConstrain(femFullSystem *mySystem,
 
 
 femProblem *femElasticityCreate(femGeo* theGeometry, 
-                  double E, double nu, double rho, double g, femElasticCase iCase)
-{   
+                  double E, double nu, double rho, double g, femElasticCase iCase  , femSolverType solverType , femRenumType renumType)
+{
     femProblem *theProblem = malloc(sizeof(femProblem));
     theProblem->E   = E;
     theProblem->nu  = nu;
@@ -647,6 +832,8 @@ femProblem *femElasticityCreate(femGeo* theGeometry,
 
     
     theProblem->geometry = theGeometry;  
+    femMesh *theMesh = theProblem->geometry->theElements;        
+
     if (theGeometry->theElements->nLocalNode == 3) {
         theProblem->space    = femDiscreteCreate(3,FEM_TRIANGLE);
         theProblem->rule     = femIntegrationCreate(3,FEM_TRIANGLE); }
@@ -655,7 +842,23 @@ femProblem *femElasticityCreate(femGeo* theGeometry,
         theProblem->rule     = femIntegrationCreate(4,FEM_QUAD); }
     theProblem->spaceEdge    = femDiscreteCreate(2,FEM_EDGE);
     theProblem->ruleEdge     = femIntegrationCreate(2,FEM_EDGE); 
-    theProblem->system       = femFullSystemCreate(size); 
+    // theProblem->system       = femFullSystemCreate(size);
+    theProblem->size = 2*theMesh->nodes->nNodes;
+    theProblem->sizeLoc = 2*theMesh->nLocalNode;
+    printf("size = %d\n", theProblem->sizeLoc);
+    switch (solverType) {
+        case FEM_FULL : 
+                theProblem->solver = femSolverFullCreate(theProblem->size,
+                                                         theProblem->sizeLoc); break;
+        // case FEM_BAND : 
+        //         band = femMeshComputeBand(theMesh);
+        //         theProblem->solver = femSolverBandCreate(theProblem->size,
+        //                                                  theProblem->sizeLoc,band); break;
+        // case FEM_ITER : 
+        //        theProblem->solver = femSolverIterativeCreate(theProblem->size,
+        //                                                      theProblem->sizeLoc); break;
+        default : Error("Unexpected solver option"); }
+        
 
     femDiscretePrint(theProblem->space);   
     femDiscretePrint(theProblem->spaceEdge);  
@@ -665,7 +868,7 @@ femProblem *femElasticityCreate(femGeo* theGeometry,
 
 void femElasticityFree(femProblem *theProblem)
 {
-    femFullSystemFree(theProblem->system);
+    femFullSystemFree(theProblem->solver->solver);
     femIntegrationFree(theProblem->rule);
     femDiscreteFree(theProblem->space);
     femIntegrationFree(theProblem->ruleEdge);
@@ -791,6 +994,7 @@ double femMax(double *x, int n)
         myMax = fmax(myMax,x[i]);
     return myMax;
 }
+
 
 void femError(char *text, int line, char *file)                                  
 { 
@@ -1372,10 +1576,42 @@ void geoMeshGenerate() {
     femGeo* theGeometry = geoGetGeometry();
     if(theGeometry->hexa_triangles == 1) {
         trianglePlot();
-    } else {
+    } else if(theGeometry->hexa_triangles == 2) {
         HexagonPlot();
+    }else {
+
+        double w = theGeometry->LxPlate;
+        double h = theGeometry->LyPlate;
+
+        int ierr;
+        double r = w/4;
+        int idRect = gmshModelOccAddRectangle(0.0,0.0,0.0,w,h,-1,0.0,&ierr); 
+        int idDisk = gmshModelOccAddDisk(w/2.0,h/2.0,0.0,r,r,-1,NULL,0,NULL,0,&ierr); 
+        int idSlit = gmshModelOccAddRectangle(w/2.0,h/2.0-r,0.0,w,2.0*r,-1,0.0,&ierr); 
+        int rect[] = {2,idRect};
+        int disk[] = {2,idDisk};
+        int slit[] = {2,idSlit};
+
+        gmshModelOccCut(rect,2,disk,2,NULL,NULL,NULL,NULL,NULL,-1,1,1,&ierr); 
+        gmshModelOccCut(rect,2,slit,2,NULL,NULL,NULL,NULL,NULL,-1,1,1,&ierr); 
+        gmshModelOccSynchronize(&ierr); 
+
+        if (theGeometry->elementType == FEM_QUAD) {
+            gmshOptionSetNumber("Mesh.SaveAll",1,&ierr);
+            gmshOptionSetNumber("Mesh.RecombineAll",1,&ierr);
+            gmshOptionSetNumber("Mesh.Algorithm",11,&ierr);  
+            gmshOptionSetNumber("Mesh.SmoothRatio", 21.5, &ierr);  
+            gmshOptionSetNumber("Mesh.RecombinationAlgorithm",1.0,&ierr); 
+            gmshModelGeoMeshSetRecombine(2,1,45,&ierr);  
+            gmshModelMeshGenerate(2,&ierr);  }
+    
+        if (theGeometry->elementType == FEM_TRIANGLE) {
+            gmshOptionSetNumber("Mesh.SaveAll",1,&ierr);
+            gmshModelMeshGenerate(2,&ierr);  }
+
+        return;
+    
     }
-   
 
     geoSetSizeCallback(geoSize);
 
@@ -1396,25 +1632,25 @@ double *B_copy  = NULL;
 
 void femElasticityAssembleElements(femProblem *theProblem)
 {
-    femFullSystem  *theSystem   = theProblem->system;
     femIntegration *theRule     = theProblem->rule;
     femDiscrete    *theSpace    = theProblem->space;
     femGeo         *theGeometry = theProblem->geometry;
     femNodes       *theNodes    = theGeometry->theNodes;
     femMesh        *theMesh     = theGeometry->theElements;
-    femMesh        *theEdges    = theGeometry->theEdges;
+    femSolver *theSolver = theProblem->solver;
 
-    double x[4], y[4], phi[4], dphidxsi[4] ,dphideta[4], dphidx[4], dphidy[4];
-    int iElem, iInteg, iEdge, i, j, d, map[4], mapX[4], mapY[4];
+    double x[4], y[4], phi[4], dphidxsi[4], dphideta[4], dphidx[4], dphidy[4];
+    int iElem, iInteg, i, j, map[4], mapX[4], mapY[4];
     int nLocal = theMesh->nLocalNode;
+    int localSize = nLocal * 2;
     double a   = theProblem->A;
     double b   = theProblem->B;
-    double c   = theProblem->C;      
+    double c   = theProblem->C;
     double rho = theProblem->rho;
     double g   = theProblem->g;
-    double **A = theSystem->A;
-    double *B  = theSystem->B;
-    
+    double *Aloc = theSolver->local->A[0];
+    double *Bloc = theSolver->local->B;
+
     for (iElem = 0; iElem < theMesh->nElem; iElem++)
     {
         for (j = 0; j < nLocal; j++)
@@ -1424,55 +1660,64 @@ void femElasticityAssembleElements(femProblem *theProblem)
             mapY[j] = 2 * map[j] + 1;
             x[j]    = theNodes->X[map[j]];
             y[j]    = theNodes->Y[map[j]];
-        } 
-        
+        }
+
+        // Initialisation des matrices locales
+        memset(Aloc, 0, localSize * localSize * sizeof(double));
+        memset(Bloc, 0, localSize * sizeof(double));
+
         for (iInteg = 0; iInteg < theRule->n; iInteg++)
-        {   
+        {
             double xsi    = theRule->xsi[iInteg];
             double eta    = theRule->eta[iInteg];
             double weight = theRule->weight[iInteg];
 
             femDiscretePhi2(theSpace, xsi, eta, phi);
             femDiscreteDphi2(theSpace, xsi, eta, dphidxsi, dphideta);
-            
+
             double dxdxsi = 0.0; double dxdeta = 0.0;
             double dydxsi = 0.0; double dydeta = 0.0;
             for (i = 0; i < theSpace->n; i++)
-            {  
-                dxdxsi += x[i] * dphidxsi[i];       
-                dxdeta += x[i] * dphideta[i];   
-                dydxsi += y[i] * dphidxsi[i];   
+            {
+                dxdxsi += x[i] * dphidxsi[i];
+                dxdeta += x[i] * dphideta[i];
+                dydxsi += y[i] * dphidxsi[i];
                 dydeta += y[i] * dphideta[i];
             }
 
             double jac = fabs(dxdxsi * dydeta - dxdeta * dydxsi);
-            
+
             for (i = 0; i < theSpace->n; i++)
-            {    
-                dphidx[i] = (dphidxsi[i] * dydeta - dphideta[i] * dydxsi) / jac;       
+            {
+                dphidx[i] = (dphidxsi[i] * dydeta - dphideta[i] * dydxsi) / jac;
                 dphidy[i] = (dphideta[i] * dxdxsi - dphidxsi[i] * dxdeta) / jac;
             }
 
             double weightedJac = jac * weight;
 
             for (i = 0; i < theSpace->n; i++)
-            { 
+            {
                 for (j = 0; j < theSpace->n; j++)
                 {
-                    A[mapX[i]][mapX[j]] += (dphidx[i] * a * dphidx[j] + dphidy[i] * c * dphidy[j]) * weightedJac;
-                    A[mapX[i]][mapY[j]] += (dphidx[i] * b * dphidy[j] + dphidy[i] * c * dphidx[j]) * weightedJac;
-                    A[mapY[i]][mapX[j]] += (dphidy[i] * b * dphidx[j] + dphidx[i] * c * dphidy[j]) * weightedJac;
-                    A[mapY[i]][mapY[j]] += (dphidy[i] * a * dphidy[j] + dphidx[i] * c * dphidx[j]) * weightedJac;
+                    int iX = 2 * i, iY = 2 * i + 1;
+                    int jX = 2 * j, jY = 2 * j + 1;
+
+                    Aloc[iX * localSize + jX] += (dphidx[i] * a * dphidx[j] + dphidy[i] * c * dphidy[j]) * weightedJac;
+                    Aloc[iX * localSize + jY] += (dphidx[i] * b * dphidy[j] + dphidy[i] * c * dphidx[j]) * weightedJac;
+                    Aloc[iY * localSize + jX] += (dphidy[i] * b * dphidx[j] + dphidx[i] * c * dphidy[j]) * weightedJac;
+                    Aloc[iY * localSize + jY] += (dphidy[i] * a * dphidy[j] + dphidx[i] * c * dphidx[j]) * weightedJac;
                 }
-                B[mapY[i]] -= phi[i] * g * rho * weightedJac;
+                int iY = 2 * i + 1;
+                Bloc[iY] -= phi[i] * g * rho * weightedJac;
             }
         }
+        femSolverAssemble(theSolver, Aloc, Bloc,NULL,  mapX, mapY, nLocal);
     }
 }
 
 void femElasticityAssembleNeumann(femProblem *theProblem)
 {
-    femFullSystem  *theSystem   = theProblem->system;
+    femFullSystem  *theSystem   = theProblem->solver->solver;
     femIntegration *theRule     = theProblem->ruleEdge;
     femDiscrete    *theSpace    = theProblem->spaceEdge;
     femGeo         *theGeometry = theProblem->geometry;
@@ -1540,16 +1785,24 @@ void femElasticityAssembleNeumann(femProblem *theProblem)
 // // Strip : BEGIN
 double *femElasticitySolve(femProblem *theProblem)
 {
-    femFullSystem *theSystem = theProblem->system;
+    femFullSystem *theSystem = theProblem->solver->solver;
+    // printf("Solving the system...\n");
+    // printf("Size of the system: %d\n", theSystem->size);
 
     // Initialize the system
     femFullSystemInit(theSystem);
-
+    
     // Assembly of stiffness matrix and load vector
     femElasticityAssembleElements(theProblem);
+    //print first element 
+    // printf("A[0][0] = %f\n", theSystem->A[0][0]);
+    // printf("A[0][1] = %f\n", theSystem->A[0][1]);
+    
 
     // Assembly of Neumann boundary conditions
     femElasticityAssembleNeumann(theProblem);
+    // Premier element du systeme 
+   
 
     // Get the size of the system
     int size = theSystem->size;
@@ -1592,7 +1845,7 @@ double *femElasticityForces(femProblem *theProblem)
 {
     double *residuals = theProblem->residuals;
     double *soluce    = theProblem->soluce;
-    int size = theProblem->system->size;
+    int size = theProblem->size;
 
     // Allocate memory for residuals if not already done
     if (residuals == NULL) { residuals = (double *) malloc(sizeof(double) * size); }
@@ -1617,4 +1870,54 @@ double *femElasticityForces(femProblem *theProblem)
 
     // Return the residuals corresponding to the forces
     return residuals;
+}
+// Strip : END
+
+
+
+femSolver *femSolverCreate(int sizeLoc)
+{
+    femSolver *mySolver = malloc(sizeof(femSolver));
+    mySolver->local = femFullSystemCreate(sizeLoc);
+    return (mySolver);
+}
+
+femSolver *femSolverFullCreate(int size, int sizeLoc)
+{
+    femSolver *mySolver = femSolverCreate(sizeLoc);
+    mySolver->type = FEM_FULL;
+    mySolver->solver = (femSolver *)femFullSystemCreate(size);
+    return(mySolver);
+}
+
+void femFullSystemAssemble(femFullSystem *mySystem, 
+    double *Aloc, double *Bloc, 
+    int *mapX, int *mapY, int nLocal)
+{
+    int localSize = 2 * nLocal;
+    for (int i = 0; i < nLocal; i++) {
+        for (int j = 0; j < nLocal; j++) {
+            // On assemble le bloc XX
+            mySystem->A[ mapX[i] ][ mapX[j] ] += Aloc[(2*i) * localSize + (2*j)];
+            // Le bloc XY
+            mySystem->A[ mapX[i] ][ mapY[j] ] += Aloc[(2*i) * localSize + (2*j+1)];
+            // Le bloc YX
+            mySystem->A[ mapY[i] ][ mapX[j] ] += Aloc[(2*i+1) * localSize + (2*j)];
+            // Le bloc YY
+            mySystem->A[ mapY[i] ][ mapY[j] ] += Aloc[(2*i+1) * localSize + (2*j+1)];
+            }
+        // On assemble le vecteur local de force
+        mySystem->B[ mapX[i] ] += Bloc[2*i];
+        mySystem->B[ mapY[i] ] += Bloc[2*i+1];
+}
+}
+
+  
+void femSolverAssemble(femSolver* mySolver, double *Aloc, double *Bloc, double *Uloc,int *mapX, int *mapY, int nLoc)
+{
+    switch (mySolver->type) {
+        case FEM_FULL : femFullSystemAssemble((femFullSystem *)mySolver->solver,Aloc,Bloc, mapX, mapY, nLoc); break;
+        // case FEM_BAND : femBandSystemAssemble((femBandSystem *)mySolver->solver,Aloc,Bloc,map,nLoc); break;
+        // case FEM_ITER : femIterativeSolverAssemble((femIterativeSolver *)mySolver->solver,Aloc,Bloc,Uloc,map,nLoc); break;
+        default : Error("Unexpected solver type"); }
 }
