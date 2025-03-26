@@ -73,8 +73,18 @@ def update_plot():
     ax.clear()
     
     current_domain = domain_ids[current_domain_index]
+    print(current_domain)
     domain_nodes = domains[current_domain]
     domain_edges = [(n1, n2) for n1, n2 in n_edges if n1 in domain_nodes and n2 in domain_nodes]
+
+    # Vérification de la validité des nœuds dans le domaine
+    invalid_nodes = [n for n in domain_nodes if n not in nodes or n == -1]
+    if invalid_nodes:
+        print(f"Avertissement : Nœuds invalides dans le domaine {current_domain}: {invalid_nodes}")
+
+    # Filtrer les nœuds valides
+    valid_nodes = [n for n in domain_nodes if n in nodes and n != -1]
+    valid_pos = {n: pos[n] for n in valid_nodes}
     
     # Tracer toutes les arêtes en gris
     nx.draw(G, pos, node_size=1, edge_color='lightgray', alpha=0.5, ax=ax, with_labels=False)
@@ -85,9 +95,8 @@ def update_plot():
     nx.draw(H, pos, node_size=5, edge_color='red', alpha=0.9, ax=ax, with_labels=False)
     
     # Mettre en évidence les nœuds du domaine
-    x = [pos[e][0] for e in domain_nodes if e in pos]
-    y = [pos[e][1] for e in domain_nodes if e in pos]
-    print(y)
+    x = [valid_pos[e][0] for e in valid_nodes]
+    y = [valid_pos[e][1] for e in valid_nodes]
     ax.scatter(x, y, color='red', s=30, label=f'Domaine {current_domain}', alpha=0.9)
     
     ax.set_title(f"Visualisation du Domaine {current_domain}")
@@ -95,6 +104,8 @@ def update_plot():
     ax.set_ylabel("Y")
     ax.legend()
     plt.draw()
+
+
 
 def next_domain(event):
     global current_domain_index

@@ -130,6 +130,19 @@ myFem/fast:
 .PHONY : myFem/fast
 
 #=============================================================================
+# Target rules for targets named myMesh
+
+# Build rule for target.
+myMesh: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 myMesh
+.PHONY : myMesh
+
+# fast build rule for target.
+myMesh/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/myMesh.dir/build.make CMakeFiles/myMesh.dir/build
+.PHONY : myMesh/fast
+
+#=============================================================================
 # Target rules for targets named run
 
 # Build rule for target.
@@ -161,6 +174,7 @@ src/fem.o: src/fem.c.o
 # target to build an object file
 src/fem.c.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/myFem.dir/build.make CMakeFiles/myFem.dir/src/fem.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/myMesh.dir/build.make CMakeFiles/myMesh.dir/src/fem.c.o
 .PHONY : src/fem.c.o
 
 src/fem.i: src/fem.c.i
@@ -169,6 +183,7 @@ src/fem.i: src/fem.c.i
 # target to preprocess a source file
 src/fem.c.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/myFem.dir/build.make CMakeFiles/myFem.dir/src/fem.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/myMesh.dir/build.make CMakeFiles/myMesh.dir/src/fem.c.i
 .PHONY : src/fem.c.i
 
 src/fem.s: src/fem.c.s
@@ -177,6 +192,7 @@ src/fem.s: src/fem.c.s
 # target to generate assembly for a file
 src/fem.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/myFem.dir/build.make CMakeFiles/myFem.dir/src/fem.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/myMesh.dir/build.make CMakeFiles/myMesh.dir/src/fem.c.s
 .PHONY : src/fem.c.s
 
 src/glfem.o: src/glfem.c.o
@@ -185,6 +201,7 @@ src/glfem.o: src/glfem.c.o
 # target to build an object file
 src/glfem.c.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/myFem.dir/build.make CMakeFiles/myFem.dir/src/glfem.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/myMesh.dir/build.make CMakeFiles/myMesh.dir/src/glfem.c.o
 .PHONY : src/glfem.c.o
 
 src/glfem.i: src/glfem.c.i
@@ -193,6 +210,7 @@ src/glfem.i: src/glfem.c.i
 # target to preprocess a source file
 src/glfem.c.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/myFem.dir/build.make CMakeFiles/myFem.dir/src/glfem.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/myMesh.dir/build.make CMakeFiles/myMesh.dir/src/glfem.c.i
 .PHONY : src/glfem.c.i
 
 src/glfem.s: src/glfem.c.s
@@ -201,6 +219,7 @@ src/glfem.s: src/glfem.c.s
 # target to generate assembly for a file
 src/glfem.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/myFem.dir/build.make CMakeFiles/myFem.dir/src/glfem.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/myMesh.dir/build.make CMakeFiles/myMesh.dir/src/glfem.c.s
 .PHONY : src/glfem.c.s
 
 src/homework.o: src/homework.c.o
@@ -209,6 +228,7 @@ src/homework.o: src/homework.c.o
 # target to build an object file
 src/homework.c.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/myFem.dir/build.make CMakeFiles/myFem.dir/src/homework.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/myMesh.dir/build.make CMakeFiles/myMesh.dir/src/homework.c.o
 .PHONY : src/homework.c.o
 
 src/homework.i: src/homework.c.i
@@ -217,6 +237,7 @@ src/homework.i: src/homework.c.i
 # target to preprocess a source file
 src/homework.c.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/myFem.dir/build.make CMakeFiles/myFem.dir/src/homework.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/myMesh.dir/build.make CMakeFiles/myMesh.dir/src/homework.c.i
 .PHONY : src/homework.c.i
 
 src/homework.s: src/homework.c.s
@@ -225,6 +246,7 @@ src/homework.s: src/homework.c.s
 # target to generate assembly for a file
 src/homework.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/myFem.dir/build.make CMakeFiles/myFem.dir/src/homework.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/myMesh.dir/build.make CMakeFiles/myMesh.dir/src/homework.c.s
 .PHONY : src/homework.c.s
 
 src/main.o: src/main.c.o
@@ -251,6 +273,30 @@ src/main.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/myFem.dir/build.make CMakeFiles/myFem.dir/src/main.c.s
 .PHONY : src/main.c.s
 
+src/mesh.o: src/mesh.c.o
+.PHONY : src/mesh.o
+
+# target to build an object file
+src/mesh.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/myMesh.dir/build.make CMakeFiles/myMesh.dir/src/mesh.c.o
+.PHONY : src/mesh.c.o
+
+src/mesh.i: src/mesh.c.i
+.PHONY : src/mesh.i
+
+# target to preprocess a source file
+src/mesh.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/myMesh.dir/build.make CMakeFiles/myMesh.dir/src/mesh.c.i
+.PHONY : src/mesh.c.i
+
+src/mesh.s: src/mesh.c.s
+.PHONY : src/mesh.s
+
+# target to generate assembly for a file
+src/mesh.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/myMesh.dir/build.make CMakeFiles/myMesh.dir/src/mesh.c.s
+.PHONY : src/mesh.c.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -262,6 +308,7 @@ help:
 	@echo "... run"
 	@echo "... glfw"
 	@echo "... myFem"
+	@echo "... myMesh"
 	@echo "... src/fem.o"
 	@echo "... src/fem.i"
 	@echo "... src/fem.s"
@@ -274,6 +321,9 @@ help:
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
+	@echo "... src/mesh.o"
+	@echo "... src/mesh.i"
+	@echo "... src/mesh.s"
 .PHONY : help
 
 

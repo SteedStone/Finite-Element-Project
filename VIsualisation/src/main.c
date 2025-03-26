@@ -15,15 +15,20 @@ double fun(double x, double y)
 {
     return 1;
 }
-int main(void)
+int main(int argc, char *argv[])
 {  
     printf("\n\n    V : Mesh and size mesh field \n");
     printf("    D : Domains \n");
     printf("    N : Next domain highlighted\n");
 
-    int show_visualisation_maillage = 1 ;
-    int type = TRIANGLE;
-    int simple = 0 ;
+    
+
+    if (argc < 2) {
+        fprintf(stderr, "Usage: %s <path_to_file>\n", argv[0]);
+        return EXIT_FAILURE;
+    }
+
+    char *file_path = argv[1];
     
 
 
@@ -35,54 +40,8 @@ int main(void)
       
     int ierr;
     femGeo* theGeometry ;
-    if(!simple){
-        geoInitialize();
-        theGeometry = geoGetGeometry();
-        theGeometry->h = 11;
-        theGeometry->NumberOfHexagonsInX = 9;
-        theGeometry->NumberOfHexagonsInY = 5;
-        theGeometry->NumberOfTrianglesInX = 12;
-        theGeometry->NumberOfTrianglesInY = 10;
-        theGeometry->hexRadius = 9.0;
-        theGeometry->MiddleX = (theGeometry->NumberOfHexagonsInX -1 ) * 1.5 * theGeometry->hexRadius + theGeometry->hexRadius - (-theGeometry->hexRadius) ; 
-        theGeometry->MiddleY = theGeometry->NumberOfHexagonsInY * sqrt(3) * theGeometry->hexRadius - (-theGeometry->hexRadius*sqrt(3)/2) ;
-        theGeometry->elementType = FEM_QUAD;
-        theGeometry->hexa_triangles = type ;
-        
-        // Appel nos fonctions pour créer notre maillage avec soit les hexagones soit les triangles avec la librairie gsmh 
-        geoMeshGenerate();
-        // On remplit la structure TheGeometry avec les noeuds, edges ect depuis gsmh vers notre programme 
-        geoMeshImport();
-        // On trouve créer les différents domaines ou on va venir appliquer nos forces celon si on apllique sur les hexagones ou les triangles.
-        if (theGeometry->hexa_triangles == 1) {
-            femFindBoundaryNodes(theGeometry, 0 , 10e-6 , "Bottom"); // numéro 
-            femFindBoundaryNodes(theGeometry, 90 , 10e-6 , "Top");
-        } else {
-            femFindBoundaryNodes(theGeometry, -1.0794229e+01  , 10e-6 , "Bottom");
-            femFindBoundaryNodes(theGeometry, 8.0942286e+01  , 10e-6 , "Top");
-        }
-    }
-    else {
-        double Lx = 1.0;
-        double Ly = 1.0;
-        
-        geoInitialize();
-        theGeometry = geoGetGeometry();
-        
-        theGeometry->LxPlate     =  Lx;
-        theGeometry->LyPlate     =  Ly;     
-        theGeometry->h           =  Lx * 0.075;    
-        theGeometry->elementType = FEM_QUAD;
-        theGeometry->hexa_triangles = 3;
-
-        geoMeshGenerate();
-        geoMeshImport();
-        geoSetDomainName(0,"Symmetry");
-        geoSetDomainName(7,"Bottom");
-        geoSetDomainName(1,"Top");
-
-        geoMeshWrite("data/elasticity.txt");
-    }
+    geoInitialize();
+    theGeometry = geoGetGeometry();
     
     
     
@@ -95,117 +54,39 @@ int main(void)
 //
 //  -2- Creation du fichier du maillage
 //
-    if(!simple){
-    char filename[] = "data/mesh.txt";
-    geoMeshWrite(filename);
-    }
+    
     
 
 //
 //  -3- Visualisation du maillage
 //  
     // On a rajouté une option pour voir si on veut l'afficher ou pas 
-    if(show_visualisation_maillage) {
-        double *meshSizeField = malloc(theGeometry->theNodes->nNodes*sizeof(double));
-        femNodes *theNodes = theGeometry->theNodes;
-        for(int i=0; i < theNodes->nNodes; ++i)
-            meshSizeField[i] = geoSize(theNodes->X[i], theNodes->Y[i]);
-        double hMin = femMin(meshSizeField,theNodes->nNodes);  
-        double hMax = femMax(meshSizeField,theNodes->nNodes);  
-        printf(" ==== Global requested h : %14.7e \n",theGeometry->h);
-        printf(" ==== Minimum h          : %14.7e \n",hMin);
-        printf(" ==== Maximum h          : %14.7e \n",hMax);
-
-
-        int mode = 1; // Change mode by pressing "j", "k", "l"
-        int domain = 0;
-        int freezingButton = FALSE;
-        double t, told = 0;
-        char theMessage[256];
-        double pos[2] = {20,460};
-
-
-        GLFWwindow* window = glfemInit("EPL1110 : Mesh generation ");
-        glfwMakeContextCurrent(window);
-
-        do {
-            int w,h;
-
-
-            glfwGetFramebufferSize(window,&w,&h);
-            glfemReshapeWindows(theGeometry->theNodes,w,h);
-
-            t = glfwGetTime();  
-        //    glfemChangeState(&mode, theMeshes->nMesh);
-            if (glfwGetKey(window,'D') == GLFW_PRESS) { mode = 0;}
-            if (glfwGetKey(window,'V') == GLFW_PRESS) { mode = 1;}
-            if (glfwGetKey(window,'N') == GLFW_PRESS && freezingButton == FALSE) { domain++; freezingButton = TRUE; told = t;}
-
-            
-            if (t-told > 0.5) {freezingButton = FALSE; }
-                
-            
-            
-                
-            if (mode == 1) {
-                glfemPlotField(theGeometry->theElements, meshSizeField);
-                glfemPlotMesh(theGeometry->theElements); 
-                sprintf(theMessage, "Number of elements : %d ",theGeometry->theElements->nElem);
-
-                
-                glColor3f(1.0,0.0,0.0); glfemMessage(theMessage);
-
-                
-                
-                }
-            if (mode == 0) {
-                domain = domain % theGeometry->nDomains;
-                glfemPlotDomain( theGeometry->theDomains[domain]); 
-                
-                
-                
-                sprintf(theMessage, "%s : %d ",theGeometry->theDomains[domain]->name,domain);
-
-                
-                glColor3f(1.0,0.0,0.0); glfemMessage(theMessage);
-                }
-                
-                glfwSwapBuffers(window);
-                glfwPollEvents();
-        } while( glfwGetKey(window,GLFW_KEY_ESCAPE) != GLFW_PRESS &&
-                    glfwWindowShouldClose(window) != 1 );
-                
-        // Check if the ESC key was pressed or the window was closed
-
-        free(meshSizeField);  
-    }
+    
             
     //
     //  -4- Creation probleme 
     //
-    if (!simple) {
-        geoMeshRead("data/mesh.txt");
-    }else {
-        geoMeshRead("data/elasticity.txt") ;
-    }
+    geoMeshRead(file_path);
+    
 
     
     double E   = 211.e9;
     double nu  = 0.3;
     double rho = 7.85e3; 
     double g   = 9.81;
+   
     // Initialisation du problème avec les conditions aux bords
     // ON remplit juste la structure theProblem avec les valeurs de E, nu, rho, g et le type de problème qu'on veut résoudre
-    femProblem* theProblem = femElasticityCreate(theGeometry,E,nu,rho,g,PLANAR_STRAIN , FEM_FULL , FEM_NO);
+    femProblem* theProblem = femElasticityCreate(theGeometry,E,nu,rho,g,PLANAR_STRESS , FEM_FULL , FEM_NO);
     // femElasticityAddBoundaryCondition(theProblem,"Symmetry",DIRICHLET_X,0.0);
-
     femElasticityAddBoundaryCondition(theProblem,"Bottom",DIRICHLET_X,0.0);
     femElasticityAddBoundaryCondition(theProblem,"Bottom",DIRICHLET_Y,0.0);
 
     femElasticityAddBoundaryCondition(theProblem,"Top",NEUMANN_Y,-1e6);
-
-    femElasticityPrint(theProblem);
     
+    femElasticityPrint(theProblem);
+    // femFullSystemPrint(theProblem->solver->solver);
+    // printf("Taille system %d" , theProblem->size);
     
     //  -3- Resolution du probleme et calcul des forces
     

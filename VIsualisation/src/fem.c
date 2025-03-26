@@ -13,7 +13,7 @@ femGeo theGeometry;
 
 femGeo *geoGetGeometry()                        { return &theGeometry; }
 
-double geoSizeDefault(double x, double y)       { return theGeometry.h; }
+double geoSizeDefault(double x, double y)       { return 4; }
 
 double geoGmshSize(int dim, int tag, double x, double y, double z, double lc, void *data)
                                                 { return theGeometry.geoSize(x,y);    }
@@ -593,8 +593,7 @@ void femFullSystemPrint(femFullSystem *mySystem)
     
     for (i=0; i < size; i++) {
         for (j=0; j < size; j++)
-            if (A[i][j] == 0)  printf("         ");   
-            else               printf(" %+.1e",A[i][j]);
+                         printf(" %+.1e",A[i][j]);
         printf(" :  %+.1e \n",B[i]); }
 }
 
@@ -691,10 +690,7 @@ double* femFullSystemEliminate(femFullSystem *mySystem) {
     for (int i = 0; i < size; i++) P[i] = i;
     
     luDecomposition(A, P, size);
-    for (int i = 0; i < 30; i++)
-    {
-        printf("%d", i);
-    }
+    
     
     luSolve(A, P, B, size);
     
@@ -1897,7 +1893,7 @@ void femFullSystemAssemble(femFullSystem *mySystem,
     int localSize = 2 * nLocal;
     for (int i = 0; i < nLocal; i++) {
         for (int j = 0; j < nLocal; j++) {
-            // On assemble le bloc XX
+
             mySystem->A[ mapX[i] ][ mapX[j] ] += Aloc[(2*i) * localSize + (2*j)];
             // Le bloc XY
             mySystem->A[ mapX[i] ][ mapY[j] ] += Aloc[(2*i) * localSize + (2*j+1)];
