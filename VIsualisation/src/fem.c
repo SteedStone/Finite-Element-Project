@@ -13,7 +13,7 @@ femGeo theGeometry;
 
 femGeo *geoGetGeometry()                        { return &theGeometry; }
 
-double geoSizeDefault(double x, double y)       { return 4; }
+double geoSizeDefault(double x, double y)       { return theGeometry.h; }
 
 double geoGmshSize(int dim, int tag, double x, double y, double z, double lc, void *data)
                                                 { return theGeometry.geoSize(x,y);    }
@@ -1124,8 +1124,8 @@ void trianglePlot() {
 
     
 
-    gmshModelMeshGenerate(2, &ierr);
-    ErrorGmsh(ierr);
+    // gmshModelMeshGenerate(2, &ierr);
+    // ErrorGmsh(ierr);
 
     // gmshFltkRun(&ierr);
     // ErrorGmsh(ierr);
@@ -1244,7 +1244,7 @@ void HexagonPlot(){
                     ErrorGmsh(ierr);
                 }
             }
-            int quadrilaterePoints[5], quadrilatereLines[5];
+            int quadrilaterePoints[6], quadrilatereLines[6];
             if( i == 0 && j == numHexY - 1) {
                 for (int k = 0; k < 3; k++)
                 {
@@ -1254,12 +1254,14 @@ void HexagonPlot(){
                     quadrilaterePoints[k] = gmshModelOccAddPoint(px, py, 0, meshSize, -1, &ierr);
                     ErrorGmsh(ierr);
                 }
-                quadrilaterePoints[3] = gmshModelOccAddPoint(-hexRadius, numHexY * sqrt(3) * hexRadius, 0, meshSize, -1, &ierr);
-                quadrilaterePoints[4] = gmshModelOccAddPoint(1 * 1.5 * hexRadius + hexRadius * cos(M_PI/3 * 2), j * sqrt(3) * hexRadius + (1 % 2) * sqrt(3) * hexRadius / 2 + hexRadius * sin(M_PI/3 * 2), 0, meshSize, -1, &ierr);
+                quadrilaterePoints[3] = gmshModelOccAddPoint(-hexRadius, numHexY * sqrt(3) * hexRadius+ hexRadius/3, 0, meshSize, -1, &ierr);
+                quadrilaterePoints[5] = gmshModelOccAddPoint(1 * 1.5 * hexRadius + hexRadius * cos(M_PI/3 * 2), j * sqrt(3) * hexRadius + (1 % 2) * sqrt(3) * hexRadius / 2 + hexRadius * sin(M_PI/3 * 2), 0, meshSize, -1, &ierr);
+                quadrilaterePoints[4] = gmshModelOccAddPoint(1 * 1.5 * hexRadius + hexRadius * cos(M_PI/3 * 2), numHexY * sqrt(3) * hexRadius+ hexRadius/3, 0, meshSize, -1, &ierr);
+
                 ErrorGmsh(ierr);
-                for (int k = 0; k < 5; k++)
+                for (int k = 0; k < 6; k++)
                 {
-                    quadrilatereLines[k] = gmshModelOccAddLine(quadrilaterePoints[k], quadrilaterePoints[(k+1)%5], -1, &ierr);
+                    quadrilatereLines[k] = gmshModelOccAddLine(quadrilaterePoints[k], quadrilaterePoints[(k+1)%6], -1, &ierr);
                     ErrorGmsh(ierr);
                 }
             }
@@ -1272,12 +1274,15 @@ void HexagonPlot(){
                     quadrilaterePoints[k] = gmshModelOccAddPoint(px, py, 0, meshSize, -1, &ierr);
                     ErrorGmsh(ierr);
                 }
-                quadrilaterePoints[4] = gmshModelOccAddPoint((numHexX -1 ) * 1.5 * hexRadius + hexRadius, numHexY * sqrt(3) * hexRadius, 0, meshSize, -1, &ierr);
+
+                quadrilaterePoints[5] = gmshModelOccAddPoint((numHexX -1 ) * 1.5 * hexRadius + hexRadius, numHexY * sqrt(3) * hexRadius+ hexRadius/3, 0, meshSize, -1, &ierr);
                 quadrilaterePoints[3] = gmshModelOccAddPoint((numHexX - 2) * 1.5 * hexRadius + hexRadius * cos(M_PI/3 ), j * sqrt(3) * hexRadius + ((numHexX - 2) % 2) * sqrt(3) * hexRadius / 2 + hexRadius * sin(M_PI/3 ), 0, meshSize, -1, &ierr);
+                quadrilaterePoints[4] = gmshModelOccAddPoint((numHexX - 2) * 1.5 * hexRadius + hexRadius * cos(M_PI/3 ), numHexY * sqrt(3) * hexRadius+ hexRadius/3, 0, meshSize, -1, &ierr);
+
                 ErrorGmsh(ierr);
-                for (int k = 0; k < 5; k++)
+                for (int k = 0; k < 6; k++)
                 {
-                    quadrilatereLines[k] = gmshModelOccAddLine(quadrilaterePoints[k], quadrilaterePoints[(k+1)%5], -1, &ierr);
+                    quadrilatereLines[k] = gmshModelOccAddLine(quadrilaterePoints[k], quadrilaterePoints[(k+1)%6], -1, &ierr);
                     ErrorGmsh(ierr);
                 }
             }
@@ -1371,12 +1376,12 @@ void HexagonPlot(){
                 trianglecoteTags[triangleWireCount++] = trianglecoteWire;
             }
             if( i == 0 && j == numHexY - 1) {
-                int quadrilatereWire = gmshModelOccAddWire(quadrilatereLines, 5, -1, 1, &ierr);
+                int quadrilatereWire = gmshModelOccAddWire(quadrilatereLines, 6, -1, 1, &ierr);
                 ErrorGmsh(ierr);
                 quadrilatereTags[0] = quadrilatereWire;
             }
             if( i == numHexX - 1 && j == numHexY - 1) {
-                int quadrilatereWire = gmshModelOccAddWire(quadrilatereLines, 5, -1, 1, &ierr);
+                int quadrilatereWire = gmshModelOccAddWire(quadrilatereLines, 6, -1, 1, &ierr);
                 ErrorGmsh(ierr);
                 quadrilatereTags[1] = quadrilatereWire;
             }
@@ -1490,13 +1495,10 @@ void HexagonPlot(){
     gmshModelOccSynchronize(&ierr);
     ErrorGmsh(ierr);
 
-    // Génération du maillage
-    gmshModelMeshGenerate(2, &ierr);
+  
+    // // Affichage dans Gmsh
+    gmshFltkRun(&ierr);
     ErrorGmsh(ierr);
-
-    // Affichage dans Gmsh
-    // gmshFltkRun(&ierr);
-    // ErrorGmsh(ierr);
 
 
 

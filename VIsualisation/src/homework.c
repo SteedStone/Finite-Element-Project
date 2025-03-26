@@ -19,21 +19,47 @@ void chk(int ierr) {
 
 double geoSize(double x, double y) {
     femGeo* theGeometry = geoGetGeometry();
-    
-    double h_max = theGeometry->h;       
-    double h_min = h_max * 0.5;  // Ajuste ce facteur pour un effet plus visible
-    double y_min = -theGeometry->MiddleY + theGeometry->MiddleY ;  
-    double y_max = theGeometry->MiddleY  * theGeometry->hexRadius;  
+    double h_min;
+    double h_max;
+    double y_min;
+    double y_max;
+    if (theGeometry->hexa_triangles == 1) {
+        double hexRadius = theGeometry->hexRadius;
+        double numHexX = theGeometry->NumberOfHexagonsInX;
+        double numHexY = theGeometry->NumberOfHexagonsInY;
+        
+        double distance = hexRadius * 1.1; // Distance entre les lignes
+        h_max = theGeometry->h;       
+        h_min = h_max * 0.2;  // Ajuste ce facteur pour un effet plus visible
+        y_min =0;
+        y_max = numHexY * distance - hexRadius;  
+    } else {
+        double hexRadius = theGeometry->hexRadius;
+        double numHexX = theGeometry->NumberOfHexagonsInX;
+        double numHexY = theGeometry->NumberOfHexagonsInY;
+        h_max = theGeometry->h;       
+        h_min = h_max * 0.1;  // Ajuste ce facteur pour un effet plus visible
+        y_min =-hexRadius*sqrt(3)/2 - hexRadius/3;  
+        y_max = numHexY * sqrt(3) * hexRadius+ hexRadius/3;  
+    }
 
+    
+    
+    
+    
     // Éviter une division par zéro
-    if (y_max == y_min) return h_max;
+
+    if (y_max == y_min) {
+        return h_max;
+    }
 
     // Progression linéaire de la taille de maille entre h_min et h_max
     double t = (y - y_min) / (y_max - y_min);
     t = fmax(0.0, fmin(1.0, t)); // S'assurer que t reste dans [0,1]
     
-    double h = h_min + (h_max - h_min) * t; // Progression linéaire
-    
+    // double h = h_min + (h_max - h_min) * pow(1 - t, 3); 
+    double h = h_min + (h_max - h_min) * (1 - t);      
+    //  printf("geoSize called: x=%.2f, y=%.2f -> h=%.5f\n", x, y, h); // 🔴 DEBUG
     return h;
 
 

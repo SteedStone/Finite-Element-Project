@@ -1,0 +1,8 @@
+Objectif : 
+- Faire une carte de taille 
+- Farie un solveur iteratif 
+- Faire un solveur bande 
+- Voire les déformations en fonction des tensions 
+- Video 
+- Slide 
+- Réorganisation du code
