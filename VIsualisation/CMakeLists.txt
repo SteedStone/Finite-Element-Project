@@ -48,11 +48,14 @@ message("GMSH_LIBRARY : ${GMSH_LIBRARY}")
 include_directories(${GMSH_INCLUDE_DIR})
 
 # link the aforementioned libraries
-add_executable(${EXEC_NAME} src/fem.c src/glfem.c src/homework.c src/main.c)
+add_executable(${EXEC_NAME} src/fem.c src/glfem.c src/functions.c src/main.c)
 target_link_libraries(${EXEC_NAME} glfw ${OPENGL_gl_LIBRARY} ${GMSH_LIBRARY})
 
-add_executable(${MESH_EXEC_NAME} src/fem.c src/glfem.c src/homework.c src/mesh.c)
+add_executable(${MESH_EXEC_NAME} src/fem.c src/glfem.c src/functions.c src/mesh.c)
 target_link_libraries(${MESH_EXEC_NAME} glfw ${OPENGL_gl_LIBRARY} ${GMSH_LIBRARY})
+
+add_executable(myVisualisation src/fem.c src/glfem.c src/functions.c src/visualisation.c)
+target_link_libraries(myVisualisation glfw ${OPENGL_gl_LIBRARY} ${GMSH_LIBRARY})
 
 if(APPLE)
     target_compile_options(${EXEC_NAME} PRIVATE "-Wdeprecated-declarations")
@@ -72,5 +75,13 @@ target_compile_definitions(${MESH_EXEC_NAME} PRIVATE graphic)
 
 # add a custom target so we can do make run directly
 add_custom_target(run COMMAND ${EXEC_NAME} DEPENDS ${EXEC_NAME} COMMENT "./${EXEC_NAME}")
-
+add_custom_target(run_visualisation COMMAND ./myVisualisation DEPENDS visualisation COMMENT "Running visualisation")
+add_custom_target(video
+    COMMAND ffmpeg -framerate 30 -i frame/frame_%d.png -c:v libx264 -crf 18 -preset slow video_tri.mp4    
+    COMMENT "Generating video from frames..."
+)
+add_custom_target(clean_frames
+    COMMAND rm -rf frame/*.png video_tri.mp4
+    COMMENT "Deleting frames and video..."
+)
 

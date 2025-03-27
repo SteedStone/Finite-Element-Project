@@ -72,6 +72,77 @@ CMakeFiles/myFem.dir/src/fem.c.o: src/fem.c \
   /usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include/stdarg.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include/stddef.h
 
+CMakeFiles/myFem.dir/src/functions.c.o: src/functions.c \
+  gmsh/gmsh-4.13.1-Linux64-sdk/include/gmshc.h \
+  src/fem.h \
+  /usr/include/alloca.h \
+  /usr/include/bits/atomic_wide_counter.h \
+  /usr/include/bits/byteswap.h \
+  /usr/include/bits/endian.h \
+  /usr/include/bits/endianness.h \
+  /usr/include/bits/floatn-common.h \
+  /usr/include/bits/floatn.h \
+  /usr/include/bits/flt-eval-method.h \
+  /usr/include/bits/fp-fast.h \
+  /usr/include/bits/fp-logb.h \
+  /usr/include/bits/libc-header-start.h \
+  /usr/include/bits/libm-simd-decl-stubs.h \
+  /usr/include/bits/long-double.h \
+  /usr/include/bits/math-vector.h \
+  /usr/include/bits/mathcalls-helper-functions.h \
+  /usr/include/bits/mathcalls-macros.h \
+  /usr/include/bits/mathcalls.h \
+  /usr/include/bits/pthreadtypes-arch.h \
+  /usr/include/bits/pthreadtypes.h \
+  /usr/include/bits/select.h \
+  /usr/include/bits/stdint-intn.h \
+  /usr/include/bits/stdio_lim.h \
+  /usr/include/bits/stdlib-float.h \
+  /usr/include/bits/struct_mutex.h \
+  /usr/include/bits/struct_rwlock.h \
+  /usr/include/bits/thread-shared-types.h \
+  /usr/include/bits/time64.h \
+  /usr/include/bits/timesize.h \
+  /usr/include/bits/types.h \
+  /usr/include/bits/types/FILE.h \
+  /usr/include/bits/types/__FILE.h \
+  /usr/include/bits/types/__fpos64_t.h \
+  /usr/include/bits/types/__fpos_t.h \
+  /usr/include/bits/types/__locale_t.h \
+  /usr/include/bits/types/__mbstate_t.h \
+  /usr/include/bits/types/__sigset_t.h \
+  /usr/include/bits/types/clock_t.h \
+  /usr/include/bits/types/clockid_t.h \
+  /usr/include/bits/types/cookie_io_functions_t.h \
+  /usr/include/bits/types/locale_t.h \
+  /usr/include/bits/types/sigset_t.h \
+  /usr/include/bits/types/struct_FILE.h \
+  /usr/include/bits/types/struct_timespec.h \
+  /usr/include/bits/types/struct_timeval.h \
+  /usr/include/bits/types/time_t.h \
+  /usr/include/bits/types/timer_t.h \
+  /usr/include/bits/typesizes.h \
+  /usr/include/bits/uintn-identity.h \
+  /usr/include/bits/waitflags.h \
+  /usr/include/bits/waitstatus.h \
+  /usr/include/bits/wordsize.h \
+  /usr/include/endian.h \
+  /usr/include/features-time64.h \
+  /usr/include/features.h \
+  /usr/include/gnu/stubs-64.h \
+  /usr/include/gnu/stubs.h \
+  /usr/include/math.h \
+  /usr/include/stdc-predef.h \
+  /usr/include/stdio.h \
+  /usr/include/stdlib.h \
+  /usr/include/string.h \
+  /usr/include/strings.h \
+  /usr/include/sys/cdefs.h \
+  /usr/include/sys/select.h \
+  /usr/include/sys/types.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include/stdarg.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include/stddef.h
+
 CMakeFiles/myFem.dir/src/glfem.c.o: src/glfem.c \
   glfw/include/GLFW/glfw3.h \
   gmsh/gmsh-4.13.1-Linux64-sdk/include/gmshc.h \
@@ -153,77 +224,6 @@ CMakeFiles/myFem.dir/src/glfem.c.o: src/glfem.c \
   /usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include/stdarg.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include/stddef.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include/stdint.h
-
-CMakeFiles/myFem.dir/src/homework.c.o: src/homework.c \
-  gmsh/gmsh-4.13.1-Linux64-sdk/include/gmshc.h \
-  src/fem.h \
-  /usr/include/alloca.h \
-  /usr/include/bits/atomic_wide_counter.h \
-  /usr/include/bits/byteswap.h \
-  /usr/include/bits/endian.h \
-  /usr/include/bits/endianness.h \
-  /usr/include/bits/floatn-common.h \
-  /usr/include/bits/floatn.h \
-  /usr/include/bits/flt-eval-method.h \
-  /usr/include/bits/fp-fast.h \
-  /usr/include/bits/fp-logb.h \
-  /usr/include/bits/libc-header-start.h \
-  /usr/include/bits/libm-simd-decl-stubs.h \
-  /usr/include/bits/long-double.h \
-  /usr/include/bits/math-vector.h \
-  /usr/include/bits/mathcalls-helper-functions.h \
-  /usr/include/bits/mathcalls-macros.h \
-  /usr/include/bits/mathcalls.h \
-  /usr/include/bits/pthreadtypes-arch.h \
-  /usr/include/bits/pthreadtypes.h \
-  /usr/include/bits/select.h \
-  /usr/include/bits/stdint-intn.h \
-  /usr/include/bits/stdio_lim.h \
-  /usr/include/bits/stdlib-float.h \
-  /usr/include/bits/struct_mutex.h \
-  /usr/include/bits/struct_rwlock.h \
-  /usr/include/bits/thread-shared-types.h \
-  /usr/include/bits/time64.h \
-  /usr/include/bits/timesize.h \
-  /usr/include/bits/types.h \
-  /usr/include/bits/types/FILE.h \
-  /usr/include/bits/types/__FILE.h \
-  /usr/include/bits/types/__fpos64_t.h \
-  /usr/include/bits/types/__fpos_t.h \
-  /usr/include/bits/types/__locale_t.h \
-  /usr/include/bits/types/__mbstate_t.h \
-  /usr/include/bits/types/__sigset_t.h \
-  /usr/include/bits/types/clock_t.h \
-  /usr/include/bits/types/clockid_t.h \
-  /usr/include/bits/types/cookie_io_functions_t.h \
-  /usr/include/bits/types/locale_t.h \
-  /usr/include/bits/types/sigset_t.h \
-  /usr/include/bits/types/struct_FILE.h \
-  /usr/include/bits/types/struct_timespec.h \
-  /usr/include/bits/types/struct_timeval.h \
-  /usr/include/bits/types/time_t.h \
-  /usr/include/bits/types/timer_t.h \
-  /usr/include/bits/typesizes.h \
-  /usr/include/bits/uintn-identity.h \
-  /usr/include/bits/waitflags.h \
-  /usr/include/bits/waitstatus.h \
-  /usr/include/bits/wordsize.h \
-  /usr/include/endian.h \
-  /usr/include/features-time64.h \
-  /usr/include/features.h \
-  /usr/include/gnu/stubs-64.h \
-  /usr/include/gnu/stubs.h \
-  /usr/include/math.h \
-  /usr/include/stdc-predef.h \
-  /usr/include/stdio.h \
-  /usr/include/stdlib.h \
-  /usr/include/string.h \
-  /usr/include/strings.h \
-  /usr/include/sys/cdefs.h \
-  /usr/include/sys/select.h \
-  /usr/include/sys/types.h \
-  /usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include/stdarg.h \
-  /usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include/stddef.h
 
 CMakeFiles/myFem.dir/src/main.c.o: src/main.c \
   glfw/include/GLFW/glfw3.h \
@@ -359,16 +359,14 @@ myFem: /usr/lib/Scrt1.o \
   /usr/lib/libxcb.so.1 \
   /usr/lib/libz.so.1 \
   CMakeFiles/myFem.dir/src/fem.c.o \
+  CMakeFiles/myFem.dir/src/functions.c.o \
   CMakeFiles/myFem.dir/src/glfem.c.o \
-  CMakeFiles/myFem.dir/src/homework.c.o \
   CMakeFiles/myFem.dir/src/main.c.o \
   glfw/src/libglfw3.a \
   gmsh/gmsh-4.13.1-Linux64-sdk/lib/libgmsh.so
 
 
 CMakeFiles/myFem.dir/src/main.c.o:
-
-CMakeFiles/myFem.dir/src/homework.c.o:
 
 CMakeFiles/myFem.dir/src/glfem.c.o:
 
@@ -398,6 +396,8 @@ CMakeFiles/myFem.dir/src/fem.c.o:
 
 /usr/lib/libdl.a:
 
+/usr/include/bits/types/cookie_io_functions_t.h:
+
 /usr/include/endian.h:
 
 /usr/include/bits/stdint-uintn.h:
@@ -409,6 +409,8 @@ CMakeFiles/myFem.dir/src/fem.c.o:
 /usr/include/bits/stdio_lim.h:
 
 /usr/include/bits/types/__mbstate_t.h:
+
+src/functions.c:
 
 /usr/include/bits/wordsize.h:
 
@@ -431,6 +433,8 @@ CMakeFiles/myFem.dir/src/fem.c.o:
 /usr/include/bits/waitstatus.h:
 
 /usr/include/bits/fp-fast.h:
+
+CMakeFiles/myFem.dir/src/functions.c.o:
 
 /usr/lib/libc.so:
 
@@ -570,12 +574,6 @@ src/glfem.c:
 
 /usr/include/stdint.h:
 
-/usr/include/bits/types/cookie_io_functions_t.h:
-
-src/homework.c:
-
-/usr/lib/libbrotlidec.so.1:
-
 src/main.c:
 
 src/stb_image_write.h:
@@ -637,6 +635,8 @@ src/glfem.h:
 gmsh/gmsh-4.13.1-Linux64-sdk/lib/libgmsh.so:
 
 /usr/lib/libXrender.so.1:
+
+/usr/lib/libbrotlidec.so.1:
 
 /usr/lib/libc.so.6:
 

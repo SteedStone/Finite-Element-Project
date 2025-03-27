@@ -100,19 +100,19 @@ CMakeFiles/myFem.dir/src/glfem.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/myFem.dir/src/glfem.c.s"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S "/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/src/glfem.c" -o CMakeFiles/myFem.dir/src/glfem.c.s
 
-CMakeFiles/myFem.dir/src/homework.c.o: CMakeFiles/myFem.dir/flags.make
-CMakeFiles/myFem.dir/src/homework.c.o: src/homework.c
-CMakeFiles/myFem.dir/src/homework.c.o: CMakeFiles/myFem.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_3) "Building C object CMakeFiles/myFem.dir/src/homework.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/myFem.dir/src/homework.c.o -MF CMakeFiles/myFem.dir/src/homework.c.o.d -o CMakeFiles/myFem.dir/src/homework.c.o -c "/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/src/homework.c"
+CMakeFiles/myFem.dir/src/functions.c.o: CMakeFiles/myFem.dir/flags.make
+CMakeFiles/myFem.dir/src/functions.c.o: src/functions.c
+CMakeFiles/myFem.dir/src/functions.c.o: CMakeFiles/myFem.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_3) "Building C object CMakeFiles/myFem.dir/src/functions.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/myFem.dir/src/functions.c.o -MF CMakeFiles/myFem.dir/src/functions.c.o.d -o CMakeFiles/myFem.dir/src/functions.c.o -c "/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/src/functions.c"
 
-CMakeFiles/myFem.dir/src/homework.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/myFem.dir/src/homework.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E "/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/src/homework.c" > CMakeFiles/myFem.dir/src/homework.c.i
+CMakeFiles/myFem.dir/src/functions.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/myFem.dir/src/functions.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E "/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/src/functions.c" > CMakeFiles/myFem.dir/src/functions.c.i
 
-CMakeFiles/myFem.dir/src/homework.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/myFem.dir/src/homework.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S "/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/src/homework.c" -o CMakeFiles/myFem.dir/src/homework.c.s
+CMakeFiles/myFem.dir/src/functions.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/myFem.dir/src/functions.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S "/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/src/functions.c" -o CMakeFiles/myFem.dir/src/functions.c.s
 
 CMakeFiles/myFem.dir/src/main.c.o: CMakeFiles/myFem.dir/flags.make
 CMakeFiles/myFem.dir/src/main.c.o: src/main.c
@@ -132,7 +132,7 @@ CMakeFiles/myFem.dir/src/main.c.s: cmake_force
 myFem_OBJECTS = \
 "CMakeFiles/myFem.dir/src/fem.c.o" \
 "CMakeFiles/myFem.dir/src/glfem.c.o" \
-"CMakeFiles/myFem.dir/src/homework.c.o" \
+"CMakeFiles/myFem.dir/src/functions.c.o" \
 "CMakeFiles/myFem.dir/src/main.c.o"
 
 # External object files for target myFem
@@ -140,7 +140,7 @@ myFem_EXTERNAL_OBJECTS =
 
 myFem: CMakeFiles/myFem.dir/src/fem.c.o
 myFem: CMakeFiles/myFem.dir/src/glfem.c.o
-myFem: CMakeFiles/myFem.dir/src/homework.c.o
+myFem: CMakeFiles/myFem.dir/src/functions.c.o
 myFem: CMakeFiles/myFem.dir/src/main.c.o
 myFem: CMakeFiles/myFem.dir/build.make
 myFem: CMakeFiles/myFem.dir/compiler_depend.ts

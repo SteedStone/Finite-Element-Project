@@ -65,12 +65,14 @@ CMAKE_BINARY_DIR = "/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---
 # The main recursive "all" target.
 all: CMakeFiles/myFem.dir/all
 all: CMakeFiles/myMesh.dir/all
+all: CMakeFiles/myVisualisation.dir/all
 all: glfw/all
 .PHONY : all
 
 # The main recursive "codegen" target.
 codegen: CMakeFiles/myFem.dir/codegen
 codegen: CMakeFiles/myMesh.dir/codegen
+codegen: CMakeFiles/myVisualisation.dir/codegen
 codegen: glfw/codegen
 .PHONY : codegen
 
@@ -81,7 +83,11 @@ preinstall: glfw/preinstall
 # The main recursive "clean" target.
 clean: CMakeFiles/myFem.dir/clean
 clean: CMakeFiles/myMesh.dir/clean
+clean: CMakeFiles/myVisualisation.dir/clean
 clean: CMakeFiles/run.dir/clean
+clean: CMakeFiles/run_visualisation.dir/clean
+clean: CMakeFiles/video.dir/clean
+clean: CMakeFiles/clean_frames.dir/clean
 clean: glfw/clean
 .PHONY : clean
 
@@ -130,7 +136,7 @@ glfw/src/clean: glfw/src/CMakeFiles/glfw.dir/clean
 CMakeFiles/myFem.dir/all: glfw/src/CMakeFiles/glfw.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/myFem.dir/build.make CMakeFiles/myFem.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/myFem.dir/build.make CMakeFiles/myFem.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir="/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/CMakeFiles" --progress-num=18,19,20,21,22 "Built target myFem"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir="/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/CMakeFiles" --progress-num=19,20,21,22,23 "Built target myFem"
 .PHONY : CMakeFiles/myFem.dir/all
 
 # Build rule for subdir invocation for target.
@@ -147,7 +153,7 @@ myFem: CMakeFiles/myFem.dir/rule
 # codegen rule for target.
 CMakeFiles/myFem.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/myFem.dir/build.make CMakeFiles/myFem.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir="/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/CMakeFiles" --progress-num=18,19,20,21,22 "Finished codegen for target myFem"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir="/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/CMakeFiles" --progress-num=19,20,21,22,23 "Finished codegen for target myFem"
 .PHONY : CMakeFiles/myFem.dir/codegen
 
 # clean rule for target.
@@ -162,7 +168,7 @@ CMakeFiles/myFem.dir/clean:
 CMakeFiles/myMesh.dir/all: glfw/src/CMakeFiles/glfw.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/myMesh.dir/build.make CMakeFiles/myMesh.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/myMesh.dir/build.make CMakeFiles/myMesh.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir="/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/CMakeFiles" --progress-num=23,24,25,26,27 "Built target myMesh"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir="/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/CMakeFiles" --progress-num=24,25,26,27,28 "Built target myMesh"
 .PHONY : CMakeFiles/myMesh.dir/all
 
 # Build rule for subdir invocation for target.
@@ -179,7 +185,7 @@ myMesh: CMakeFiles/myMesh.dir/rule
 # codegen rule for target.
 CMakeFiles/myMesh.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/myMesh.dir/build.make CMakeFiles/myMesh.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir="/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/CMakeFiles" --progress-num=23,24,25,26,27 "Finished codegen for target myMesh"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir="/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/CMakeFiles" --progress-num=24,25,26,27,28 "Finished codegen for target myMesh"
 .PHONY : CMakeFiles/myMesh.dir/codegen
 
 # clean rule for target.
@@ -188,13 +194,45 @@ CMakeFiles/myMesh.dir/clean:
 .PHONY : CMakeFiles/myMesh.dir/clean
 
 #=============================================================================
+# Target rules for target CMakeFiles/myVisualisation.dir
+
+# All Build rule for target.
+CMakeFiles/myVisualisation.dir/all: glfw/src/CMakeFiles/glfw.dir/all
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/myVisualisation.dir/build.make CMakeFiles/myVisualisation.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/myVisualisation.dir/build.make CMakeFiles/myVisualisation.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir="/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/CMakeFiles" --progress-num=29,30,31,32,33 "Built target myVisualisation"
+.PHONY : CMakeFiles/myVisualisation.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/myVisualisation.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start "/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/CMakeFiles" 22
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/myVisualisation.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start "/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/CMakeFiles" 0
+.PHONY : CMakeFiles/myVisualisation.dir/rule
+
+# Convenience name for target.
+myVisualisation: CMakeFiles/myVisualisation.dir/rule
+.PHONY : myVisualisation
+
+# codegen rule for target.
+CMakeFiles/myVisualisation.dir/codegen:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/myVisualisation.dir/build.make CMakeFiles/myVisualisation.dir/codegen
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir="/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/CMakeFiles" --progress-num=29,30,31,32,33 "Finished codegen for target myVisualisation"
+.PHONY : CMakeFiles/myVisualisation.dir/codegen
+
+# clean rule for target.
+CMakeFiles/myVisualisation.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/myVisualisation.dir/build.make CMakeFiles/myVisualisation.dir/clean
+.PHONY : CMakeFiles/myVisualisation.dir/clean
+
+#=============================================================================
 # Target rules for target CMakeFiles/run.dir
 
 # All Build rule for target.
 CMakeFiles/run.dir/all: CMakeFiles/myFem.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/run.dir/build.make CMakeFiles/run.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/run.dir/build.make CMakeFiles/run.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir="/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/CMakeFiles" --progress-num=28 "Built target run"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir="/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/CMakeFiles" --progress-num=34 "Built target run"
 .PHONY : CMakeFiles/run.dir/all
 
 # Build rule for subdir invocation for target.
@@ -211,7 +249,7 @@ run: CMakeFiles/run.dir/rule
 # codegen rule for target.
 CMakeFiles/run.dir/codegen: CMakeFiles/myFem.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/run.dir/build.make CMakeFiles/run.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir="/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/CMakeFiles" --progress-num=28 "Finished codegen for target run"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir="/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/CMakeFiles" --progress-num=34 "Finished codegen for target run"
 .PHONY : CMakeFiles/run.dir/codegen
 
 # clean rule for target.
@@ -220,13 +258,109 @@ CMakeFiles/run.dir/clean:
 .PHONY : CMakeFiles/run.dir/clean
 
 #=============================================================================
+# Target rules for target CMakeFiles/run_visualisation.dir
+
+# All Build rule for target.
+CMakeFiles/run_visualisation.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_visualisation.dir/build.make CMakeFiles/run_visualisation.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_visualisation.dir/build.make CMakeFiles/run_visualisation.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir="/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/CMakeFiles" --progress-num=35 "Built target run_visualisation"
+.PHONY : CMakeFiles/run_visualisation.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/run_visualisation.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start "/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/CMakeFiles" 1
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/run_visualisation.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start "/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/CMakeFiles" 0
+.PHONY : CMakeFiles/run_visualisation.dir/rule
+
+# Convenience name for target.
+run_visualisation: CMakeFiles/run_visualisation.dir/rule
+.PHONY : run_visualisation
+
+# codegen rule for target.
+CMakeFiles/run_visualisation.dir/codegen:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_visualisation.dir/build.make CMakeFiles/run_visualisation.dir/codegen
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir="/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/CMakeFiles" --progress-num=35 "Finished codegen for target run_visualisation"
+.PHONY : CMakeFiles/run_visualisation.dir/codegen
+
+# clean rule for target.
+CMakeFiles/run_visualisation.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_visualisation.dir/build.make CMakeFiles/run_visualisation.dir/clean
+.PHONY : CMakeFiles/run_visualisation.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/video.dir
+
+# All Build rule for target.
+CMakeFiles/video.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/video.dir/build.make CMakeFiles/video.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/video.dir/build.make CMakeFiles/video.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir="/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/CMakeFiles" --progress-num=36 "Built target video"
+.PHONY : CMakeFiles/video.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/video.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start "/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/CMakeFiles" 1
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/video.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start "/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/CMakeFiles" 0
+.PHONY : CMakeFiles/video.dir/rule
+
+# Convenience name for target.
+video: CMakeFiles/video.dir/rule
+.PHONY : video
+
+# codegen rule for target.
+CMakeFiles/video.dir/codegen:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/video.dir/build.make CMakeFiles/video.dir/codegen
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir="/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/CMakeFiles" --progress-num=36 "Finished codegen for target video"
+.PHONY : CMakeFiles/video.dir/codegen
+
+# clean rule for target.
+CMakeFiles/video.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/video.dir/build.make CMakeFiles/video.dir/clean
+.PHONY : CMakeFiles/video.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/clean_frames.dir
+
+# All Build rule for target.
+CMakeFiles/clean_frames.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/clean_frames.dir/build.make CMakeFiles/clean_frames.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/clean_frames.dir/build.make CMakeFiles/clean_frames.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir="/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/CMakeFiles" --progress-num=1 "Built target clean_frames"
+.PHONY : CMakeFiles/clean_frames.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/clean_frames.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start "/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/CMakeFiles" 1
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/clean_frames.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start "/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/CMakeFiles" 0
+.PHONY : CMakeFiles/clean_frames.dir/rule
+
+# Convenience name for target.
+clean_frames: CMakeFiles/clean_frames.dir/rule
+.PHONY : clean_frames
+
+# codegen rule for target.
+CMakeFiles/clean_frames.dir/codegen:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/clean_frames.dir/build.make CMakeFiles/clean_frames.dir/codegen
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir="/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/CMakeFiles" --progress-num=1 "Finished codegen for target clean_frames"
+.PHONY : CMakeFiles/clean_frames.dir/codegen
+
+# clean rule for target.
+CMakeFiles/clean_frames.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/clean_frames.dir/build.make CMakeFiles/clean_frames.dir/clean
+.PHONY : CMakeFiles/clean_frames.dir/clean
+
+#=============================================================================
 # Target rules for target glfw/src/CMakeFiles/glfw.dir
 
 # All Build rule for target.
 glfw/src/CMakeFiles/glfw.dir/all:
 	$(MAKE) $(MAKESILENT) -f glfw/src/CMakeFiles/glfw.dir/build.make glfw/src/CMakeFiles/glfw.dir/depend
 	$(MAKE) $(MAKESILENT) -f glfw/src/CMakeFiles/glfw.dir/build.make glfw/src/CMakeFiles/glfw.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir="/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/CMakeFiles" --progress-num=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17 "Built target glfw"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir="/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/CMakeFiles" --progress-num=2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18 "Built target glfw"
 .PHONY : glfw/src/CMakeFiles/glfw.dir/all
 
 # Build rule for subdir invocation for target.
@@ -243,7 +377,7 @@ glfw: glfw/src/CMakeFiles/glfw.dir/rule
 # codegen rule for target.
 glfw/src/CMakeFiles/glfw.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f glfw/src/CMakeFiles/glfw.dir/build.make glfw/src/CMakeFiles/glfw.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir="/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/CMakeFiles" --progress-num=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17 "Finished codegen for target glfw"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir="/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/CMakeFiles" --progress-num=2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18 "Finished codegen for target glfw"
 .PHONY : glfw/src/CMakeFiles/glfw.dir/codegen
 
 # clean rule for target.

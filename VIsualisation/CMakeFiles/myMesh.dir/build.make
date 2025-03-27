@@ -100,19 +100,19 @@ CMakeFiles/myMesh.dir/src/glfem.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/myMesh.dir/src/glfem.c.s"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S "/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/src/glfem.c" -o CMakeFiles/myMesh.dir/src/glfem.c.s
 
-CMakeFiles/myMesh.dir/src/homework.c.o: CMakeFiles/myMesh.dir/flags.make
-CMakeFiles/myMesh.dir/src/homework.c.o: src/homework.c
-CMakeFiles/myMesh.dir/src/homework.c.o: CMakeFiles/myMesh.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_3) "Building C object CMakeFiles/myMesh.dir/src/homework.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/myMesh.dir/src/homework.c.o -MF CMakeFiles/myMesh.dir/src/homework.c.o.d -o CMakeFiles/myMesh.dir/src/homework.c.o -c "/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/src/homework.c"
+CMakeFiles/myMesh.dir/src/functions.c.o: CMakeFiles/myMesh.dir/flags.make
+CMakeFiles/myMesh.dir/src/functions.c.o: src/functions.c
+CMakeFiles/myMesh.dir/src/functions.c.o: CMakeFiles/myMesh.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_3) "Building C object CMakeFiles/myMesh.dir/src/functions.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/myMesh.dir/src/functions.c.o -MF CMakeFiles/myMesh.dir/src/functions.c.o.d -o CMakeFiles/myMesh.dir/src/functions.c.o -c "/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/src/functions.c"
 
-CMakeFiles/myMesh.dir/src/homework.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/myMesh.dir/src/homework.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E "/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/src/homework.c" > CMakeFiles/myMesh.dir/src/homework.c.i
+CMakeFiles/myMesh.dir/src/functions.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/myMesh.dir/src/functions.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E "/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/src/functions.c" > CMakeFiles/myMesh.dir/src/functions.c.i
 
-CMakeFiles/myMesh.dir/src/homework.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/myMesh.dir/src/homework.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S "/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/src/homework.c" -o CMakeFiles/myMesh.dir/src/homework.c.s
+CMakeFiles/myMesh.dir/src/functions.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/myMesh.dir/src/functions.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S "/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/src/functions.c" -o CMakeFiles/myMesh.dir/src/functions.c.s
 
 CMakeFiles/myMesh.dir/src/mesh.c.o: CMakeFiles/myMesh.dir/flags.make
 CMakeFiles/myMesh.dir/src/mesh.c.o: src/mesh.c
@@ -132,7 +132,7 @@ CMakeFiles/myMesh.dir/src/mesh.c.s: cmake_force
 myMesh_OBJECTS = \
 "CMakeFiles/myMesh.dir/src/fem.c.o" \
 "CMakeFiles/myMesh.dir/src/glfem.c.o" \
-"CMakeFiles/myMesh.dir/src/homework.c.o" \
+"CMakeFiles/myMesh.dir/src/functions.c.o" \
 "CMakeFiles/myMesh.dir/src/mesh.c.o"
 
 # External object files for target myMesh
@@ -140,7 +140,7 @@ myMesh_EXTERNAL_OBJECTS =
 
 myMesh: CMakeFiles/myMesh.dir/src/fem.c.o
 myMesh: CMakeFiles/myMesh.dir/src/glfem.c.o
-myMesh: CMakeFiles/myMesh.dir/src/homework.c.o
+myMesh: CMakeFiles/myMesh.dir/src/functions.c.o
 myMesh: CMakeFiles/myMesh.dir/src/mesh.c.o
 myMesh: CMakeFiles/myMesh.dir/build.make
 myMesh: CMakeFiles/myMesh.dir/compiler_depend.ts

@@ -4,7 +4,7 @@ myMesh: \
   /usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/crtbeginS.o \
   CMakeFiles/myMesh.dir/src/fem.c.o \
   CMakeFiles/myMesh.dir/src/glfem.c.o \
-  CMakeFiles/myMesh.dir/src/homework.c.o \
+  CMakeFiles/myMesh.dir/src/functions.c.o \
   CMakeFiles/myMesh.dir/src/mesh.c.o \
   glfw/src/libglfw3.a \
   /usr/lib/libGL.so \
@@ -80,7 +80,7 @@ CMakeFiles/myMesh.dir/src/fem.c.o:
 
 CMakeFiles/myMesh.dir/src/glfem.c.o:
 
-CMakeFiles/myMesh.dir/src/homework.c.o:
+CMakeFiles/myMesh.dir/src/functions.c.o:
 
 CMakeFiles/myMesh.dir/src/mesh.c.o:
 

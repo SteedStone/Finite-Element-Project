@@ -143,6 +143,19 @@ myMesh/fast:
 .PHONY : myMesh/fast
 
 #=============================================================================
+# Target rules for targets named myVisualisation
+
+# Build rule for target.
+myVisualisation: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 myVisualisation
+.PHONY : myVisualisation
+
+# fast build rule for target.
+myVisualisation/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/myVisualisation.dir/build.make CMakeFiles/myVisualisation.dir/build
+.PHONY : myVisualisation/fast
+
+#=============================================================================
 # Target rules for targets named run
 
 # Build rule for target.
@@ -154,6 +167,45 @@ run: cmake_check_build_system
 run/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/run.dir/build.make CMakeFiles/run.dir/build
 .PHONY : run/fast
+
+#=============================================================================
+# Target rules for targets named run_visualisation
+
+# Build rule for target.
+run_visualisation: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 run_visualisation
+.PHONY : run_visualisation
+
+# fast build rule for target.
+run_visualisation/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_visualisation.dir/build.make CMakeFiles/run_visualisation.dir/build
+.PHONY : run_visualisation/fast
+
+#=============================================================================
+# Target rules for targets named video
+
+# Build rule for target.
+video: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 video
+.PHONY : video
+
+# fast build rule for target.
+video/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/video.dir/build.make CMakeFiles/video.dir/build
+.PHONY : video/fast
+
+#=============================================================================
+# Target rules for targets named clean_frames
+
+# Build rule for target.
+clean_frames: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 clean_frames
+.PHONY : clean_frames
+
+# fast build rule for target.
+clean_frames/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/clean_frames.dir/build.make CMakeFiles/clean_frames.dir/build
+.PHONY : clean_frames/fast
 
 #=============================================================================
 # Target rules for targets named glfw
@@ -175,6 +227,7 @@ src/fem.o: src/fem.c.o
 src/fem.c.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/myFem.dir/build.make CMakeFiles/myFem.dir/src/fem.c.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/myMesh.dir/build.make CMakeFiles/myMesh.dir/src/fem.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/myVisualisation.dir/build.make CMakeFiles/myVisualisation.dir/src/fem.c.o
 .PHONY : src/fem.c.o
 
 src/fem.i: src/fem.c.i
@@ -184,6 +237,7 @@ src/fem.i: src/fem.c.i
 src/fem.c.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/myFem.dir/build.make CMakeFiles/myFem.dir/src/fem.c.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/myMesh.dir/build.make CMakeFiles/myMesh.dir/src/fem.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/myVisualisation.dir/build.make CMakeFiles/myVisualisation.dir/src/fem.c.i
 .PHONY : src/fem.c.i
 
 src/fem.s: src/fem.c.s
@@ -193,7 +247,38 @@ src/fem.s: src/fem.c.s
 src/fem.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/myFem.dir/build.make CMakeFiles/myFem.dir/src/fem.c.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/myMesh.dir/build.make CMakeFiles/myMesh.dir/src/fem.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/myVisualisation.dir/build.make CMakeFiles/myVisualisation.dir/src/fem.c.s
 .PHONY : src/fem.c.s
+
+src/functions.o: src/functions.c.o
+.PHONY : src/functions.o
+
+# target to build an object file
+src/functions.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/myFem.dir/build.make CMakeFiles/myFem.dir/src/functions.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/myMesh.dir/build.make CMakeFiles/myMesh.dir/src/functions.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/myVisualisation.dir/build.make CMakeFiles/myVisualisation.dir/src/functions.c.o
+.PHONY : src/functions.c.o
+
+src/functions.i: src/functions.c.i
+.PHONY : src/functions.i
+
+# target to preprocess a source file
+src/functions.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/myFem.dir/build.make CMakeFiles/myFem.dir/src/functions.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/myMesh.dir/build.make CMakeFiles/myMesh.dir/src/functions.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/myVisualisation.dir/build.make CMakeFiles/myVisualisation.dir/src/functions.c.i
+.PHONY : src/functions.c.i
+
+src/functions.s: src/functions.c.s
+.PHONY : src/functions.s
+
+# target to generate assembly for a file
+src/functions.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/myFem.dir/build.make CMakeFiles/myFem.dir/src/functions.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/myMesh.dir/build.make CMakeFiles/myMesh.dir/src/functions.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/myVisualisation.dir/build.make CMakeFiles/myVisualisation.dir/src/functions.c.s
+.PHONY : src/functions.c.s
 
 src/glfem.o: src/glfem.c.o
 .PHONY : src/glfem.o
@@ -202,6 +287,7 @@ src/glfem.o: src/glfem.c.o
 src/glfem.c.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/myFem.dir/build.make CMakeFiles/myFem.dir/src/glfem.c.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/myMesh.dir/build.make CMakeFiles/myMesh.dir/src/glfem.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/myVisualisation.dir/build.make CMakeFiles/myVisualisation.dir/src/glfem.c.o
 .PHONY : src/glfem.c.o
 
 src/glfem.i: src/glfem.c.i
@@ -211,6 +297,7 @@ src/glfem.i: src/glfem.c.i
 src/glfem.c.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/myFem.dir/build.make CMakeFiles/myFem.dir/src/glfem.c.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/myMesh.dir/build.make CMakeFiles/myMesh.dir/src/glfem.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/myVisualisation.dir/build.make CMakeFiles/myVisualisation.dir/src/glfem.c.i
 .PHONY : src/glfem.c.i
 
 src/glfem.s: src/glfem.c.s
@@ -220,34 +307,8 @@ src/glfem.s: src/glfem.c.s
 src/glfem.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/myFem.dir/build.make CMakeFiles/myFem.dir/src/glfem.c.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/myMesh.dir/build.make CMakeFiles/myMesh.dir/src/glfem.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/myVisualisation.dir/build.make CMakeFiles/myVisualisation.dir/src/glfem.c.s
 .PHONY : src/glfem.c.s
-
-src/homework.o: src/homework.c.o
-.PHONY : src/homework.o
-
-# target to build an object file
-src/homework.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/myFem.dir/build.make CMakeFiles/myFem.dir/src/homework.c.o
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/myMesh.dir/build.make CMakeFiles/myMesh.dir/src/homework.c.o
-.PHONY : src/homework.c.o
-
-src/homework.i: src/homework.c.i
-.PHONY : src/homework.i
-
-# target to preprocess a source file
-src/homework.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/myFem.dir/build.make CMakeFiles/myFem.dir/src/homework.c.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/myMesh.dir/build.make CMakeFiles/myMesh.dir/src/homework.c.i
-.PHONY : src/homework.c.i
-
-src/homework.s: src/homework.c.s
-.PHONY : src/homework.s
-
-# target to generate assembly for a file
-src/homework.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/myFem.dir/build.make CMakeFiles/myFem.dir/src/homework.c.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/myMesh.dir/build.make CMakeFiles/myMesh.dir/src/homework.c.s
-.PHONY : src/homework.c.s
 
 src/main.o: src/main.c.o
 .PHONY : src/main.o
@@ -297,6 +358,30 @@ src/mesh.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/myMesh.dir/build.make CMakeFiles/myMesh.dir/src/mesh.c.s
 .PHONY : src/mesh.c.s
 
+src/visualisation.o: src/visualisation.c.o
+.PHONY : src/visualisation.o
+
+# target to build an object file
+src/visualisation.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/myVisualisation.dir/build.make CMakeFiles/myVisualisation.dir/src/visualisation.c.o
+.PHONY : src/visualisation.c.o
+
+src/visualisation.i: src/visualisation.c.i
+.PHONY : src/visualisation.i
+
+# target to preprocess a source file
+src/visualisation.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/myVisualisation.dir/build.make CMakeFiles/myVisualisation.dir/src/visualisation.c.i
+.PHONY : src/visualisation.c.i
+
+src/visualisation.s: src/visualisation.c.s
+.PHONY : src/visualisation.s
+
+# target to generate assembly for a file
+src/visualisation.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/myVisualisation.dir/build.make CMakeFiles/myVisualisation.dir/src/visualisation.c.s
+.PHONY : src/visualisation.c.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -305,25 +390,32 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
+	@echo "... clean_frames"
 	@echo "... run"
+	@echo "... run_visualisation"
+	@echo "... video"
 	@echo "... glfw"
 	@echo "... myFem"
 	@echo "... myMesh"
+	@echo "... myVisualisation"
 	@echo "... src/fem.o"
 	@echo "... src/fem.i"
 	@echo "... src/fem.s"
+	@echo "... src/functions.o"
+	@echo "... src/functions.i"
+	@echo "... src/functions.s"
 	@echo "... src/glfem.o"
 	@echo "... src/glfem.i"
 	@echo "... src/glfem.s"
-	@echo "... src/homework.o"
-	@echo "... src/homework.i"
-	@echo "... src/homework.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
 	@echo "... src/mesh.o"
 	@echo "... src/mesh.i"
 	@echo "... src/mesh.s"
+	@echo "... src/visualisation.o"
+	@echo "... src/visualisation.i"
+	@echo "... src/visualisation.s"
 .PHONY : help
 
 
