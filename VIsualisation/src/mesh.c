@@ -16,15 +16,17 @@
      return 1;
  }
  int main(int argc, char *argv[]) {  
-    if (argc < 3) {
+    if (argc < 4) {
         printf("Usage: %s <type> <show_visualisation>\n", argv[0]);
         printf("type: 1 (TRIANGLE), 2 (HEXAGON)\n");
         printf("show_visualisation: 0 (non), 1 (oui)\n");
+        printf("Type de maillage: 0 (Triangle) , 1 (Quadrilatère)\n");
         return EXIT_FAILURE;
     }
     
     int type = atoi(argv[1]);
     int show_visualisation_maillage = atoi(argv[2]);
+    int type1 = atoi(argv[3]);
     int simple = 0;
      
  
@@ -44,11 +46,11 @@
          theGeometry->NumberOfHexagonsInX = 9;
          theGeometry->NumberOfHexagonsInY = 5;
          theGeometry->NumberOfTrianglesInX = 5;
-         theGeometry->NumberOfTrianglesInY = 4;
+         theGeometry->NumberOfTrianglesInY = 3;
          theGeometry->hexRadius = 9.0;
          theGeometry->MiddleX = (theGeometry->NumberOfHexagonsInX -1 ) * 1.5 * theGeometry->hexRadius + theGeometry->hexRadius - (-theGeometry->hexRadius) ; 
          theGeometry->MiddleY = theGeometry->NumberOfHexagonsInY * sqrt(3) * theGeometry->hexRadius - (-theGeometry->hexRadius*sqrt(3)/2) ;
-         theGeometry->elementType = FEM_QUAD;
+         theGeometry->elementType = type1;
          theGeometry->hexa_triangles = type ;
          
          // Appel nos fonctions pour créer notre maillage avec soit les hexagones soit les triangles avec la librairie gsmh 
@@ -65,8 +67,8 @@
         //  }
          if (theGeometry->hexa_triangles == 1) {
 
-         geoSetDomainName(37 , "Top");
-            geoSetDomainName(48 , "Bottom");
+        geoSetDomainName(25 , "Top"); // 298
+            geoSetDomainName(33 , "Bottom"); // 327
          
          } else {
             geoSetDomainName(549 , "Top"); // 549
@@ -129,7 +131,7 @@
  
  
          int mode = 1; // Change mode by pressing "j", "k", "l"
-         int domain = 500;
+         int domain = 0;
          int freezingButton = FALSE;
          double t, told = 0;
          char theMessage[256];

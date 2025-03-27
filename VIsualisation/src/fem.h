@@ -43,6 +43,7 @@ typedef struct {
     int nNodes;
     double *X;
     double *Y;
+    int *number;
 } femNodes;
 
 typedef struct {
@@ -256,5 +257,6 @@ double               femIterativeSolverGet(femIterativeSolver* mySolver, int i, 
 int                  femIterativeSolverConverged(femIterativeSolver *mySolver);
 
 void femSolverAssemble(femSolver* mySolver, double *Aloc, double *Bloc, double *Uloc,int *mapX, int *mapY, int nLoc) ;
+void femMeshRenumber(femMesh *theMesh, femRenumType renumType) ;
 
 #endif

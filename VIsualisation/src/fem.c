@@ -43,10 +43,12 @@ void geoFinalize() {
     if (theGeometry.theEdges) {
         free(theGeometry.theEdges->elem);
         free(theGeometry.theEdges); }
-    for (int i=0; i < theGeometry.nDomains; i++) {
-        free(theGeometry.theDomains[i]->elem);
-        free(theGeometry.theDomains[i]);  }
+    // for (int i=0; i < theGeometry.nDomains; i++) {
+    //     free(theGeometry.theDomains[i]->elem);
+    //     free(theGeometry.theDomains[i]);  }
     free(theGeometry.theDomains);
+    // free(theGeometry.theNodes->number);
+    
     gmshFinalize(&ierr); ErrorGmsh(ierr);
 }
 
@@ -318,7 +320,10 @@ void geoMeshRead(const char *filename)
       for (int i=0; i < theDomain->nElem; i++){
           ErrorScan(fscanf(file,"%6d",&theDomain->elem[i]));
           if ((i+1) != theDomain->nElem  && (i+1) % 10 == 0) ErrorScan(fscanf(file,"\n")); }}
-    
+    theNodes->number = malloc(sizeof(int)*theNodes->nNodes);
+    printf("Geo     : Importing %d nodes \n",theNodes->nNodes);
+    for (int i = 0; i < theNodes->nNodes; i++) 
+        theNodes->number[i] = i;
    fclose(file);
 }
 
@@ -841,6 +846,7 @@ femProblem *femElasticityCreate(femGeo* theGeometry,
     // theProblem->system       = femFullSystemCreate(size);
     theProblem->size = 2*theMesh->nodes->nNodes;
     theProblem->sizeLoc = 2*theMesh->nLocalNode;
+    femMeshRenumber(theMesh,renumType);
     printf("size = %d\n", theProblem->sizeLoc);
     switch (solverType) {
         case FEM_FULL : 
@@ -865,6 +871,8 @@ femProblem *femElasticityCreate(femGeo* theGeometry,
 void femElasticityFree(femProblem *theProblem)
 {
     femFullSystemFree(theProblem->solver->solver);
+    femFullSystemFree(theProblem->solver->local);
+
     femIntegrationFree(theProblem->rule);
     femDiscreteFree(theProblem->space);
     femIntegrationFree(theProblem->ruleEdge);
@@ -1497,8 +1505,8 @@ void HexagonPlot(){
 
   
     // // Affichage dans Gmsh
-    gmshFltkRun(&ierr);
-    ErrorGmsh(ierr);
+    // gmshFltkRun(&ierr);
+    // ErrorGmsh(ierr);
 
 
 
@@ -1615,8 +1623,18 @@ void geoMeshGenerate() {
 
     int ierr;
     gmshModelOccSynchronize(&ierr);
-    gmshOptionSetNumber("Mesh.SaveAll", 1, &ierr);
-    gmshModelMeshGenerate(2, &ierr);
+    if (theGeometry->elementType == FEM_QUAD) {
+        gmshOptionSetNumber("Mesh.SaveAll",1,&ierr);
+        gmshOptionSetNumber("Mesh.RecombineAll",1,&ierr);
+        gmshOptionSetNumber("Mesh.Algorithm",11,&ierr);  
+        gmshOptionSetNumber("Mesh.SmoothRatio", 21.5, &ierr);  
+        gmshOptionSetNumber("Mesh.RecombinationAlgorithm",1.0,&ierr); 
+        gmshModelGeoMeshSetRecombine(2,1,45,&ierr);  
+        gmshModelMeshGenerate(2,&ierr);  }
+
+    if (theGeometry->elementType == FEM_TRIANGLE) {
+        gmshOptionSetNumber("Mesh.SaveAll",1,&ierr);
+        gmshModelMeshGenerate(2,&ierr);  }
     if (ierr != 0) {
         printf("Erreur lors de la génération du maillage: %d\n", ierr);
         exit(1);
@@ -1658,6 +1676,8 @@ void femElasticityAssembleElements(femProblem *theProblem)
             mapY[j] = 2 * map[j] + 1;
             x[j]    = theNodes->X[map[j]];
             y[j]    = theNodes->Y[map[j]];
+            map[j] = theMesh->nodes->number[map[j]];
+
         }
 
         // Initialisation des matrices locales
@@ -1735,6 +1755,8 @@ void femElasticityAssembleNeumann(femProblem *theProblem)
         femBoundaryType type = theCondition->type;
         femDomain *domain = theCondition->domain;
         double value = theCondition->value;
+        femMesh *theMesh = theProblem->geometry->theElements;
+
 
         // Skip Dirichlet boundary conditions
         if (type == DIRICHLET_X || type == DIRICHLET_Y) { continue; }
@@ -1754,6 +1776,8 @@ void femElasticityAssembleNeumann(femProblem *theProblem)
                 mapU[j] = 2 * map[j] + shift;
                 x[j] = theNodes->X[map[j]];
                 y[j] = theNodes->Y[map[j]];
+                // map[j] = theMesh->nodes->number[map[j]];
+
             }
             
             // Compute the constant Jacobian
@@ -1833,7 +1857,16 @@ double *femElasticitySolve(femProblem *theProblem)
 
     // Solve the system and return the solution
     femFullSystemEliminate(theSystem);
-    memcpy(theProblem->soluce, theSystem->B, theSystem->size * sizeof(double));
+    // memcpy(theProblem->soluce, theSystem->B, theSystem->size * sizeof(double));
+    femMesh *theMesh = theProblem->geometry->theElements;
+    int *number = theMesh->nodes->number;
+
+    for (int i = 0; i < theProblem->size/2; i++){
+        theProblem->soluce[2*number[i]] += theSystem->B[2*number[i]+0];
+        theProblem->soluce[2*number[i]+1] += theSystem->B[2*number[i]+1];
+
+        
+     }
     return theProblem->soluce;
 }
 // Strip : END
@@ -1919,3 +1952,51 @@ void femSolverAssemble(femSolver* mySolver, double *Aloc, double *Bloc, double *
         // case FEM_ITER : femIterativeSolverAssemble((femIterativeSolver *)mySolver->solver,Aloc,Bloc,Uloc,map,nLoc); break;
         default : Error("Unexpected solver type"); }
 }
+
+
+#ifndef NORENUMBER 
+double *positionMeshNodes;
+int comparPositionNode(const void *a, const void *b)
+{
+    const int *nodePos_a = (const int *) a;
+    const int *nodePos_b = (const int *) b;
+    
+    double diff = positionMeshNodes[*nodePos_a] - positionMeshNodes[*nodePos_b];
+    return (diff < 0) - (diff > 0);
+}
+void femMeshRenumber(femMesh *theMesh, femRenumType renumType)
+{
+    int i;
+
+    // Strip : BEGIN
+    int nNodes = theMesh->nodes->nNodes;
+    int *mapper = (int *) malloc(nNodes * sizeof(int));
+    if (mapper == NULL) { Error("Memory allocation failed !"); exit(EXIT_FAILURE); return; }
+    for (int i = 0; i < nNodes; i++) { mapper[i] = i; }
+
+    switch (renumType)
+    {
+        case FEM_NO :
+            break;
+
+        case FEM_XNUM :
+            positionMeshNodes = theMesh->nodes->X;
+            qsort(mapper, nNodes, sizeof(int), comparPositionNode);
+            break;
+
+        case FEM_YNUM :
+            positionMeshNodes = theMesh->nodes->Y;
+            qsort(mapper, nNodes, sizeof(int), comparPositionNode);
+            break;    
+
+        default : Error("Unexpected renumbering option"); }
+
+    for (i = 0; i < nNodes; i++) { theMesh->nodes->number[mapper[i]] = i; }
+
+    // Free the memory
+    free(mapper);
+
+    // Strip : END   
+}
+
+#endif

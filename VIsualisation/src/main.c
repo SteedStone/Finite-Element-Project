@@ -105,11 +105,12 @@ int main(int argc, char *argv[])
     //
 
     femNodes *theNodes = theGeometry->theNodes;
-    double deformationFactor = 1e3;
+    double deformationFactor = 5000.0; // 5000.0 pour hexa et 300 pour triangle
     double *normDisplacement = malloc(theNodes->nNodes * sizeof(double));
     double *forcesX = malloc(theNodes->nNodes * sizeof(double));
     double *forcesY = malloc(theNodes->nNodes * sizeof(double));
-
+    femMesh *theMesh = theProblem->geometry->theElements;
+    int *number = theMesh->nodes->number;
     for (int i=0; i<theNodes->nNodes; i++){
         theNodes->X[i] += theSoluce[2*i+0]*deformationFactor;
         theNodes->Y[i] += theSoluce[2*i+1]*deformationFactor;
