@@ -1,40 +1,38 @@
-# How to Launch the Program
+# Finite Elements : LEPL1110
 
-Follow these steps to launch the program:
+## Authors
 
-1. **Ensure Dependencies are Installed**  
-    Make sure you have all the required dependencies installed. If the program uses a package manager (e.g., `pip` for Python), you can install the dependencies using:
-    ```
-    pip install -r requirements.txt
-    ```
+- **Student:** Guerand Dewell
+- **Student:** Romain Valadi
 
-2. **Navigate to the Project Directory**  
-    Open a terminal and navigate to the project directory:
-    ```
-    cd /home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project
-    ```
+## How to launch the program 
 
-3. **Run the Program**  
-    Execute the program using the appropriate command. For example:
-    - If it's a Python script:
-      ```
-      python main.py
-      ```
-    - If it's a compiled program:
-      ```
-      ./program_name
-      ```
 
-4. **Provide Necessary Inputs**  
-    If the program requires input files or arguments, ensure they are provided. For example:
-    ```
-    python main.py input_file.txt
-    ```
+To launch the program, follow these steps:
 
-5. **Check Output**  
-    The program should now be running. Check the terminal or output files for results.
+1. Ensure you have Python installed on your system (version 3.8 or higher).
+2. You have several option to launch the program. 
+First : 
+```
+cmake CMakeList.txt 
+make
+```
+Second you need to generate the mesh as you want with the following option : 
 
-6. **Troubleshooting**  
-    If you encounter any issues, refer to the error messages or consult the documentation for further assistance.
+- 1 : Sheet with carton , 2 : Sheet with hexagon
+- 1 : Visualise the mesh created , 2 : No visualisation of the created mesh 
+- 1 : Creation of the mesh with triangle , 2 : Creation of the mesh with quad.
+```
+./myMesh <Option 1> <Option 2> <Option 3>
+```
 
-Enjoy using the program!
+Thirdly you need to execute : 
+```python test.py```
+Finally you can generate the deformation of the problem with 
+```
+./myFem <Path_to_file>
+```
+
+YOu can also visualise the deformation by running 
+```make video```
+
