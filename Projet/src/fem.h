@@ -235,6 +235,13 @@ double*              femSolverEliminate(femSolver* mySolver);
 void                 femFullSystemAssemble(femFullSystem *mySystem, double *Aloc, double *Bloc, int *mapX, int *mapY, int nLocal) ; 
 double               femSolverGet(femSolver* mySolver, int i, int j);
 int                  femSolverConverged(femSolver *mySolver);
+double femFullSystemGet(femFullSystem* myFullSystem, int myRow, int myCol) ;
+void femSolverPrintInfos(femSolver *mySolver) ;
+void femFullSystemPrintInfos(femFullSystem *mySystem) ;
+
+
+
+
 
 
 femBandSystem*       femBandSystemCreate(int size, int band);

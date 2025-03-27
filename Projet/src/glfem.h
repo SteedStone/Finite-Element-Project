@@ -25,6 +25,8 @@ void 		    glfemDrawNodes(double* x, double* y,int n);
 int         glfemGetAction();
 
 void 		    glfemReshapeWindows(femNodes *theNodes, int width, int height);
+void 		    glfemReshapeWindows2(femMesh *theMesh, int width, int heigh);
+
 void 		    glfemPlotField(femMesh *theMesh, double *u);
 void 		    glfemPlotMesh(femMesh *theMesh);
 void        glfemPlotDomain(femDomain *theDomain);
@@ -32,6 +34,12 @@ void        glfemPlotDomain(femDomain *theDomain);
 void 		    glfemMessage(char *message);
 void 		    glfemDrawMessage(int h, int v, char *message);
 void 		    glfemSetRasterSize(int width, int height);
+
+
+
+void        glfemMatrix(double **A, int size, int width, int heigh);
+void        glfemPlotSolver(femSolver *theSolver, int size, int width, int heigh);
+
 
 GLFWwindow* glfemInit(char *windowName);
 static void glfemKeyCallback(GLFWwindow* self,int key,int scancode,int action,int mods);

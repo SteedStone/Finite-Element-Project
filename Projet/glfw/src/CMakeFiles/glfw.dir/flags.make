@@ -4,7 +4,7 @@
 # compile C with /usr/bin/cc
 C_DEFINES = -D_GLFW_USE_CONFIG_H
 
-C_INCLUDES = -I"/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/glfw/include" -I"/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/glfw/src"
+C_INCLUDES = -I"/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/Projet/glfw/include" -I"/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/Projet/glfw/src"
 
 C_FLAGS = -fPIC -Wall
 

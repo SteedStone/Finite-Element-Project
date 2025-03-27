@@ -47,7 +47,7 @@ void geoFinalize() {
     //     free(theGeometry.theDomains[i]->elem);
     //     free(theGeometry.theDomains[i]);  }
     free(theGeometry.theDomains);
-    // free(theGeometry.theNodes->number);
+    free(theGeometry.theNodes->number);
     
     gmshFinalize(&ierr); ErrorGmsh(ierr);
 }
@@ -1461,6 +1461,52 @@ void femMeshRenumber(femMesh *theMesh, femRenumType renumType)
     free(mapper);
 
     // Strip : END   
+}
+
+double femSolverGet(femSolver *mySolver,int i,int j)
+{
+    double value = 0;
+    switch (mySolver->type) {
+        case FEM_FULL : value = femFullSystemGet((femFullSystem *)mySolver->solver,i,j); break;
+        // case FEM_BAND : value = femBandSystemGet((femBandSystem *)mySolver->solver,i,j); break;
+        // case FEM_ITER : value = (i==j); break;
+        default : Error("Unexpected solver type"); }
+    return(value);
+}
+
+
+void femSolverPrintInfos(femSolver *mySolver)
+{
+    switch (mySolver->type) {
+        case FEM_FULL : femFullSystemPrintInfos((femFullSystem *)mySolver->solver); break;
+        // case FEM_BAND : femBandSystemPrintInfos((femBandSystem *)mySolver->solver); break;
+        // case FEM_ITER : femIterativeSolverPrintInfos((femIterativeSolver *)mySolver->solver); break;
+        default : Error("Unexpected solver type"); }
+}
+double femFullSystemGet(femFullSystem* myFullSystem, int myRow, int myCol)
+{
+    return(myFullSystem->A[myRow][myCol]); 
+}
+
+void femFullSystemPrintInfos(femFullSystem *mySystem)
+{
+    int  size = mySystem->size;
+    printf(" \n");
+    printf("    Full Gaussian elimination \n");
+    printf("    Storage informations \n");
+    printf("    Matrix size      : %8d\n",size);
+    printf("    Bytes required   : %8d\n",(int)sizeof(double)*size*(size+1));     
+}
+
+int femSolverConverged(femSolver *mySolver)
+{
+    int  testConvergence;
+    switch (mySolver->type) {
+        case FEM_FULL : testConvergence = 1; break;
+        // case FEM_BAND : testConvergence = 1; break;
+        // case FEM_ITER : testConvergence = femIterativeSolverConverged((femIterativeSolver *)mySolver->solver); break;
+        default : Error("Unexpected solver type"); }
+    return(testConvergence);
 }
 
 #endif

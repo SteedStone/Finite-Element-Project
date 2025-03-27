@@ -410,4 +410,140 @@ GLFWwindow* glfemInit(char *theWindowName)
 
 
 
+void glfemMatrix(double **A, int n, int w, int h)
+{
+    double sizeX = (n-1)*40/1.7;
+    double meanX = (n-1)*20; 
+    double sizeY = (n-1)*40/1.7;
+    double meanY = (n-1)*20;
+    
+    double ratio = (GLfloat) h / (GLfloat) w;
+    double size = fmax(sizeX,sizeY);
+    double left,right,top,bottom;
+    if (ratio > 1.0) {
+        left = meanX - size;
+        right = meanX + size;
+        bottom = meanY - size*ratio;
+        top = meanY + size*ratio;  }   
+    else {
+        left = meanX - size/ratio;
+        right = meanX + size/ratio;
+        bottom = meanY - size;
+        top = meanY + size;  }   
+
+        
+    glViewport(0,0,w,h);    
+    glClearColor( 0.9f, 0.9f, 0.8f, 0.0f );
+   // glClearColor( 1.0f, 1.0f, 1.0f, 0.0f );  // for white plot
+    glClear(GL_COLOR_BUFFER_BIT);   
+    glViewport(0, 0, (GLsizei) w, (GLsizei) h);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(left, right, bottom, top, -5.0, 5.0);
+    
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    
+    int i,j;
+    glEnable(GL_POINT_SMOOTH);
+    double pointSize = fmin(w,h)/(n-1) * 0.5;
+    glPointSize(pointSize);
+    glBegin(GL_POINTS);
+    for (i = 0; i < n; i++) {      
+        for (j = 0; j < n; j++) {      
+            if (fabs(A[i][j]) >= 1e-6)  glVertex2f(i*40.0,(n-j-1)*40.0); }}
+    glEnd();
+
+}
+
+void glfemPlotSolver(femSolver *mySolver, int n, int w, int h)
+{
+    double sizeX = (n-1)*40/1.7;
+    double meanX = (n-1)*20; 
+    double sizeY = (n-1)*40/1.7;
+    double meanY = (n-1)*20;
+    
+    double ratio = (GLfloat) h / (GLfloat) w;
+    double size = fmax(sizeX,sizeY);
+    double left,right,top,bottom;
+    if (ratio > 1.0) {
+        left = meanX - size;
+        right = meanX + size;
+        bottom = meanY - size*ratio;
+        top = meanY + size*ratio;  }   
+    else {
+        left = meanX - size/ratio;
+        right = meanX + size/ratio;
+        bottom = meanY - size;
+        top = meanY + size;  }   
+
+        
+    glViewport(0,0,w,h);    
+    glClearColor( 0.9f, 0.9f, 0.8f, 0.0f );
+   // glClearColor( 1.0f, 1.0f, 1.0f, 0.0f );  // for white plot
+    glClear(GL_COLOR_BUFFER_BIT);   
+    glViewport(0, 0, (GLsizei) w, (GLsizei) h);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(left, right, bottom, top, -5.0, 5.0);
+    
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    
+    int i,j;
+    glEnable(GL_POINT_SMOOTH);
+    double pointSize = fmin(w,h)/(n-1) * 0.5;
+    glPointSize(pointSize);
+    glBegin(GL_POINTS);
+    for (i = 0; i < n; i++) {      
+        for (j = 0; j < n; j++) {      
+            double value = femSolverGet(mySolver,j,i);
+            if (fabs(value) >= 1e-6){    
+            	//printf("value %d, %d : %f \n",i,j,fabs(value));
+            	glVertex2f(i*40.0,(n-j-1)*40.0);
+            }
+       }}
+    glEnd();
+
+}
+
+void glfemReshapeWindows2(femMesh *theMesh, int w, int h)
+{
+    double minX  = femMin(theMesh->nodes->X,theMesh->nodes->nNodes);
+    double maxX  = femMax(theMesh->nodes->X,theMesh->nodes->nNodes);
+    double minY  = femMin(theMesh->nodes->Y,theMesh->nodes->nNodes);
+    double maxY  = femMax(theMesh->nodes->Y,theMesh->nodes->nNodes);
+    double sizeX = (maxX-minX)/1.65;
+    double meanX = (maxX+minX)/2.0; 
+    double sizeY = (maxY-minY)/1.65;
+    double meanY = (maxY+minY)/2.0;
+    
+    double ratio = (GLfloat) h / (GLfloat) w;
+    double size = fmax(sizeX,sizeY);
+    double left,right,top,bottom;
+    if (ratio > 1.0) {
+        left = meanX - size;
+        right = meanX + size;
+        bottom = meanY - size*ratio;
+        top = meanY + size*ratio;  }   
+    else {
+        left = meanX - size/ratio;
+        right = meanX + size/ratio;
+        bottom = meanY - size;
+        top = meanY + size;  }   
+
+        
+    glViewport(0,0,w,h);    
+    glClearColor( 0.9f, 0.9f, 0.8f, 0.0f );
+   // glClearColor( 1.0f, 1.0f, 1.0f, 0.0f );  // for white plot
+    glClear(GL_COLOR_BUFFER_BIT);   
+    glViewport(0, 0, (GLsizei) w, (GLsizei) h);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(left, right, bottom, top, -5.0, 5.0);
+    
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+}
+
 

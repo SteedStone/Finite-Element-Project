@@ -4,7 +4,7 @@
 # compile C with /usr/bin/cc
 C_DEFINES = -Dgraphic
 
-C_INCLUDES = -I"/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/glfw/include" -I"/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/gmsh/gmsh-4.13.1-Linux64-sdk/include"
+C_INCLUDES = -I"/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/Projet/glfw/include" -I"/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/Projet/gmsh/gmsh-4.13.1-Linux64-sdk/include"
 
 C_FLAGS = 
 

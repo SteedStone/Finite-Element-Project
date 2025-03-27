@@ -53,10 +53,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = "/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation"
+CMAKE_SOURCE_DIR = "/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/Projet"
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = "/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation"
+CMAKE_BINARY_DIR = "/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/Projet"
 
 # Utility rule file for video.
 
@@ -67,7 +67,7 @@ include CMakeFiles/video.dir/compiler_depend.make
 include CMakeFiles/video.dir/progress.make
 
 CMakeFiles/video:
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir="/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_1) "Generating video from frames..."
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir="/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/Projet/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_1) "Generating video from frames..."
 	ffmpeg -framerate 30 -i frame/frame_%d.png -c:v libx264 -crf 18 -preset slow video_tri.mp4
 
 CMakeFiles/video.dir/codegen:
@@ -86,6 +86,6 @@ CMakeFiles/video.dir/clean:
 .PHONY : CMakeFiles/video.dir/clean
 
 CMakeFiles/video.dir/depend:
-	cd "/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation" && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" "/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation" "/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation" "/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation" "/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation" "/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/CMakeFiles/video.dir/DependInfo.cmake" "--color=$(COLOR)"
+	cd "/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/Projet" && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" "/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/Projet" "/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/Projet" "/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/Projet" "/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/Projet" "/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/Projet/CMakeFiles/video.dir/DependInfo.cmake" "--color=$(COLOR)"
 .PHONY : CMakeFiles/video.dir/depend
 

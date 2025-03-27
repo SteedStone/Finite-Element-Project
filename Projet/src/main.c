@@ -11,6 +11,7 @@
 #include "glfem.h"
 #define TRIANGLE 1 
 #define HEXAGON 2
+#include <time.h>
 double fun(double x, double y) 
 {
     return 1;
@@ -132,62 +133,131 @@ int main(int argc, char *argv[])
     //  -6- Visualisation du maillage
     //  
 
-    int mode = 1; 
-    int domain = 0;
-    int freezingButton = FALSE;
-    double t, told = 0;
-    char theMessage[MAXNAME];
+    // int mode = 1; 
+    // int domain = 0;
+    // int freezingButton = FALSE;
+    // double t, told = 0;
+    // char theMessage[MAXNAME];
 
 
-    GLFWwindow* window = glfemInit("EPL1110 : Recovering forces on constrained nodes");
+    // GLFWwindow* window = glfemInit("EPL1110 : Recovering forces on constrained nodes");
+    // glfwMakeContextCurrent(window);
+
+    // do {
+    //     int w,h;
+    //     glfwGetFramebufferSize(window,&w,&h);
+    //     glfemReshapeWindows(theGeometry->theNodes,w,h);
+
+    //     t = glfwGetTime();  
+    //     if (glfwGetKey(window,'D') == GLFW_PRESS) { mode = 0;}
+    //     if (glfwGetKey(window,'V') == GLFW_PRESS) { mode = 1;}
+    //     if (glfwGetKey(window,'X') == GLFW_PRESS) { mode = 2;}
+    //     if (glfwGetKey(window,'Y') == GLFW_PRESS) { mode = 3;}
+    //     if (glfwGetKey(window,'N') == GLFW_PRESS && freezingButton == FALSE) { domain++; freezingButton = TRUE; told = t;}
+    //     if (t-told > 0.5) {freezingButton = FALSE; }
+        
+    //     if (mode == 0) {
+    //         domain = domain % theGeometry->nDomains;
+    //         glfemPlotDomain( theGeometry->theDomains[domain]); 
+    //         sprintf(theMessage, "%s : %d ",theGeometry->theDomains[domain]->name,domain);
+    //         glColor3f(1.0,0.0,0.0); glfemMessage(theMessage); }
+    //     if (mode == 1) {
+    //         glfemPlotField(theGeometry->theElements,normDisplacement);
+    //         glfemPlotMesh(theGeometry->theElements); 
+    //         sprintf(theMessage, "Number of elements : %d ",theGeometry->theElements->nElem);
+    //         glColor3f(1.0,0.0,0.0); glfemMessage(theMessage); }
+    //     if (mode == 2) {
+    //         glfemPlotField(theGeometry->theElements,forcesX);
+    //         glfemPlotMesh(theGeometry->theElements); 
+    //         sprintf(theMessage, "Number of elements : %d ",theGeometry->theElements->nElem);
+    //         glColor3f(1.0,0.0,0.0); glfemMessage(theMessage); }
+    //     if (mode == 3) {
+    //         glfemPlotField(theGeometry->theElements,forcesY);
+    //         glfemPlotMesh(theGeometry->theElements); 
+    //         sprintf(theMessage, "Number of elements : %d ",theGeometry->theElements->nElem);
+    //         glColor3f(1.0,0.0,0.0); glfemMessage(theMessage); }
+    //     glfwSwapBuffers(window);
+    //     glfwPollEvents();
+    // } while( glfwGetKey(window,GLFW_KEY_ESCAPE) != GLFW_PRESS &&
+    //         glfwWindowShouldClose(window) != 1 );
+            
+    // // Check if the ESC key was pressed or the window was closed
+
+    // free(normDisplacement);
+    // free(forcesX);
+    // free(forcesY);
+    // femElasticityFree(theProblem) ; 
+    // geoFinalize();
+    // glfwTerminate(); 
+
+    femSolverType solverType = FEM_FULL;
+    femRenumType  renumType  = FEM_NO;
+    int option = 1;    
+    femSolverType newSolverType = solverType;
+    femRenumType  newRenumType  = renumType;
+
+    GLFWwindow* window = glfemInit("LEPL1110 : Band Solver ");
     glfwMakeContextCurrent(window);
-
-    do {
+    
+    do 
+    {
+        int testConvergence;
+        char theMessage[256];
+        sprintf(theMessage, "Max : %.4f ",femMax(theProblem->soluce,theProblem->size));
         int w,h;
         glfwGetFramebufferSize(window,&w,&h);
         glfemReshapeWindows(theGeometry->theNodes,w,h);
-
-        t = glfwGetTime();  
-        if (glfwGetKey(window,'D') == GLFW_PRESS) { mode = 0;}
-        if (glfwGetKey(window,'V') == GLFW_PRESS) { mode = 1;}
-        if (glfwGetKey(window,'X') == GLFW_PRESS) { mode = 2;}
-        if (glfwGetKey(window,'Y') == GLFW_PRESS) { mode = 3;}
-        if (glfwGetKey(window,'N') == GLFW_PRESS && freezingButton == FALSE) { domain++; freezingButton = TRUE; told = t;}
-        if (t-told > 0.5) {freezingButton = FALSE; }
-        
-        if (mode == 0) {
-            domain = domain % theGeometry->nDomains;
-            glfemPlotDomain( theGeometry->theDomains[domain]); 
-            sprintf(theMessage, "%s : %d ",theGeometry->theDomains[domain]->name,domain);
-            glColor3f(1.0,0.0,0.0); glfemMessage(theMessage); }
-        if (mode == 1) {
+    
+        if (option == 1) {
             glfemPlotField(theGeometry->theElements,normDisplacement);
             glfemPlotMesh(theGeometry->theElements); 
             sprintf(theMessage, "Number of elements : %d ",theGeometry->theElements->nElem);
-            glColor3f(1.0,0.0,0.0); glfemMessage(theMessage); }
-        if (mode == 2) {
-            glfemPlotField(theGeometry->theElements,forcesX);
-            glfemPlotMesh(theGeometry->theElements); 
-            sprintf(theMessage, "Number of elements : %d ",theGeometry->theElements->nElem);
-            glColor3f(1.0,0.0,0.0); glfemMessage(theMessage); }
-        if (mode == 3) {
-            glfemPlotField(theGeometry->theElements,forcesY);
-            glfemPlotMesh(theGeometry->theElements); 
-            sprintf(theMessage, "Number of elements : %d ",theGeometry->theElements->nElem);
-            glColor3f(1.0,0.0,0.0); glfemMessage(theMessage); }
+            glColor3f(1.0,0.0,0.0); glfemMessage(theMessage); 
+        }
+        else {
+            glColor3f(1.0,0.0,0.0);
+            glfemPlotSolver(theProblem->solver,theProblem->size,w,h); }
+        glColor3f(1.0,0.0,0.0); glfemDrawMessage(20,460,theMessage);              
+    
+        if (solverType != newSolverType || renumType != newRenumType) { 
+            solverType = newSolverType;
+            renumType = newRenumType;
+            femElasticityFree(theProblem);
+            theProblem = femElasticityCreate(theGeometry,E,nu,rho,g,PLANAR_STRESS , solverType , renumType);
+            theMesh = theProblem->geometry->theElements;
+            clock_t tic = clock();
+            do {
+                femElasticitySolve(theProblem);  
+                femSolverPrintInfos(theProblem->solver); 
+                testConvergence = femSolverConverged(theProblem->solver); }
+            while ( testConvergence == 0);
+            if (testConvergence == -1)  printf("    Iterative solver stopped afer a maximum number of iterations\n");
+            printf("    CPU time : %.2f [sec] \n", (clock() - tic) * 1.0 /CLOCKS_PER_SEC);
+            switch (renumType) {
+                case FEM_XNUM : printf("    Renumbering along the x-direction\n"); break;
+                case FEM_YNUM : printf("    Renumbering along the y-direction\n"); break;
+                default : break; }
+            printf("    Maximum value : %.4f\n", femMax(theProblem->soluce,theProblem->size));
+            fflush(stdout); }
+        if (glfwGetKey(window,'V') == GLFW_PRESS)   option = 1;
+        if (glfwGetKey(window,'S') == GLFW_PRESS)   option = 0;
+        if (glfwGetKey(window,'F') == GLFW_PRESS)   newSolverType = FEM_FULL; 
+        // if (glfwGetKey(window,'B') == GLFW_PRESS)   newSolverType = FEM_BAND; 
+        // if (glfwGetKey(window,'I') == GLFW_PRESS)   newSolverType = FEM_ITER; 
+        if (glfwGetKey(window,'X') == GLFW_PRESS)   newRenumType  = FEM_XNUM; 
+        if (glfwGetKey(window,'Y') == GLFW_PRESS)   newRenumType  = FEM_YNUM; 
+        if (glfwGetKey(window,'N') == GLFW_PRESS)   newRenumType  = FEM_NO; 
+    
         glfwSwapBuffers(window);
         glfwPollEvents();
     } while( glfwGetKey(window,GLFW_KEY_ESCAPE) != GLFW_PRESS &&
             glfwWindowShouldClose(window) != 1 );
             
     // Check if the ESC key was pressed or the window was closed
-
-    free(normDisplacement);
-    free(forcesX);
-    free(forcesY);
-    femElasticityFree(theProblem) ; 
-    geoFinalize();
+            
     glfwTerminate(); 
+
+
     
 
 
