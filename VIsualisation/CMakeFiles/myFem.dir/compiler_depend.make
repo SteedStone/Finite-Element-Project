@@ -230,11 +230,13 @@ CMakeFiles/myFem.dir/src/main.c.o: src/main.c \
   gmsh/gmsh-4.13.1-Linux64-sdk/include/gmshc.h \
   src/fem.h \
   src/glfem.h \
+  src/stb_image_write.h \
   /usr/include/GL/gl.h \
   /usr/include/GL/glext.h \
   /usr/include/GL/glu.h \
   /usr/include/KHR/khrplatform.h \
   /usr/include/alloca.h \
+  /usr/include/assert.h \
   /usr/include/bits/atomic_wide_counter.h \
   /usr/include/bits/byteswap.h \
   /usr/include/bits/endian.h \
@@ -376,6 +378,8 @@ CMakeFiles/myFem.dir/src/fem.c.o:
 
 /usr/lib/librt.a:
 
+/usr/lib/libpcre2-8.so.0:
+
 /usr/include/math.h:
 
 /usr/include/bits/types/time_t.h:
@@ -410,11 +414,13 @@ CMakeFiles/myFem.dir/src/fem.c.o:
 
 /usr/include/bits/math-vector.h:
 
+/usr/lib/libpng16.so.16:
+
+/usr/include/bits/types/__FILE.h:
+
 /usr/lib/libz.so.1:
 
 /usr/include/KHR/khrplatform.h:
-
-/usr/lib/libpcre2-8.so.0:
 
 /usr/lib/libc_nonshared.a:
 
@@ -453,10 +459,6 @@ CMakeFiles/myFem.dir/src/fem.c.o:
 /usr/include/features.h:
 
 /usr/include/bits/endianness.h:
-
-/usr/include/bits/types/__FILE.h:
-
-/usr/lib/libpng16.so.16:
 
 /usr/include/bits/libm-simd-decl-stubs.h:
 
@@ -576,7 +578,11 @@ src/homework.c:
 
 src/main.c:
 
+src/stb_image_write.h:
+
 /usr/lib/ld-linux-x86-64.so.2:
+
+/usr/include/assert.h:
 
 /usr/include/bits/types/timer_t.h:
 

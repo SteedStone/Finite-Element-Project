@@ -11,10 +11,61 @@
 #include "glfem.h"
 #define TRIANGLE 1 
 #define HEXAGON 2
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image_write.h"
 double fun(double x, double y) 
 {
     return 1;
 }
+
+
+
+void captureFrame(int frame, GLFWwindow* window) {
+    int width, height;
+    glfwGetFramebufferSize(window, &width, &height);
+
+    // Créer un tableau pour stocker les pixels
+    unsigned char* pixels = (unsigned char*)malloc(3 * width * height);
+
+    printf("Framebuffer size: %d x %d\n", width, height);
+
+    GLint viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
+    printf("Viewport: x=%d, y=%d, width=%d, height=%d\n", viewport[0], viewport[1], viewport[2], viewport[3]);
+
+    int winWidth, winHeight;
+    glfwGetWindowSize(window, &winWidth, &winHeight);
+    printf("Window size: %d x %d\n", winWidth, winHeight);
+
+
+
+    // Lire le contenu du framebuffer (RGB)
+    glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, pixels);
+
+
+
+    // Inverser l'image verticalement (OpenGL utilise une origine en bas à gauche)
+    unsigned char* flippedPixels = (unsigned char*)malloc(3 * width * height);
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            int srcIndex = 3 * (y * width + x);
+            int destIndex = 3 * ((height - y - 1) * width + x);
+            flippedPixels[destIndex] = pixels[srcIndex];
+            flippedPixels[destIndex + 1] = pixels[srcIndex + 1];
+            flippedPixels[destIndex + 2] = pixels[srcIndex + 2];
+        }
+    }
+
+    // Sauvegarder l'image sous un fichier
+    char filename[100];
+    sprintf(filename, "frame/frame_%04d.png", frame);
+    stbi_write_png(filename, width, height, 3, flippedPixels, width * 3);
+
+    // Libérer la mémoire
+    free(pixels);
+    free(flippedPixels);
+}
+
 int main(int argc, char *argv[])
 {  
     printf("\n\n    V : Mesh and size mesh field \n");
@@ -103,21 +154,80 @@ int main(int argc, char *argv[])
     //  -4- Deformation du maillage pour le plot final
     //      Creation du champ de la norme du deplacement
     //
+    int normal = 0;
+
 
     femNodes *theNodes = theGeometry->theNodes;
-    double deformationFactor = 5000.0; // 5000.0 pour hexa et 300 pour triangle
     double *normDisplacement = malloc(theNodes->nNodes * sizeof(double));
     double *forcesX = malloc(theNodes->nNodes * sizeof(double));
     double *forcesY = malloc(theNodes->nNodes * sizeof(double));
-    femMesh *theMesh = theProblem->geometry->theElements;
-    int *number = theMesh->nodes->number;
-    for (int i=0; i<theNodes->nNodes; i++){
-        theNodes->X[i] += theSoluce[2*i+0]*deformationFactor;
-        theNodes->Y[i] += theSoluce[2*i+1]*deformationFactor;
-        normDisplacement[i] = sqrt(theSoluce[2*i+0]*theSoluce[2*i+0] + 
-                                theSoluce[2*i+1]*theSoluce[2*i+1]);
-        forcesX[i] = theForces[2*i+0];
-        forcesY[i] = theForces[2*i+1]; }
+
+
+    if (normal) {
+        double deformationFactor = 300.0; // 5000.0 pour hexa et 300 pour triangle
+        
+        femMesh *theMesh = theProblem->geometry->theElements;
+        int *number = theMesh->nodes->number;
+        for (int i=0; i<theNodes->nNodes; i++){
+            theNodes->X[i] += theSoluce[2*i+0]*deformationFactor;
+            theNodes->Y[i] += theSoluce[2*i+1]*deformationFactor;
+            normDisplacement[i] = sqrt(theSoluce[2*i+0]*theSoluce[2*i+0] + 
+                                    theSoluce[2*i+1]*theSoluce[2*i+1]);
+            forcesX[i] = theForces[2*i+0];
+            forcesY[i] = theForces[2*i+1]; }
+        }
+    else {
+        GLFWwindow* window = glfemInit("EPL1110 : Recovering forces on constrained nodes");
+    glfwMakeContextCurrent(window);
+
+
+
+    double deformationFactor_start = 0.0;  // Commence à 0 (pas de déformation initiale)
+    double deformationFactor_end = 1000.0;  // Incrément du facteur de déformation à chaque itération
+    double deformationFactor = 0.0;
+    
+    double *X0 = malloc(sizeof(double) * theNodes->nNodes);
+    double *Y0 = malloc(sizeof(double) * theNodes->nNodes);
+
+    for (int j = 0; j < theNodes->nNodes; j++) {
+        X0[j] = theNodes->X[j];
+        Y0[j] = theNodes->Y[j];
+    }
+
+
+    // Boucle d'animation
+    for (double i = deformationFactor_start; i < deformationFactor_end; i += 10.0) {
+        double deformationFactor = i;
+    
+        // Repartir systématiquement des coordonnées initiales
+        for (int j = 0; j < theNodes->nNodes; j++) {
+            theNodes->X[j] = X0[j] + deformationFactor * theSoluce[2*j + 0];
+            theNodes->Y[j] = Y0[j] + deformationFactor * theSoluce[2*j + 1];
+        }
+        
+        int w, h;
+        glfwGetFramebufferSize(window, &w, &h);
+        glfemReshapeWindows(theGeometry->theNodes, w, h);
+    
+        // 3) Effacer l’écran avant de redessiner (optionnel mais souvent nécessaire)
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    
+        // Redessiner et capturer l'image
+        glfemPlotField(theGeometry->theElements, normDisplacement);
+        glfemPlotMesh(theGeometry->theElements);
+        glFlush();
+        glFinish();
+        captureFrame(i, window);
+    
+        // Swap des buffers et poll events
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+    }
+    
+    // 3) À la fin, libérer la mémoire
+    free(X0);
+    free(Y0);
+    }
 
     double hMin = femMin(normDisplacement,theNodes->nNodes);  
     double hMax = femMax(normDisplacement,theNodes->nNodes);  

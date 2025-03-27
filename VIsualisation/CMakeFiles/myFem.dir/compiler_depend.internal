@@ -234,11 +234,13 @@ CMakeFiles/myFem.dir/src/main.c.o
  /home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/gmsh/gmsh-4.13.1-Linux64-sdk/include/gmshc.h
  /home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/src/fem.h
  /home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/src/glfem.h
+ /home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/VIsualisation/src/stb_image_write.h
  /usr/include/GL/gl.h
  /usr/include/GL/glext.h
  /usr/include/GL/glu.h
  /usr/include/KHR/khrplatform.h
  /usr/include/alloca.h
+ /usr/include/assert.h
  /usr/include/bits/atomic_wide_counter.h
  /usr/include/bits/byteswap.h
  /usr/include/bits/endian.h

@@ -47,4 +47,6 @@ CMakeFiles/myFem.dir/src/main.c.o: \
  /usr/include/bits/mathcalls.h /usr/include/string.h \
  /usr/include/bits/types/locale_t.h /usr/include/bits/types/__locale_t.h \
  /usr/include/strings.h \
- /home/Guerand/Documents/Q6/Element\ finis/Project/LEPL1110---Project/VIsualisation/gmsh/gmsh-4.13.1-Linux64-sdk/include/gmshc.h
+ /home/Guerand/Documents/Q6/Element\ finis/Project/LEPL1110---Project/VIsualisation/gmsh/gmsh-4.13.1-Linux64-sdk/include/gmshc.h \
+ /home/Guerand/Documents/Q6/Element\ finis/Project/LEPL1110---Project/VIsualisation/src/stb_image_write.h \
+ /usr/include/assert.h
