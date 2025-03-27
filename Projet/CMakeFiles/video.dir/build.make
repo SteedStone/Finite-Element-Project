@@ -68,6 +68,7 @@ include CMakeFiles/video.dir/progress.make
 
 CMakeFiles/video:
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir="/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/Projet/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_1) "Generating video from frames..."
+	./myVisualisation data/mesh_fix.txt
 	ffmpeg -framerate 30 -i frame/frame_%d.png -c:v libx264 -crf 18 -preset slow video_tri.mp4
 
 CMakeFiles/video.dir/codegen:

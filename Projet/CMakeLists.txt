@@ -75,9 +75,8 @@ target_compile_definitions(${MESH_EXEC_NAME} PRIVATE graphic)
 
 # add a custom target so we can do make run directly
 add_custom_target(run COMMAND ${EXEC_NAME} DEPENDS ${EXEC_NAME} COMMENT "./${EXEC_NAME}")
-add_custom_target(run_visualisation COMMAND ./myVisualisation DEPENDS visualisation COMMENT "Running visualisation")
 add_custom_target(video
-    COMMAND ./myVisualisation DEPENDS visualisation
+    COMMAND ./myVisualisation "data/mesh_fix.txt"
     COMMAND ffmpeg -framerate 30 -i frame/frame_%d.png -c:v libx264 -crf 18 -preset slow video_tri.mp4    
     COMMENT "Generating video from frames..."
 )

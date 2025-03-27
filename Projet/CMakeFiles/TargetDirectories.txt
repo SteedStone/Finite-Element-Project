@@ -2,7 +2,6 @@
 /home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/Projet/CMakeFiles/myMesh.dir
 /home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/Projet/CMakeFiles/myVisualisation.dir
 /home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/Projet/CMakeFiles/run.dir
-/home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/Projet/CMakeFiles/run_visualisation.dir
 /home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/Projet/CMakeFiles/video.dir
 /home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/Projet/CMakeFiles/clean_frames.dir
 /home/Guerand/Documents/Q6/Element finis/Project/LEPL1110---Project/Projet/CMakeFiles/edit_cache.dir

@@ -169,19 +169,6 @@ run/fast:
 .PHONY : run/fast
 
 #=============================================================================
-# Target rules for targets named run_visualisation
-
-# Build rule for target.
-run_visualisation: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 run_visualisation
-.PHONY : run_visualisation
-
-# fast build rule for target.
-run_visualisation/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_visualisation.dir/build.make CMakeFiles/run_visualisation.dir/build
-.PHONY : run_visualisation/fast
-
-#=============================================================================
 # Target rules for targets named video
 
 # Build rule for target.
@@ -392,7 +379,6 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... clean_frames"
 	@echo "... run"
-	@echo "... run_visualisation"
 	@echo "... video"
 	@echo "... glfw"
 	@echo "... myFem"
