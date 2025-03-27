@@ -47,7 +47,7 @@ void geoFinalize() {
     //     free(theGeometry.theDomains[i]->elem);
     //     free(theGeometry.theDomains[i]);  }
     free(theGeometry.theDomains);
-    free(theGeometry.theNodes->number);
+    // free(theGeometry.theNodes->number);
     
     gmshFinalize(&ierr); ErrorGmsh(ierr);
 }
@@ -848,14 +848,17 @@ femProblem *femElasticityCreate(femGeo* theGeometry,
     theProblem->sizeLoc = 2*theMesh->nLocalNode;
     femMeshRenumber(theMesh,renumType);
     printf("size = %d\n", theProblem->sizeLoc);
+    int band ;
+    
     switch (solverType) {
         case FEM_FULL : 
                 theProblem->solver = femSolverFullCreate(theProblem->size,
                                                          theProblem->sizeLoc); break;
-        // case FEM_BAND : 
-        //         band = femMeshComputeBand(theMesh);
-        //         theProblem->solver = femSolverBandCreate(theProblem->size,
-        //                                                  theProblem->sizeLoc,band); break;
+        case FEM_BAND : 
+                    
+                band = femMeshComputeBand(theMesh);
+                theProblem->solver = femSolverBandCreate(theProblem->size,
+                                                         theProblem->sizeLoc,band); break;
         // case FEM_ITER : 
         //        theProblem->solver = femSolverIterativeCreate(theProblem->size,
         //                                                      theProblem->sizeLoc); break;
@@ -1118,7 +1121,7 @@ void femElasticityAssembleElements(femProblem *theProblem)
     femNodes       *theNodes    = theGeometry->theNodes;
     femMesh        *theMesh     = theGeometry->theElements;
     femSolver *theSolver = theProblem->solver;
-
+    
     double x[4], y[4], phi[4], dphidxsi[4], dphideta[4], dphidx[4], dphidy[4];
     int iElem, iInteg, i, j, map[4], mapX[4], mapY[4];
     int nLocal = theMesh->nLocalNode;
@@ -1193,6 +1196,7 @@ void femElasticityAssembleElements(femProblem *theProblem)
                 Bloc[iY] -= phi[i] * g * rho * weightedJac;
             }
         }
+        
         femSolverAssemble(theSolver, Aloc, Bloc,NULL,  mapX, mapY, nLocal);
     }
 }
@@ -1280,6 +1284,7 @@ double *femElasticitySolve(femProblem *theProblem)
     
     // Assembly of stiffness matrix and load vector
     femElasticityAssembleElements(theProblem);
+    
     //print first element 
     // printf("A[0][0] = %f\n", theSystem->A[0][0]);
     // printf("A[0][1] = %f\n", theSystem->A[0][1]);
@@ -1384,6 +1389,13 @@ femSolver *femSolverFullCreate(int size, int sizeLoc)
     mySolver->solver = (femSolver *)femFullSystemCreate(size);
     return(mySolver);
 }
+femSolver *femSolverBandCreate(int size, int sizeLoc, int band)
+{
+    femSolver *mySolver = femSolverCreate(sizeLoc);
+    mySolver->type = FEM_BAND;
+    mySolver->solver = (femSolver *)femBandSystemCreate(size,band);
+    return(mySolver);
+}
 
 void femFullSystemAssemble(femFullSystem *mySystem, 
     double *Aloc, double *Bloc, 
@@ -1412,7 +1424,7 @@ void femSolverAssemble(femSolver* mySolver, double *Aloc, double *Bloc, double *
 {
     switch (mySolver->type) {
         case FEM_FULL : femFullSystemAssemble((femFullSystem *)mySolver->solver,Aloc,Bloc, mapX, mapY, nLoc); break;
-        // case FEM_BAND : femBandSystemAssemble((femBandSystem *)mySolver->solver,Aloc,Bloc,map,nLoc); break;
+        case FEM_BAND : femBandSystemAssemble((femBandSystem *)mySolver->solver,Aloc,Bloc,mapX , mapY,nLoc); break;
         // case FEM_ITER : femIterativeSolverAssemble((femIterativeSolver *)mySolver->solver,Aloc,Bloc,Uloc,map,nLoc); break;
         default : Error("Unexpected solver type"); }
 }
@@ -1468,7 +1480,7 @@ double femSolverGet(femSolver *mySolver,int i,int j)
     double value = 0;
     switch (mySolver->type) {
         case FEM_FULL : value = femFullSystemGet((femFullSystem *)mySolver->solver,i,j); break;
-        // case FEM_BAND : value = femBandSystemGet((femBandSystem *)mySolver->solver,i,j); break;
+        case FEM_BAND : value = femBandSystemGet((femBandSystem *)mySolver->solver,i,j); break;
         // case FEM_ITER : value = (i==j); break;
         default : Error("Unexpected solver type"); }
     return(value);
@@ -1479,7 +1491,7 @@ void femSolverPrintInfos(femSolver *mySolver)
 {
     switch (mySolver->type) {
         case FEM_FULL : femFullSystemPrintInfos((femFullSystem *)mySolver->solver); break;
-        // case FEM_BAND : femBandSystemPrintInfos((femBandSystem *)mySolver->solver); break;
+        case FEM_BAND : femBandSystemPrintInfos((femBandSystem *)mySolver->solver); break;
         // case FEM_ITER : femIterativeSolverPrintInfos((femIterativeSolver *)mySolver->solver); break;
         default : Error("Unexpected solver type"); }
 }
@@ -1508,5 +1520,205 @@ int femSolverConverged(femSolver *mySolver)
         default : Error("Unexpected solver type"); }
     return(testConvergence);
 }
+int femMeshComputeBand(femMesh *theMesh)
+{
+    // Strip : BEGIN
+    int myBand = 0;
+    int maxNum, minNum, nodeNum, elemNum;
+
+    for (int iElem = 0; iElem < theMesh->nElem; iElem++)
+    {   
+        maxNum = INT_MIN;
+        minNum = INT_MAX;
+
+        for (int j = 0; j < theMesh->nLocalNode; j++)
+        {
+            elemNum = theMesh->elem[iElem * theMesh->nLocalNode + j];
+            nodeNum = theMesh->nodes->number[elemNum];
+
+            maxNum = (nodeNum > maxNum) ? nodeNum : maxNum;
+            minNum = (nodeNum < minNum) ? nodeNum : minNum;
+        }
+
+        if (myBand < maxNum - minNum) { myBand = maxNum - minNum; }
+    }
+    
+    return ++myBand;
+    // Strip : END
+}
+
+#endif
+#ifndef NOBANDASSEMBLE
+
+void femBandSystemAssemble(femBandSystem *myBandSystem, 
+    double *Aloc, double *Bloc, 
+    int *mapX, int *mapY, int nLoc)
+{
+    
+int i, j;
+int currRow, currCol;
+int localSize = 2 * nLoc; // deux degrés de liberté par noeud local
+
+// Assemblage de la matrice de raideur (stiffness matrix)
+for (i = 0; i < nLoc; i++)
+{
+// Bloc X-X
+currRow = mapX[i];
+for (j = 0; j < nLoc; j++)
+{
+currCol = mapX[j];
+if (currRow <= currCol)
+{
+// La case (2*i,2*j) dans Aloc correspond au bloc X-X
+myBandSystem->A[currRow][currCol] += Aloc[(2 * i) * localSize + (2 * j)];
+}
+}
+// Bloc X-Y
+currRow = mapX[i];
+for (j = 0; j < nLoc; j++)
+{
+currCol = mapY[j];
+if (currRow <= currCol)
+{
+// La case (2*i,2*j+1) dans Aloc correspond au bloc X-Y
+myBandSystem->A[currRow][currCol] += Aloc[(2 * i) * localSize + (2 * j + 1)];
+}
+}
+// Bloc Y-X
+currRow = mapY[i];
+for (j = 0; j < nLoc; j++)
+{
+currCol = mapX[j];
+if (currRow <= currCol)
+{
+// La case (2*i+1,2*j) dans Aloc correspond au bloc Y-X
+myBandSystem->A[currRow][currCol] += Aloc[(2 * i + 1) * localSize + (2 * j)];
+}
+}
+// Bloc Y-Y
+currRow = mapY[i];
+for (j = 0; j < nLoc; j++)
+{
+currCol = mapY[j];
+if (currRow <= currCol)
+{
+// La case (2*i+1,2*j+1) dans Aloc correspond au bloc Y-Y
+myBandSystem->A[currRow][currCol] += Aloc[(2 * i + 1) * localSize + (2 * j + 1)];
+}
+}
+
+// Assemblage du vecteur second membre
+myBandSystem->B[ mapX[i] ] += Bloc[2 * i];
+myBandSystem->B[ mapY[i] ] += Bloc[2 * i + 1];
+}
+}
+
+
+#endif
+#ifndef NOBANDELIMINATE
+
+double  *femBandSystemEliminate(femBandSystem *myBand)
+{
+    double  **A, *B, factor;
+    int     i, j, k, jend, size, band;
+    A    = myBand->A;
+    B    = myBand->B;
+    size = myBand->size;
+    band = myBand->band;
+
+    // Strip : BEGIN
+
+    for (k = 0; k < size; k++)
+    {
+        if (fabs(A[k][k]) <= 1e-8) { Error("Cannot eliminate with such a pivot.\n"); }
+        jend = (k + band < size) ? k + band : size;
+        for (i = k + 1; i < jend; i++)
+        {
+            factor = A[k][i] / A[k][k];
+            for (j = i ; j < jend; j++) { A[i][j] -= factor * A[k][j]; }
+            B[i] -= factor * B[k];
+        }    
+    }
+    
+    for (i = size - 1; i >= 0 ; i--)
+    {
+        factor = 0;
+        jend = (i + band < size) ? i + band : size;
+        for (j = i + 1 ; j < jend; j++) { factor += A[i][j] * B[j]; }
+        B[i] = ( B[i] - factor) / A[i][i];
+    }
+    // Strip : END
+
+    return myBand->B;
+}
+
+
+femBandSystem *femBandSystemCreate(int size, int band)
+{
+    femBandSystem *myBandSystem = malloc(sizeof(femBandSystem));
+    myBandSystem->B = malloc(sizeof(double)*size*(band+1));
+    myBandSystem->A = malloc(sizeof(double*)*size);        
+    myBandSystem->size = size;
+    myBandSystem->band = band;
+    myBandSystem->A[0] = myBandSystem->B + size;
+    int i;
+    for (i=1 ; i < size ; i++) 
+        myBandSystem->A[i] = myBandSystem->A[i-1] + band - 1;
+    femBandSystemInit(myBandSystem);
+    return(myBandSystem);
+}
+ 
+void femBandSystemFree(femBandSystem *myBandSystem)
+{
+    free(myBandSystem->B);
+    free(myBandSystem->A); 
+    free(myBandSystem);
+}
+ 
+void femBandSystemInit(femBandSystem *myBandSystem)
+{
+    int i;
+    int size = myBandSystem->size;
+    int band = myBandSystem->band;
+    for (i=0 ; i < size*(band+1) ; i++) 
+        myBandSystem->B[i] = 0;        
+}
+ 
+void femBandSystemPrint(femBandSystem *myBand)
+{
+    double  **A, *B;
+    int     i, j, band, size;
+    A    = myBand->A;
+    B    = myBand->B;
+    size = myBand->size;
+    band = myBand->band;
+
+    for (i=0; i < size; i++) {
+        for (j=i; j < i+band; j++)
+            if (A[i][j] == 0) printf("         ");   
+            else              printf(" %+.1e",A[i][j]);
+        printf(" :  %+.1e \n",B[i]); }
+}
+  
+void femBandSystemPrintInfos(femBandSystem *myBand)
+{
+    int size = myBand->size;
+    int band = myBand->band;
+    printf(" \n");
+    printf("    Banded Gaussian elimination \n");
+    printf("    Storage informations \n");
+    printf("    Matrix size      : %8d\n",size);
+    printf("    Matrix band      : %8d\n",band);
+    printf("    Bytes required   : %8d\n",(int)sizeof(double)*size*(band+1));     
+}
+
+
+double femBandSystemGet(femBandSystem* myBandSystem, int myRow, int myCol)
+{
+    double value = 0;
+    if (myCol >= myRow && myCol < myRow+myBandSystem->band)  value = myBandSystem->A[myRow][myCol]; 
+    return(value);
+}
+
 
 #endif

@@ -85,3 +85,7 @@ add_custom_target(clean_frames
     COMMENT "Deleting frames and video..."
 )
 
+add_custom_target(run_python_script
+    COMMAND python test.py 
+    COMMENT "Running Python script"
+)

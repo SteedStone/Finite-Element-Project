@@ -89,5 +89,6 @@ set(CMAKE_DEPEND_INFO_FILES
   "CMakeFiles/run.dir/DependInfo.cmake"
   "CMakeFiles/video.dir/DependInfo.cmake"
   "CMakeFiles/clean_frames.dir/DependInfo.cmake"
+  "CMakeFiles/run_python_script.dir/DependInfo.cmake"
   "glfw/src/CMakeFiles/glfw.dir/DependInfo.cmake"
   )

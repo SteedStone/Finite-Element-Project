@@ -195,6 +195,19 @@ clean_frames/fast:
 .PHONY : clean_frames/fast
 
 #=============================================================================
+# Target rules for targets named run_python_script
+
+# Build rule for target.
+run_python_script: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 run_python_script
+.PHONY : run_python_script
+
+# fast build rule for target.
+run_python_script/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_python_script.dir/build.make CMakeFiles/run_python_script.dir/build
+.PHONY : run_python_script/fast
+
+#=============================================================================
 # Target rules for targets named glfw
 
 # Build rule for target.
@@ -379,6 +392,7 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... clean_frames"
 	@echo "... run"
+	@echo "... run_python_script"
 	@echo "... video"
 	@echo "... glfw"
 	@echo "... myFem"

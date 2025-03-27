@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+#include <limits.h>
 #include "gmshc.h"
 
 #ifndef M_PI
@@ -250,8 +251,11 @@ void                 femBandSystemInit(femBandSystem *myBand);
 void                 femBandSystemPrint(femBandSystem *myBand);
 void                 femBandSystemPrintInfos(femBandSystem *myBand);
 double*              femBandSystemEliminate(femBandSystem *myBand);
-void                 femBandSystemAssemble(femBandSystem* myBandSystem, double *Aloc, double *Bloc, int *map, int nLoc);
+void femBandSystemAssemble(femBandSystem *myBandSystem, double *Aloc, double *Bloc, int *mapX,int *mapY, int nLoc) ;
 double               femBandSystemGet(femBandSystem* myBandSystem, int i, int j);
+int femMeshComputeBand(femMesh *theMesh) ;
+femSolver *femSolverBandCreate(int size, int sizeLoc, int band);
+
 
 femIterativeSolver*  femIterativeSolverCreate(int size);
 void                 femIterativeSolverFree(femIterativeSolver* mySolver);

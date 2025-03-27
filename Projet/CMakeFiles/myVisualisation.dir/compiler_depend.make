@@ -16,11 +16,16 @@ CMakeFiles/myVisualisation.dir/src/fem.c.o: src/fem.c \
   /usr/include/bits/fp-logb.h \
   /usr/include/bits/libc-header-start.h \
   /usr/include/bits/libm-simd-decl-stubs.h \
+  /usr/include/bits/local_lim.h \
   /usr/include/bits/long-double.h \
   /usr/include/bits/math-vector.h \
   /usr/include/bits/mathcalls-helper-functions.h \
   /usr/include/bits/mathcalls-macros.h \
   /usr/include/bits/mathcalls.h \
+  /usr/include/bits/posix1_lim.h \
+  /usr/include/bits/posix2_lim.h \
+  /usr/include/bits/pthread_stack_min-dynamic.h \
+  /usr/include/bits/pthread_stack_min.h \
   /usr/include/bits/pthreadtypes-arch.h \
   /usr/include/bits/pthreadtypes.h \
   /usr/include/bits/select.h \
@@ -60,6 +65,8 @@ CMakeFiles/myVisualisation.dir/src/fem.c.o: src/fem.c \
   /usr/include/features.h \
   /usr/include/gnu/stubs-64.h \
   /usr/include/gnu/stubs.h \
+  /usr/include/limits.h \
+  /usr/include/linux/limits.h \
   /usr/include/math.h \
   /usr/include/stdc-predef.h \
   /usr/include/stdio.h \
@@ -69,8 +76,10 @@ CMakeFiles/myVisualisation.dir/src/fem.c.o: src/fem.c \
   /usr/include/sys/cdefs.h \
   /usr/include/sys/select.h \
   /usr/include/sys/types.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include/limits.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include/stdarg.h \
-  /usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include/stddef.h
+  /usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include/stddef.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include/syslimits.h
 
 CMakeFiles/myVisualisation.dir/src/functions.c.o: src/functions.c \
   gmsh/gmsh-4.13.1-Linux64-sdk/include/gmshc.h \
@@ -87,11 +96,16 @@ CMakeFiles/myVisualisation.dir/src/functions.c.o: src/functions.c \
   /usr/include/bits/fp-logb.h \
   /usr/include/bits/libc-header-start.h \
   /usr/include/bits/libm-simd-decl-stubs.h \
+  /usr/include/bits/local_lim.h \
   /usr/include/bits/long-double.h \
   /usr/include/bits/math-vector.h \
   /usr/include/bits/mathcalls-helper-functions.h \
   /usr/include/bits/mathcalls-macros.h \
   /usr/include/bits/mathcalls.h \
+  /usr/include/bits/posix1_lim.h \
+  /usr/include/bits/posix2_lim.h \
+  /usr/include/bits/pthread_stack_min-dynamic.h \
+  /usr/include/bits/pthread_stack_min.h \
   /usr/include/bits/pthreadtypes-arch.h \
   /usr/include/bits/pthreadtypes.h \
   /usr/include/bits/select.h \
@@ -131,6 +145,8 @@ CMakeFiles/myVisualisation.dir/src/functions.c.o: src/functions.c \
   /usr/include/features.h \
   /usr/include/gnu/stubs-64.h \
   /usr/include/gnu/stubs.h \
+  /usr/include/limits.h \
+  /usr/include/linux/limits.h \
   /usr/include/math.h \
   /usr/include/stdc-predef.h \
   /usr/include/stdio.h \
@@ -140,8 +156,10 @@ CMakeFiles/myVisualisation.dir/src/functions.c.o: src/functions.c \
   /usr/include/sys/cdefs.h \
   /usr/include/sys/select.h \
   /usr/include/sys/types.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include/limits.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include/stdarg.h \
-  /usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include/stddef.h
+  /usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include/stddef.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include/syslimits.h
 
 CMakeFiles/myVisualisation.dir/src/glfem.c.o: src/glfem.c \
   glfw/include/GLFW/glfw3.h \
@@ -164,11 +182,16 @@ CMakeFiles/myVisualisation.dir/src/glfem.c.o: src/glfem.c \
   /usr/include/bits/fp-logb.h \
   /usr/include/bits/libc-header-start.h \
   /usr/include/bits/libm-simd-decl-stubs.h \
+  /usr/include/bits/local_lim.h \
   /usr/include/bits/long-double.h \
   /usr/include/bits/math-vector.h \
   /usr/include/bits/mathcalls-helper-functions.h \
   /usr/include/bits/mathcalls-macros.h \
   /usr/include/bits/mathcalls.h \
+  /usr/include/bits/posix1_lim.h \
+  /usr/include/bits/posix2_lim.h \
+  /usr/include/bits/pthread_stack_min-dynamic.h \
+  /usr/include/bits/pthread_stack_min.h \
   /usr/include/bits/pthreadtypes-arch.h \
   /usr/include/bits/pthreadtypes.h \
   /usr/include/bits/select.h \
@@ -211,6 +234,8 @@ CMakeFiles/myVisualisation.dir/src/glfem.c.o: src/glfem.c \
   /usr/include/features.h \
   /usr/include/gnu/stubs-64.h \
   /usr/include/gnu/stubs.h \
+  /usr/include/limits.h \
+  /usr/include/linux/limits.h \
   /usr/include/math.h \
   /usr/include/stdc-predef.h \
   /usr/include/stdint.h \
@@ -221,9 +246,11 @@ CMakeFiles/myVisualisation.dir/src/glfem.c.o: src/glfem.c \
   /usr/include/sys/cdefs.h \
   /usr/include/sys/select.h \
   /usr/include/sys/types.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include/limits.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include/stdarg.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include/stddef.h \
-  /usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include/stdint.h
+  /usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include/stdint.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include/syslimits.h
 
 CMakeFiles/myVisualisation.dir/src/visualisation.c.o: src/visualisation.c \
   glfw/include/GLFW/glfw3.h \
@@ -248,11 +275,16 @@ CMakeFiles/myVisualisation.dir/src/visualisation.c.o: src/visualisation.c \
   /usr/include/bits/fp-logb.h \
   /usr/include/bits/libc-header-start.h \
   /usr/include/bits/libm-simd-decl-stubs.h \
+  /usr/include/bits/local_lim.h \
   /usr/include/bits/long-double.h \
   /usr/include/bits/math-vector.h \
   /usr/include/bits/mathcalls-helper-functions.h \
   /usr/include/bits/mathcalls-macros.h \
   /usr/include/bits/mathcalls.h \
+  /usr/include/bits/posix1_lim.h \
+  /usr/include/bits/posix2_lim.h \
+  /usr/include/bits/pthread_stack_min-dynamic.h \
+  /usr/include/bits/pthread_stack_min.h \
   /usr/include/bits/pthreadtypes-arch.h \
   /usr/include/bits/pthreadtypes.h \
   /usr/include/bits/select.h \
@@ -295,6 +327,8 @@ CMakeFiles/myVisualisation.dir/src/visualisation.c.o: src/visualisation.c \
   /usr/include/features.h \
   /usr/include/gnu/stubs-64.h \
   /usr/include/gnu/stubs.h \
+  /usr/include/limits.h \
+  /usr/include/linux/limits.h \
   /usr/include/math.h \
   /usr/include/stdc-predef.h \
   /usr/include/stdint.h \
@@ -305,9 +339,11 @@ CMakeFiles/myVisualisation.dir/src/visualisation.c.o: src/visualisation.c \
   /usr/include/sys/cdefs.h \
   /usr/include/sys/select.h \
   /usr/include/sys/types.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include/limits.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include/stdarg.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include/stddef.h \
-  /usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include/stdint.h
+  /usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include/stdint.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include/syslimits.h
 
 myVisualisation: /usr/lib/Scrt1.o \
   /usr/lib/crti.o \
@@ -378,7 +414,11 @@ CMakeFiles/myVisualisation.dir/src/fem.c.o:
 
 /usr/lib/libpcre2-8.so.0:
 
-/usr/include/math.h:
+/usr/lib/libmvec.so.1:
+
+/usr/lib/libm.so.6:
+
+/usr/lib/libfontconfig.so.1:
 
 /usr/include/bits/types/time_t.h:
 
@@ -389,6 +429,10 @@ CMakeFiles/myVisualisation.dir/src/fem.c.o:
 /usr/lib/libpthread.so.0:
 
 /usr/include/bits/types/struct_timespec.h:
+
+/usr/lib/libgomp.so.1:
+
+/usr/lib/libbz2.so.1.0:
 
 /usr/include/bits/types/struct_FILE.h:
 
@@ -410,6 +454,10 @@ CMakeFiles/myVisualisation.dir/src/fem.c.o:
 
 /usr/include/bits/types/__mbstate_t.h:
 
+/usr/lib/libexpat.so.1:
+
+/usr/include/bits/local_lim.h:
+
 src/functions.c:
 
 /usr/include/bits/wordsize.h:
@@ -424,15 +472,25 @@ src/functions.c:
 
 /usr/include/KHR/khrplatform.h:
 
+/usr/include/limits.h:
+
 /usr/lib/libc_nonshared.a:
 
-/usr/include/bits/endian.h:
+/usr/include/bits/thread-shared-types.h:
 
-/usr/include/bits/timesize.h:
+src/fem.c:
 
-/usr/include/bits/waitstatus.h:
+/usr/include/bits/struct_mutex.h:
+
+/usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include/stddef.h:
+
+/usr/include/bits/types/sigset_t.h:
+
+/usr/include/bits/pthread_stack_min-dynamic.h:
 
 /usr/include/bits/fp-fast.h:
+
+/usr/include/bits/posix1_lim.h:
 
 /usr/lib/libc.so:
 
@@ -446,7 +504,9 @@ src/functions.c:
 
 /usr/include/bits/floatn-common.h:
 
-/usr/include/bits/types/sigset_t.h:
+/usr/lib/libgraphite2.so.3:
+
+/usr/lib/libXcursor.so.1:
 
 /usr/include/bits/stdlib-float.h:
 
@@ -458,41 +518,61 @@ src/functions.c:
 
 /usr/include/bits/byteswap.h:
 
-/usr/include/features.h:
-
-/usr/include/bits/endianness.h:
-
 /usr/include/bits/libm-simd-decl-stubs.h:
 
 /usr/include/bits/waitflags.h:
 
 /usr/include/bits/types/__sigset_t.h:
 
+/usr/include/bits/endian.h:
+
+/usr/include/bits/waitstatus.h:
+
+/usr/include/bits/timesize.h:
+
 /usr/include/alloca.h:
+
+/usr/lib/libglib-2.0.so.0:
+
+/usr/lib/libdl.so.2:
 
 src/fem.h:
 
-/usr/include/bits/uintn-identity.h:
-
 /usr/lib/libfreetype.so.6:
+
+/usr/include/bits/uintn-identity.h:
 
 /usr/lib/libXau.so.6:
 
 /usr/include/bits/pthreadtypes.h:
 
-/usr/include/bits/typesizes.h:
+/usr/lib/Scrt1.o:
 
-/usr/lib/crti.o:
+/usr/include/bits/types/timer_t.h:
 
 /usr/include/stdio.h:
-
-src/fem.c:
-
-/usr/include/bits/thread-shared-types.h:
 
 /usr/include/bits/libc-header-start.h:
 
 /usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include/stdint.h:
+
+/usr/include/bits/pthread_stack_min.h:
+
+/usr/include/bits/types/__fpos64_t.h:
+
+/usr/lib/libOpenGL.so.0:
+
+glfw/src/libglfw3.a:
+
+/usr/include/bits/select.h:
+
+/usr/include/bits/fp-logb.h:
+
+glfw/include/GLFW/glfw3.h:
+
+/usr/include/bits/long-double.h:
+
+/usr/include/GL/gl.h:
 
 /usr/include/bits/types/__fpos_t.h:
 
@@ -506,39 +586,31 @@ gmsh/gmsh-4.13.1-Linux64-sdk/include/gmshc.h:
 
 /usr/include/bits/mathcalls-macros.h:
 
-/usr/include/bits/fp-logb.h:
-
-glfw/include/GLFW/glfw3.h:
-
-/usr/include/bits/long-double.h:
-
-/usr/include/GL/gl.h:
-
-/usr/lib/librt.so.1:
-
-/usr/include/gnu/stubs.h:
-
-/usr/include/bits/pthreadtypes-arch.h:
+/usr/include/bits/posix2_lim.h:
 
 /usr/include/stdc-predef.h:
 
+/usr/include/bits/stdint-intn.h:
+
+/usr/lib/libX11.so:
+
+src/glfem.h:
+
 /usr/include/features-time64.h:
 
-/usr/include/bits/types/__fpos64_t.h:
+/usr/include/bits/endianness.h:
 
-/usr/lib/libOpenGL.so.0:
-
-glfw/src/libglfw3.a:
-
-/usr/include/bits/select.h:
+/usr/include/features.h:
 
 /usr/include/gnu/stubs-64.h:
 
-/usr/include/bits/struct_mutex.h:
+/usr/lib/librt.so.1:
 
-/usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include/stddef.h:
+/usr/include/bits/pthreadtypes-arch.h:
 
-/usr/include/bits/stdint-intn.h:
+/usr/include/gnu/stubs.h:
+
+/usr/include/math.h:
 
 /usr/include/stdlib.h:
 
@@ -546,17 +618,23 @@ glfw/src/libglfw3.a:
 
 /usr/include/sys/select.h:
 
-/usr/lib/libm.so.6:
-
 /usr/include/sys/types.h:
 
+/usr/include/bits/typesizes.h:
+
+/usr/lib/crti.o:
+
+/usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include/limits.h:
+
+/usr/lib/libbrotlidec.so.1:
+
 /usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include/stdarg.h:
+
+/usr/include/GL/glext.h:
 
 /usr/include/sys/cdefs.h:
 
 src/glfem.c:
-
-/usr/include/GL/glext.h:
 
 /usr/include/bits/types.h:
 
@@ -570,6 +648,8 @@ src/glfem.c:
 
 /usr/lib/libbrotlicommon.so.1:
 
+/usr/include/linux/limits.h:
+
 /usr/include/stdint.h:
 
 CMakeFiles/myVisualisation.dir/src/functions.c.o:
@@ -577,10 +657,6 @@ CMakeFiles/myVisualisation.dir/src/functions.c.o:
 src/visualisation.c:
 
 src/stb_image_write.h:
-
-/usr/include/bits/types/timer_t.h:
-
-/usr/lib/Scrt1.o:
 
 /usr/lib/crtn.o:
 
@@ -596,10 +672,6 @@ src/stb_image_write.h:
 
 /usr/lib/libm.so:
 
-/usr/lib/libdl.so.2:
-
-/usr/lib/libglib-2.0.so.0:
-
 /usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/crtbeginS.o:
 
 /usr/include/assert.h:
@@ -612,14 +684,6 @@ src/stb_image_write.h:
 
 /usr/lib/libGLdispatch.so.0:
 
-src/glfem.h:
-
-/usr/lib/libX11.so:
-
-/usr/lib/libXcursor.so.1:
-
-/usr/lib/libgraphite2.so.3:
-
 /usr/lib/libXdmcp.so.6:
 
 /usr/lib/libXfixes.so.3:
@@ -630,20 +694,10 @@ src/glfem.h:
 
 /usr/lib/libXinerama.so.1:
 
-/usr/lib/libmvec.so.1:
-
 gmsh/gmsh-4.13.1-Linux64-sdk/lib/libgmsh.so:
+
+/usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include/syslimits.h:
 
 /usr/lib/libXrender.so.1:
 
-/usr/lib/libbrotlidec.so.1:
-
 /usr/lib/libc.so.6:
-
-/usr/lib/libexpat.so.1:
-
-/usr/lib/libfontconfig.so.1:
-
-/usr/lib/libbz2.so.1.0:
-
-/usr/lib/libgomp.so.1:
