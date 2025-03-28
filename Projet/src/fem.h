@@ -263,7 +263,7 @@ void                 femIterativeSolverInit(femIterativeSolver* mySolver);
 void                 femIterativeSolverPrint(femIterativeSolver* mySolver);
 void                 femIterativeSolverPrintInfos(femIterativeSolver* mySolver);
 double*              femIterativeSolverEliminate(femIterativeSolver* mySolver);
-void                 femIterativeSolverAssemble(femIterativeSolver* mySolver, double *Aloc, double *Bloc, double *Uloc, int *map, int nLoc);
+void femIterativeSolverAssemble(femIterativeSolver* mySolver, double *Aloc, double *Bloc, double *Uloc, int *mapX ,int *mapY, int nLoc);
 double               femIterativeSolverGet(femIterativeSolver* mySolver, int i, int j);
 int                  femIterativeSolverConverged(femIterativeSolver *mySolver);
 

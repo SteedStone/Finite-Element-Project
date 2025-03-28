@@ -36,7 +36,9 @@ void geoFinalize() {
     if (theGeometry.theNodes) {
         free(theGeometry.theNodes->X);
         free(theGeometry.theNodes->Y);
-        free(theGeometry.theNodes); }   
+        free(theGeometry.theNodes);
+        // free(theGeometry.theNodes->number); 
+        }   
     if (theGeometry.theElements) {
         free(theGeometry.theElements->elem);
         free(theGeometry.theElements); }
@@ -847,7 +849,6 @@ femProblem *femElasticityCreate(femGeo* theGeometry,
     theProblem->size = 2*theMesh->nodes->nNodes;
     theProblem->sizeLoc = 2*theMesh->nLocalNode;
     femMeshRenumber(theMesh,renumType);
-    printf("size = %d\n", theProblem->sizeLoc);
     int band ;
     
     switch (solverType) {
@@ -857,16 +858,16 @@ femProblem *femElasticityCreate(femGeo* theGeometry,
         case FEM_BAND : 
                     
                 band = femMeshComputeBand(theMesh);
+                printf("band %d" , band) ;
                 theProblem->solver = femSolverBandCreate(theProblem->size,
                                                          theProblem->sizeLoc,band); break;
-        // case FEM_ITER : 
-        //        theProblem->solver = femSolverIterativeCreate(theProblem->size,
-        //                                                      theProblem->sizeLoc); break;
+        case FEM_ITER : 
+               theProblem->solver = femSolverIterativeCreate(theProblem->size,
+                                                             theProblem->sizeLoc); break;
         default : Error("Unexpected solver option"); }
         
 
-    femDiscretePrint(theProblem->space);   
-    femDiscretePrint(theProblem->spaceEdge);  
+    
   
     return theProblem;
 }
@@ -1123,7 +1124,7 @@ void femElasticityAssembleElements(femProblem *theProblem)
     femSolver *theSolver = theProblem->solver;
     
     double x[4], y[4], phi[4], dphidxsi[4], dphideta[4], dphidx[4], dphidy[4];
-    int iElem, iInteg, i, j, map[4], mapX[4], mapY[4];
+    int iElem, iInteg, i, j, map[4], mapX[4], mapY[4];double Uloc[4];
     int nLocal = theMesh->nLocalNode;
     int localSize = nLocal * 2;
     double a   = theProblem->A;
@@ -1139,11 +1140,12 @@ void femElasticityAssembleElements(femProblem *theProblem)
         for (j = 0; j < nLocal; j++)
         {
             map[j]  = theMesh->elem[iElem * nLocal + j];
-            mapX[j] = 2 * map[j];
-            mapY[j] = 2 * map[j] + 1;
             x[j]    = theNodes->X[map[j]];
             y[j]    = theNodes->Y[map[j]];
             map[j] = theMesh->nodes->number[map[j]];
+            mapX[j] = 2 * map[j];
+            mapY[j] = 2 * map[j] + 1;
+
 
         }
 
@@ -1197,7 +1199,7 @@ void femElasticityAssembleElements(femProblem *theProblem)
             }
         }
         
-        femSolverAssemble(theSolver, Aloc, Bloc,NULL,  mapX, mapY, nLocal);
+        femSolverAssemble(theSolver, Aloc, Bloc,Uloc,  mapX, mapY, nLocal);
     }
 }
 
@@ -1244,7 +1246,7 @@ void femElasticityAssembleNeumann(femProblem *theProblem)
                 mapU[j] = 2 * map[j] + shift;
                 x[j] = theNodes->X[map[j]];
                 y[j] = theNodes->Y[map[j]];
-                // map[j] = theMesh->nodes->number[map[j]];
+                map[j] = theMesh->nodes->number[map[j]];
 
             }
             
@@ -1280,7 +1282,7 @@ double *femElasticitySolve(femProblem *theProblem)
     // printf("Size of the system: %d\n", theSystem->size);
 
     // Initialize the system
-    femFullSystemInit(theSystem);
+    // femFullSystemInit(theSystem);
     
     // Assembly of stiffness matrix and load vector
     femElasticityAssembleElements(theProblem);
@@ -1325,14 +1327,15 @@ double *femElasticitySolve(femProblem *theProblem)
     }
 
     // Solve the system and return the solution
-    femFullSystemEliminate(theSystem);
+    // femFullSystemEliminate(theProblem->solver);
+    femSolverEliminate(theProblem->solver);
     // memcpy(theProblem->soluce, theSystem->B, theSystem->size * sizeof(double));
-    femMesh *theMesh = theProblem->geometry->theElements;
-    int *number = theMesh->nodes->number;
+    femNodes *theNodes = theProblem->geometry->theNodes;
+    int *number = theNodes->number;
 
     for (int i = 0; i < theProblem->size/2; i++){
-        theProblem->soluce[2*number[i]] += theSystem->B[2*number[i]+0];
-        theProblem->soluce[2*number[i]+1] += theSystem->B[2*number[i]+1];
+        theProblem->soluce[2*i] += theSystem->B[2*number[i]+0];
+        theProblem->soluce[2*i+1] += theSystem->B[2*number[i]+1];
 
         
      }
@@ -1340,6 +1343,16 @@ double *femElasticitySolve(femProblem *theProblem)
 }
 // Strip : END
 
+double *femSolverEliminate(femSolver *mySolver)
+{
+    double *soluce;
+    switch (mySolver->type) {
+        case FEM_FULL : soluce = femFullSystemEliminate((femFullSystem *)mySolver->solver); break;
+        case FEM_BAND : soluce = femBandSystemEliminate((femBandSystem *)mySolver->solver); break;
+        case FEM_ITER : soluce = femIterativeSolverEliminate((femIterativeSolver *)mySolver->solver); break;
+        default : Error("Unexpected solver type"); }
+    return(soluce);
+}
 // Strip : BEGIN
 double *femElasticityForces(femProblem *theProblem)
 {
@@ -1397,6 +1410,13 @@ femSolver *femSolverBandCreate(int size, int sizeLoc, int band)
     return(mySolver);
 }
 
+femSolver *femSolverIterativeCreate(int size, int sizeLoc)
+{
+    femSolver *mySolver = femSolverCreate(sizeLoc);
+    mySolver->type = FEM_ITER;
+    mySolver->solver = (femSolver *)femIterativeSolverCreate(size);
+    return(mySolver);
+}
 void femFullSystemAssemble(femFullSystem *mySystem, 
     double *Aloc, double *Bloc, 
     int *mapX, int *mapY, int nLocal)
@@ -1425,7 +1445,7 @@ void femSolverAssemble(femSolver* mySolver, double *Aloc, double *Bloc, double *
     switch (mySolver->type) {
         case FEM_FULL : femFullSystemAssemble((femFullSystem *)mySolver->solver,Aloc,Bloc, mapX, mapY, nLoc); break;
         case FEM_BAND : femBandSystemAssemble((femBandSystem *)mySolver->solver,Aloc,Bloc,mapX , mapY,nLoc); break;
-        // case FEM_ITER : femIterativeSolverAssemble((femIterativeSolver *)mySolver->solver,Aloc,Bloc,Uloc,map,nLoc); break;
+        case FEM_ITER : femIterativeSolverAssemble((femIterativeSolver *)mySolver->solver,Aloc,Bloc,Uloc,mapX ,mapY,nLoc); break;
         default : Error("Unexpected solver type"); }
 }
 
@@ -1515,7 +1535,7 @@ int femSolverConverged(femSolver *mySolver)
     int  testConvergence;
     switch (mySolver->type) {
         case FEM_FULL : testConvergence = 1; break;
-        // case FEM_BAND : testConvergence = 1; break;
+        case FEM_BAND : testConvergence = 1; break;
         // case FEM_ITER : testConvergence = femIterativeSolverConverged((femIterativeSolver *)mySolver->solver); break;
         default : Error("Unexpected solver type"); }
     return(testConvergence);
@@ -1543,7 +1563,7 @@ int femMeshComputeBand(femMesh *theMesh)
         if (myBand < maxNum - minNum) { myBand = maxNum - minNum; }
     }
     
-    return ++myBand;
+    return 2 * (myBand + 1);
     // Strip : END
 }
 
@@ -1720,5 +1740,108 @@ double femBandSystemGet(femBandSystem* myBandSystem, int myRow, int myCol)
     return(value);
 }
 
+
+
+femIterativeSolver *femIterativeSolverCreate(int size)
+{
+    femIterativeSolver *mySolver = malloc(sizeof(femIterativeSolver));
+    mySolver->R = malloc(sizeof(double)*size*4);      
+    mySolver->D = mySolver->R + size;       
+    mySolver->S = mySolver->R + size*2;       
+    mySolver->X = mySolver->R + size*3;       
+    mySolver->size = size;
+    femIterativeSolverInit(mySolver);
+    return(mySolver);
+}
+
+void femIterativeSolverFree(femIterativeSolver *mySolver)
+{
+    free(mySolver->R);
+    free(mySolver);
+}
+
+void femIterativeSolverInit(femIterativeSolver *mySolver)
+{
+    int i;
+    mySolver->iter = 0;
+    mySolver->error = 10.0e+12;
+    for (i=0 ; i < mySolver->size*4 ; i++) 
+        mySolver->R[i] = 0;        
+}
+ 
+void femIterativeSolverPrint(femIterativeSolver *mySolver)
+{
+    double  *R;
+    int     i, size;
+    R    = mySolver->R;
+    size = mySolver->size;
+
+    for (i=0; i < size; i++) {
+        printf("%d :  %+.1e \n",i,R[i]); }
+}
+
+void femIterativeSolverPrintInfos(femIterativeSolver *mySolver)
+{
+    if (mySolver->iter == 1)     printf("\n    Iterative solver \n");
+    printf("    Iteration %4d : %14.7e\n",mySolver->iter,mySolver->error);
+}
+
+int femIterativeSolverConverged(femIterativeSolver *mySolver)
+{
+    int  testConvergence = 0;
+    if (mySolver->iter  > 3000)     testConvergence = -1;
+    if (mySolver->error < 10.0e-6)  testConvergence = 1;
+    return(testConvergence);
+}
+
+void femIterativeSolverAssemble(femIterativeSolver* mySolver, 
+                                double *Aloc, 
+                                double *Bloc, 
+                                double *Uloc, 
+                                int *mapX, 
+                                int *mapY, 
+                                int nLoc)
+{
+    int i, j;
+    int localSize = nLoc * 2; // taille du système local (x et y)
+    
+    for (i = 0; i < nLoc; i++) {
+        int myRowX = mapX[i];  // indice global pour la DOF x du nœud i
+        int myRowY = mapY[i];  // indice global pour la DOF y du nœud i
+        
+        // Assembler les contributions du vecteur bloc (Bloc) pour les deux composantes
+        mySolver->R[myRowX] -= Bloc[2 * i];     // contribution en x
+        mySolver->R[myRowY] -= Bloc[2 * i + 1];   // contribution en y
+        
+        // Boucle sur les nœuds locaux pour assembler la matrice locale (Aloc)
+        for (j = 0; j < nLoc; j++) {
+            // Contribution de la ligne associée à la composante x du nœud i
+            mySolver->R[myRowX] += 
+                Aloc[(2 * i) * localSize + (2 * j)]     * Uloc[2 * j]     +
+                Aloc[(2 * i) * localSize + (2 * j + 1)] * Uloc[2 * j + 1];
+            
+            // Contribution de la ligne associée à la composante y du nœud i
+            mySolver->R[myRowY] += 
+                Aloc[(2 * i + 1) * localSize + (2 * j)]     * Uloc[2 * j]     +
+                Aloc[(2 * i + 1) * localSize + (2 * j + 1)] * Uloc[2 * j + 1];
+        }
+    }
+}
+
+
+
+
+double *femIterativeSolverEliminate(femIterativeSolver *mySolver)
+{
+    mySolver->iter++;
+    double error = 0.0; int i;
+    for (i=0; i < mySolver->size; i++) {
+        error += (mySolver->R[i])*(mySolver->R[i]);
+        mySolver->X[i] = -mySolver->R[i]/5.0; 
+        mySolver->R[i] = 0.0; }
+        
+    mySolver->error = sqrt(error);
+    return(mySolver->X);
+}
 
 #endif

@@ -71,9 +71,10 @@
             geoSetDomainName(33 , "Bottom"); // 327
          
          } else {
-            geoSetDomainName(549 , "Top"); // 549
-            geoSetDomainName(564 , "Bottom"); // 564
+            geoSetDomainName(549 , "Top"); // hexagone (9;5) = 549 , Hexagone(3;3) = 149 115
+            geoSetDomainName(564 , "Bottom"); // hexagone (9;5) = 564 , Hexagone(3;3) = 158 124
          }
+         
      }
      else {
          double Lx = 1.0;

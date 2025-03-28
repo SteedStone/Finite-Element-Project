@@ -57,12 +57,12 @@ int main(int argc, char *argv[])
     
     double E   = 211.e9;
     double nu  = 0.3;
-    double rho = 7.85e3; 
+    double rho = 7.85e3;  
     double g   = 9.81;
    
     // Initialisation du problème avec les conditions aux bords
     // ON remplit juste la structure theProblem avec les valeurs de E, nu, rho, g et le type de problème qu'on veut résoudre
-    femProblem* theProblem = femElasticityCreate(theGeometry,E,nu,rho,g,PLANAR_STRESS , FEM_BAND , FEM_NO);
+    femProblem* theProblem = femElasticityCreate(theGeometry,E,nu,rho,g,PLANAR_STRESS , FEM_FULL , FEM_NO);
     // femElasticityAddBoundaryCondition(theProblem,"Symmetry",DIRICHLET_X,0.0);
     femElasticityAddBoundaryCondition(theProblem,"Bottom",DIRICHLET_X,0.0);
     femElasticityAddBoundaryCondition(theProblem,"Bottom",DIRICHLET_Y,0.0);
@@ -194,6 +194,7 @@ int main(int argc, char *argv[])
     femSolverType solverType = FEM_FULL;
     femRenumType  renumType  = FEM_NO;
     int option = 1;    
+    int mode = 5;
     femSolverType newSolverType = solverType;
     femRenumType  newRenumType  = renumType;
 
@@ -204,7 +205,7 @@ int main(int argc, char *argv[])
     {
         int testConvergence;
         char theMessage[256];
-        sprintf(theMessage, "Max : %.4f ",femMax(theProblem->soluce,theProblem->size));
+        // sprintf(theMessage, "Max : %.4f ",femMax(theProblem->soluce,theProblem->size));
         int w,h;
         glfwGetFramebufferSize(window,&w,&h);
         glfemReshapeWindows(theGeometry->theNodes,w,h);
@@ -220,7 +221,7 @@ int main(int argc, char *argv[])
             glfemPlotSolver(theProblem->solver,theProblem->size,w,h); }
         glColor3f(1.0,0.0,0.0); glfemDrawMessage(20,460,theMessage);              
     
-        if (solverType != newSolverType || renumType != newRenumType) { 
+        if (solverType != newSolverType || renumType != newRenumType && option == 0) { 
             solverType = newSolverType;
             renumType = newRenumType;
             femElasticityFree(theProblem);
@@ -238,17 +239,35 @@ int main(int argc, char *argv[])
                 case FEM_XNUM : printf("    Renumbering along the x-direction\n"); break;
                 case FEM_YNUM : printf("    Renumbering along the y-direction\n"); break;
                 default : break; }
-            printf("    Maximum value : %.4f\n", femMax(theProblem->soluce,theProblem->size));
+            // printf("    Maximum value : %.4f\n", femMax(theProblem->soluce,theProblem->size));
             fflush(stdout); }
-        if (glfwGetKey(window,'V') == GLFW_PRESS)   option = 1;
+        if (glfwGetKey(window,'V') == GLFW_PRESS)   {option = 1;mode = 5;}
         if (glfwGetKey(window,'S') == GLFW_PRESS)   option = 0;
         if (glfwGetKey(window,'F') == GLFW_PRESS)   newSolverType = FEM_FULL; 
-        // if (glfwGetKey(window,'B') == GLFW_PRESS)   newSolverType = FEM_BAND; 
+        if (glfwGetKey(window,'B') == GLFW_PRESS)   newSolverType = FEM_BAND; 
         // if (glfwGetKey(window,'I') == GLFW_PRESS)   newSolverType = FEM_ITER; 
         if (glfwGetKey(window,'X') == GLFW_PRESS)   newRenumType  = FEM_XNUM; 
         if (glfwGetKey(window,'Y') == GLFW_PRESS)   newRenumType  = FEM_YNUM; 
         if (glfwGetKey(window,'N') == GLFW_PRESS)   newRenumType  = FEM_NO; 
-    
+        if (glfwGetKey(window, 'X') == GLFW_PRESS) { mode = 3; }
+        if (glfwGetKey(window, 'Y') == GLFW_PRESS) { mode = 4; }
+        if(option == 1 && mode == 3) {
+            glfemPlotField(theGeometry->theElements, forcesX);
+            glfemPlotMesh(theGeometry->theElements); 
+            sprintf(theMessage, "Number of elements : %d ",theGeometry->theElements->nElem);
+            glColor3f(1.0,0.0,0.0); glfemMessage(theMessage);
+        }
+        else if(option == 1 && mode == 4) {
+            glfemPlotField(theGeometry->theElements, forcesY);
+            glfemPlotMesh(theGeometry->theElements); 
+            sprintf(theMessage, "Number of elements : %d ",theGeometry->theElements->nElem);
+            glColor3f(1.0,0.0,0.0); glfemMessage(theMessage);
+        } else {
+            glfemPlotField(theGeometry->theElements,normDisplacement);
+            glfemPlotMesh(theGeometry->theElements); 
+            sprintf(theMessage, "Number of elements : %d ",theGeometry->theElements->nElem);
+            glColor3f(1.0,0.0,0.0); glfemMessage(theMessage); 
+        }
         glfwSwapBuffers(window);
         glfwPollEvents();
     } while( glfwGetKey(window,GLFW_KEY_ESCAPE) != GLFW_PRESS &&
@@ -257,6 +276,117 @@ int main(int argc, char *argv[])
     // Check if the ESC key was pressed or the window was closed
             
     glfwTerminate(); 
+
+//     int mode = 1;
+//     int domain = 0;
+//     int freezingButton = FALSE;
+//     double t, told = 0;
+//     char theMessage[MAXNAME + 5];
+
+//     GLFWwindow *window = glfemInit("EPL1110 : Project 2022-23 ");
+//     glfwMakeContextCurrent(window);
+//     // glfwSetScrollCallback(window, scroll_callback);
+//     // glfwSetMouseButtonCallback(window, mouse_button_callback);
+
+//     do {
+//         int w, h;
+//         glfwGetFramebufferSize(window, &w, &h);
+//         glfemReshapeWindows(theGeometry->theNodes, w, h);
+
+//         t = glfwGetTime();
+//         if (glfwGetKey(window, 'D') == GLFW_PRESS) { mode = 0; }
+//         if (glfwGetKey(window, 'V') == GLFW_PRESS) { mode = 1; }
+//         if (glfwGetKey(window, 'S') == GLFW_PRESS) { mode = 2; }
+//         if (glfwGetKey(window, 'X') == GLFW_PRESS) { mode = 3; }
+//         if (glfwGetKey(window, 'Y') == GLFW_PRESS) { mode = 4; }
+//         if (glfwGetKey(window, 'U') == GLFW_PRESS) { mode = 5; }
+//         if (glfwGetKey(window, 'I') == GLFW_PRESS) { mode = 6; }
+//         if (glfwGetKey(window, 'O') == GLFW_PRESS) { mode = 7; }
+//         if (glfwGetKey(window, 'P') == GLFW_PRESS) { mode = 8; }
+//         if (glfwGetKey(window, 'N') == GLFW_PRESS && freezingButton == FALSE)
+//         {
+//             domain++;
+//             freezingButton = TRUE;
+//             told = t;
+//         }
+
+//         if (t - told > 0.5) { freezingButton = FALSE; }
+//         if (mode == 1)
+//         {
+//             glfemPlotField(theGeometry->theElements, normDisplacement);
+//             glfemPlotMesh(theGeometry->theElements);
+//             sprintf(theMessage, "Number of elements : %d ", theGeometry->theElements->nElem);
+//             glColor3f(1.0, 0.0, 0.0);
+//             glfemMessage(theMessage);
+//         }
+//         else if (mode == 0)
+//         {
+//             domain = domain % theGeometry->nDomains;
+//             glfemPlotDomain(theGeometry->theDomains[domain]);
+//             sprintf(theMessage, "%s : %d ", theGeometry->theDomains[domain]->name, domain);
+//             glColor3f(1.0, 0.0, 0.0);
+//             glfemMessage(theMessage);
+//         } 
+//         else if (mode == 2)
+//         {
+//             glColor3f(1.0, 0.0, 0.0);
+//             glfemPlotSolver(theProblem->solver, theProblem->size, w, h);
+//         }
+//         else if (mode == 3)
+//         {
+//             glfemPlotField(theGeometry->theElements, forcesX);
+//             glfemPlotMesh(theGeometry->theElements); 
+//             sprintf(theMessage, "Number of elements : %d ",theGeometry->theElements->nElem);
+//             glColor3f(1.0,0.0,0.0); glfemMessage(theMessage);
+//         }
+//         else if (mode == 4)
+//         {
+//             glfemPlotField(theGeometry->theElements, forcesY);
+//             glfemPlotMesh(theGeometry->theElements); 
+//             sprintf(theMessage, "Number of elements : %d ",theGeometry->theElements->nElem);
+//             glColor3f(1.0,0.0,0.0); glfemMessage(theMessage);
+//         }
+//         // else if (mode == 5)
+//         // {
+//         //     glfemPlotField(theGeometry->theElements, sigmaXX);
+//         //     glfemPlotMesh(theGeometry->theElements); 
+//         //     sprintf(theMessage, "Number of elements : %d ",theGeometry->theElements->nElem);
+//         //     glColor3f(1.0,0.0,0.0); glfemMessage(theMessage);
+//         // }
+//         // else if (mode == 6)
+//         // {
+//         //     glfemPlotField(theGeometry->theElements, sigmaYY);
+//         //     glfemPlotMesh(theGeometry->theElements); 
+//         //     sprintf(theMessage, "Number of elements : %d ",theGeometry->theElements->nElem);
+//         //     glColor3f(1.0,0.0,0.0); glfemMessage(theMessage);
+//         // }
+//         // else if (mode == 7)
+//         // {
+//         //     glfemPlotField(theGeometry->theElements, sigmaXY);
+//         //     glfemPlotMesh(theGeometry->theElements); 
+//         //     sprintf(theMessage, "Number of elements : %d ",theGeometry->theElements->nElem);
+//         //     glColor3f(1.0,0.0,0.0); glfemMessage(theMessage);
+//         // }
+//         // else if (mode == 8)
+//         // {
+//         //     glfemPlotField(theGeometry->theElements, vonMises);
+//         //     glfemPlotMesh(theGeometry->theElements); 
+//         //     sprintf(theMessage, "Number of elements : %d ",theGeometry->theElements->nElem);
+//         //     glColor3f(1.0,0.0,0.0); glfemMessage(theMessage);
+//         // }
+//         else { printf("Mode %d not implemented\n", mode); }  
+
+//         glfwSwapBuffers(window);
+//         glfwPollEvents();
+//     } while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS && glfwWindowShouldClose(window) != 1);
+//     // Check if the ESC key was pressed or the window was closed
+
+//    free(normDisplacement);
+//     free(forcesX);
+//     free(forcesY);
+//     femElasticityFree(theProblem) ; 
+//     geoFinalize();
+//     glfwTerminate(); 
 
 
     
