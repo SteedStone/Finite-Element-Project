@@ -222,26 +222,28 @@ void                femWarning(char *text, int line, char *file);
 // Fonctions de visualisation 
 void               trianglePlot();
 void               HexagonPlot();
-void femFindBoundaryNodes(femGeo *theProblem, double targetY, double epsilon , char *name) ;
+void               femFindBoundaryNodes(femGeo *theProblem, double targetY, double epsilon , char *name) ;
+void               femSolverSet(femSolver *mySolver, double **newA, double *newB) ;
+void               femElasticitySigma(femProblem *theProblem, double *sigmaXX, double *sigmaYY, double *sigmaXY) ;
+
+
+
 
 // Different type de solvers 
 femSolver*           femSolverFullCreate(int size, int sizeLoc);
 femSolver*           femSolverBandCreate(int size, int sizeLoc, int band);
 femSolver*           femSolverIterativeCreate(int size, int sizeLoc);
-void                 femSolverFree(femSolver* mySolver);
-void                 femSolverInit(femSolver* mySolver);
-void                 femSolverPrint(femSolver* mySolver);
+// void                 femSolverFree(femSolver* mySolver);
+// void                 femSolverInit(femSolver* mySolver);
+// void                 femSolverPrint(femSolver* mySolver);
 void                 femSolverPrintInfos(femSolver* mySolver);
 double*              femSolverEliminate(femSolver* mySolver);
 void                 femFullSystemAssemble(femFullSystem *mySystem, double *Aloc, double *Bloc, int *mapX, int *mapY, int nLocal) ; 
 double               femSolverGet(femSolver* mySolver, int i, int j);
 int                  femSolverConverged(femSolver *mySolver);
-double femFullSystemGet(femFullSystem* myFullSystem, int myRow, int myCol) ;
-void femSolverPrintInfos(femSolver *mySolver) ;
-void femFullSystemPrintInfos(femFullSystem *mySystem) ;
-
-
-
+double               femFullSystemGet(femFullSystem* myFullSystem, int myRow, int myCol) ;
+void                 femSolverPrintInfos(femSolver *mySolver) ;
+void                 femFullSystemPrintInfos(femFullSystem *mySystem) ;
 
 
 
@@ -251,10 +253,10 @@ void                 femBandSystemInit(femBandSystem *myBand);
 void                 femBandSystemPrint(femBandSystem *myBand);
 void                 femBandSystemPrintInfos(femBandSystem *myBand);
 double*              femBandSystemEliminate(femBandSystem *myBand);
-void femBandSystemAssemble(femBandSystem *myBandSystem, double *Aloc, double *Bloc, int *mapX,int *mapY, int nLoc) ;
+void                 femBandSystemAssemble(femBandSystem *myBandSystem, double *Aloc, double *Bloc, int *mapX,int *mapY, int nLoc) ;
 double               femBandSystemGet(femBandSystem* myBandSystem, int i, int j);
-int femMeshComputeBand(femMesh *theMesh) ;
-femSolver *femSolverBandCreate(int size, int sizeLoc, int band);
+int                  femMeshComputeBand(femMesh *theMesh) ;
+femSolver*           femSolverBandCreate(int size, int sizeLoc, int band);
 
 
 femIterativeSolver*  femIterativeSolverCreate(int size);
@@ -263,11 +265,11 @@ void                 femIterativeSolverInit(femIterativeSolver* mySolver);
 void                 femIterativeSolverPrint(femIterativeSolver* mySolver);
 void                 femIterativeSolverPrintInfos(femIterativeSolver* mySolver);
 double*              femIterativeSolverEliminate(femIterativeSolver* mySolver);
-void femIterativeSolverAssemble(femIterativeSolver* mySolver, double *Aloc, double *Bloc, double *Uloc, int *mapX ,int *mapY, int nLoc);
+void                 femIterativeSolverAssemble(femIterativeSolver* mySolver, double *Aloc, double *Bloc, double *Uloc, int *mapX ,int *mapY, int nLoc);
 double               femIterativeSolverGet(femIterativeSolver* mySolver, int i, int j);
 int                  femIterativeSolverConverged(femIterativeSolver *mySolver);
 
-void femSolverAssemble(femSolver* mySolver, double *Aloc, double *Bloc, double *Uloc,int *mapX, int *mapY, int nLoc) ;
-void femMeshRenumber(femMesh *theMesh, femRenumType renumType) ;
+void                 femSolverAssemble(femSolver* mySolver, double *Aloc, double *Bloc, double *Uloc,int *mapX, int *mapY, int nLoc) ;
+void                 femMeshRenumber(femMesh *theMesh, femRenumType renumType) ;
 
 #endif

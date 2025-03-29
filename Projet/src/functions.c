@@ -606,5 +606,186 @@ void femFindBoundaryNodes(femGeo *theProblem, double targetY, double epsilon , c
 
 
 
+void femSolverSet(femSolver *mySolver, double **newA, double *newB)
+{
+    if (mySolver->type == FEM_FULL)
+    {
+        femFullSystem *mySystem = mySolver->solver;
+        mySystem->A = newA;
+        mySystem->B = newB;
+    }
+    else if (mySolver->type == FEM_BAND)
+    {
+        femBandSystem *mySystem = mySolver->solver;
+        mySystem->A = newA;
+        mySystem->B = newB;
+    }
+    else { Error("Unexpected solver type"); }
+}
+void femElasticitySigma(femProblem *theProblem, double *sigmaXX, double *sigmaYY, double *sigmaXY)
+{
+    femIntegration *theRule  = theProblem->rule;
+    femDiscrete *theSpace    = theProblem->space;
+    femGeo *theGeometry = theProblem->geometry;
+    femNodes *theNodes       = theGeometry->theNodes;
+    femMesh *theMesh         = theGeometry->theElements;
+
+    int nLocal = theSpace->n;
+
+    femSolver *theSolver;
+    double **M1, **M2, **M3, *B1, *B2, *B3, *epsilonXX, *epsilonYY, *epsilonXY, *theSoluce;
+    double x[nLocal], y[nLocal], phi[nLocal], dphidxsi[nLocal], dphideta[nLocal], dphidx[nLocal], dphidy[nLocal];
+    double u[nLocal], v[nLocal], xsi, eta, weight, jac, weightedJac, dxdxsi, dxdeta, dydxsi, dydeta, a, b, c;
+    int iElem, iInteg, iEdge, i, j, map[nLocal], nNodes;
+
+    nNodes    = theNodes->nNodes;
+    theSoluce = theProblem->soluce;    
+    theSolver = femSolverFullCreate(nNodes , theProblem->sizeLoc);
+
+    if (theSolver->type == FEM_FULL) {
+        M1 = ((femFullSystem *) theSolver->solver)->A  ;
+        B1 = ((femFullSystem *) theSolver->solver)->B ;
+    } else if(theSolver->type == FEM_BAND) 
+    {
+        M1 = ((femBandSystem *) theSolver->solver)->A  ;
+        B1 = ((femBandSystem *) theSolver->solver)->B ;
+    } 
+    
+    
+
+    B2 = (double *) malloc(nNodes * sizeof(double));
+    B3 = (double *) malloc(nNodes * sizeof(double));
+
+    if (B2 == NULL) { Error("Allocation Error\n"); exit(EXIT_FAILURE); return; }
+    if (B3 == NULL) { Error("Allocation Error\n"); exit(EXIT_FAILURE); return; }
+
+    for (i = 0; i < nNodes; i++) { B2[i] = 0.0; B3[i] = 0.0; }
+    
+    for (iElem = 0; iElem < theMesh->nElem; iElem++)
+    {
+        for (i = 0; i < theSpace->n; i++)
+        {
+            map[i] = theMesh->elem[iElem * nLocal + i];
+            x[i] = theNodes->X[map[i]];
+            y[i] = theNodes->Y[map[i]];
+            u[i] = theSoluce[2 * map[i]];
+            v[i] = theSoluce[2 * map[i] + 1];
+        }
+
+        for (iInteg = 0; iInteg < theRule->n; iInteg++)
+        {
+            xsi    = theRule->xsi[iInteg];
+            eta    = theRule->eta[iInteg];
+            weight = theRule->weight[iInteg];
+
+            femDiscretePhi2(theSpace, xsi, eta, phi);
+            femDiscreteDphi2(theSpace, xsi, eta, dphidxsi, dphideta);
+
+            dxdxsi = 0.0; dydxsi = 0.0;
+            dxdeta = 0.0; dydeta = 0.0;
+            for (i = 0; i < theSpace->n; i++)
+            {
+                dxdxsi += x[i] * dphidxsi[i];
+                dxdeta += x[i] * dphideta[i];
+                dydxsi += y[i] * dphidxsi[i];
+                dydeta += y[i] * dphideta[i];
+            }
+
+            jac = dxdxsi * dydeta - dxdeta * dydxsi;
+            if (jac < 0.0) { printf("Negative jacobian! Your mesh is oriented in reverse. The normals will be wrong\n"); }
+            jac = fabs(jac);
+
+            for (i = 0; i < theSpace->n; i++)
+            {
+                dphidx[i] = (dphidxsi[i] * dydeta - dphideta[i] * dydxsi) / jac;
+                dphidy[i] = (dphideta[i] * dxdxsi - dphidxsi[i] * dxdeta) / jac;
+            }
+
+            weightedJac = jac * weight;
+
+            for (i = 0; i < theSpace->n; i++)
+            {
+                for (j = 0; j < theSpace->n; j++) { M1[map[i]][map[j]] += phi[i] * phi[j] * weightedJac; }
+                B1[map[i]] += phi[i] * dphidx[i] * u[i] * weightedJac;
+                B2[map[i]] += phi[i] * dphidy[i] * v[i] * weightedJac;
+                B3[map[i]] += phi[i] * (dphidy[i] * u[i] + dphidx[i] * v[i]) * weightedJac / 2.0;
+            }
+        }
+    }
+
+    M2 = (double **) malloc(sizeof(double *) * nNodes);
+    M3 = (double **) malloc(sizeof(double *) * nNodes);
+
+    if (M2 == NULL) { Error("Memory allocation error\n"); exit(EXIT_FAILURE); return; }
+    if (M3 == NULL) { Error("Memory allocation error\n"); exit(EXIT_FAILURE); return; }
+
+    for (i = 0; i < nNodes; i++)
+    {
+        M2[i] = (double *) malloc(nNodes * sizeof(double));
+        M3[i] = (double *) malloc(nNodes * sizeof(double));
+
+        if (M2[i] == NULL) { Error("Memory allocation error\n"); exit(EXIT_FAILURE); return; }
+        if (M3[i] == NULL) { Error("Memory allocation error\n"); exit(EXIT_FAILURE); return; }
+
+        memcpy(M2[i], M1[i], nNodes * sizeof(double));
+        memcpy(M3[i], M1[i], nNodes * sizeof(double));
+    }
+
+    epsilonXX = (double *) malloc(nNodes * sizeof(double));
+    epsilonYY = (double *) malloc(nNodes * sizeof(double));
+    epsilonXY = (double *) malloc(nNodes * sizeof(double));
+
+    if (epsilonXX == NULL) { Error("Allocation Error\n"); exit(EXIT_FAILURE); return; }
+    if (epsilonYY == NULL) { Error("Allocation Error\n"); exit(EXIT_FAILURE); return; }
+    if (epsilonXY == NULL) { Error("Allocation Error\n"); exit(EXIT_FAILURE); return; }
+
+    if (theSolver->type == FEM_FULL) {
+
+        femSolverEliminate(theSolver);
+        memcpy(epsilonXX, ((femFullSystem *) theSolver->solver)->B, nNodes * sizeof(double));
+        
+        femSolverSet(theSolver, M2, B2);
+        femSolverEliminate(theSolver);
+        memcpy(epsilonYY, ((femFullSystem *) theSolver->solver)->B, nNodes * sizeof(double));
+
+        femSolverSet(theSolver, M3, B3);
+        femSolverEliminate(theSolver);
+        memcpy(epsilonXY, ((femFullSystem *) theSolver->solver)->B, nNodes * sizeof(double));
+    } else  if(theSolver->type == FEM_BAND ) {
+        femSolverEliminate(theSolver);
+        memcpy(epsilonXX, ((femBandSystem *) theSolver->solver)->B, nNodes * sizeof(double));
+
+        femSolverSet(theSolver, M2, B2);
+        femSolverEliminate(theSolver);
+        memcpy(epsilonYY, ((femBandSystem *) theSolver->solver)->B, nNodes * sizeof(double));
+
+        femSolverSet(theSolver, M3, B3);
+        femSolverEliminate(theSolver);
+        memcpy(epsilonXY, ((femBandSystem *) theSolver->solver)->B, nNodes * sizeof(double));
+    }
+
+    a = theProblem->A;
+    b = theProblem->B;
+    c = theProblem->C;
+
+    for (i = 0; i < nNodes; i++)
+    {
+        sigmaXX[i] = a * epsilonXX[i] + b * epsilonYY[i];
+        sigmaXY[i] = 2 * c * epsilonXY[i];
+        sigmaYY[i] = b * epsilonXX[i] + a * epsilonYY[i];
+    }
+
+    free(epsilonXX); epsilonXX = NULL;
+    free(epsilonYY); epsilonYY = NULL;
+    free(epsilonXY); epsilonXY = NULL;
+    for (i = 0; i < nNodes; i++) { free(M2[i]); M2[i] = NULL; free(M3[i]); M3[i] = NULL; }
+    free(M2); M2 = NULL;
+    free(M3); M3 = NULL;
+    free(B2); B2 = NULL;
+    free(B3); B3 = NULL;
+}
+
+
+
 
 

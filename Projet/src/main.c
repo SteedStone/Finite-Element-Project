@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
 
 
    
-    double deformationFactor = 300.0; // 5000.0 pour hexa et 300 pour triangle
+    double deformationFactor = 5000.0; // 5000.0 pour hexa et 300 pour triangle
     
     femMesh *theMesh = theProblem->geometry->theElements;
     int *number = theMesh->nodes->number;
@@ -129,77 +129,32 @@ int main(int argc, char *argv[])
     printf(" ==== Global horizontal force       : %14.7e [N] \n",theGlobalForce[0]);
     printf(" ==== Global vertical force         : %14.7e [N] \n",theGlobalForce[1]);
     printf(" ==== Weight                        : %14.7e [N] \n", area * rho * g);
+    
+    int nNodes = theNodes->nNodes;
+    double *sigmaXX = (double *) malloc(nNodes * sizeof(double));
+    double *sigmaYY = (double *) malloc(nNodes * sizeof(double));
+    double *sigmaXY = (double *) malloc(nNodes * sizeof(double));
 
-    //
-    //  -6- Visualisation du maillage
-    //  
+    if (sigmaXX == NULL) { Error("Allocation Error\n"); exit(EXIT_FAILURE); return EXIT_FAILURE; }
+    if (sigmaYY == NULL) { Error("Allocation Error\n"); exit(EXIT_FAILURE); return EXIT_FAILURE; }
+    if (sigmaXY == NULL) { Error("Allocation Error\n"); exit(EXIT_FAILURE); return EXIT_FAILURE; }
 
-    // int mode = 1; 
-    // int domain = 0;
-    // int freezingButton = FALSE;
-    // double t, told = 0;
-    // char theMessage[MAXNAME];
-
-
-    // GLFWwindow* window = glfemInit("EPL1110 : Recovering forces on constrained nodes");
-    // glfwMakeContextCurrent(window);
-
-    // do {
-    //     int w,h;
-    //     glfwGetFramebufferSize(window,&w,&h);
-    //     glfemReshapeWindows(theGeometry->theNodes,w,h);
-
-    //     t = glfwGetTime();  
-    //     if (glfwGetKey(window,'D') == GLFW_PRESS) { mode = 0;}
-    //     if (glfwGetKey(window,'V') == GLFW_PRESS) { mode = 1;}
-    //     if (glfwGetKey(window,'X') == GLFW_PRESS) { mode = 2;}
-    //     if (glfwGetKey(window,'Y') == GLFW_PRESS) { mode = 3;}
-    //     if (glfwGetKey(window,'N') == GLFW_PRESS && freezingButton == FALSE) { domain++; freezingButton = TRUE; told = t;}
-    //     if (t-told > 0.5) {freezingButton = FALSE; }
-        
-    //     if (mode == 0) {
-    //         domain = domain % theGeometry->nDomains;
-    //         glfemPlotDomain( theGeometry->theDomains[domain]); 
-    //         sprintf(theMessage, "%s : %d ",theGeometry->theDomains[domain]->name,domain);
-    //         glColor3f(1.0,0.0,0.0); glfemMessage(theMessage); }
-    //     if (mode == 1) {
-    //         glfemPlotField(theGeometry->theElements,normDisplacement);
-    //         glfemPlotMesh(theGeometry->theElements); 
-    //         sprintf(theMessage, "Number of elements : %d ",theGeometry->theElements->nElem);
-    //         glColor3f(1.0,0.0,0.0); glfemMessage(theMessage); }
-    //     if (mode == 2) {
-    //         glfemPlotField(theGeometry->theElements,forcesX);
-    //         glfemPlotMesh(theGeometry->theElements); 
-    //         sprintf(theMessage, "Number of elements : %d ",theGeometry->theElements->nElem);
-    //         glColor3f(1.0,0.0,0.0); glfemMessage(theMessage); }
-    //     if (mode == 3) {
-    //         glfemPlotField(theGeometry->theElements,forcesY);
-    //         glfemPlotMesh(theGeometry->theElements); 
-    //         sprintf(theMessage, "Number of elements : %d ",theGeometry->theElements->nElem);
-    //         glColor3f(1.0,0.0,0.0); glfemMessage(theMessage); }
-    //     glfwSwapBuffers(window);
-    //     glfwPollEvents();
-    // } while( glfwGetKey(window,GLFW_KEY_ESCAPE) != GLFW_PRESS &&
-    //         glfwWindowShouldClose(window) != 1 );
-            
-    // // Check if the ESC key was pressed or the window was closed
-
-    // free(normDisplacement);
-    // free(forcesX);
-    // free(forcesY);
-    // femElasticityFree(theProblem) ; 
-    // geoFinalize();
-    // glfwTerminate(); 
+    femElasticitySigma(theProblem, sigmaXX, sigmaYY, sigmaXY);
+    
+    
 
     femSolverType solverType = FEM_FULL;
     femRenumType  renumType  = FEM_NO;
     int option = 1;    
-    int mode = 5;
+    int mode = 8;
     femSolverType newSolverType = solverType;
     femRenumType  newRenumType  = renumType;
 
     GLFWwindow* window = glfemInit("LEPL1110 : Band Solver ");
     glfwMakeContextCurrent(window);
+    glPointSize(4.0f);                 // Par exemple, un point de 4 pixels
+    glEnable(GL_POINT_SMOOTH);         // Active l’anticrénelage pour les points
+    glHint(GL_POINT_SMOOTH_HINT, GL_NICEST); 
     
     do 
     {
@@ -226,6 +181,9 @@ int main(int argc, char *argv[])
             renumType = newRenumType;
             femElasticityFree(theProblem);
             theProblem = femElasticityCreate(theGeometry,E,nu,rho,g,PLANAR_STRESS , solverType , renumType);
+            // femElasticityAddBoundaryCondition(theProblem,"Bottom",DIRICHLET_X,0.0);
+            // femElasticityAddBoundaryCondition(theProblem,"Bottom",DIRICHLET_Y,0.0);
+            // femElasticityAddBoundaryCondition(theProblem,"Top",NEUMANN_Y,-1e6);
             theMesh = theProblem->geometry->theElements;
             clock_t tic = clock();
             do {
@@ -241,7 +199,7 @@ int main(int argc, char *argv[])
                 default : break; }
             // printf("    Maximum value : %.4f\n", femMax(theProblem->soluce,theProblem->size));
             fflush(stdout); }
-        if (glfwGetKey(window,'V') == GLFW_PRESS)   {option = 1;mode = 5;}
+        if (glfwGetKey(window,'V') == GLFW_PRESS)   {option = 1;mode = 8;}
         if (glfwGetKey(window,'S') == GLFW_PRESS)   option = 0;
         if (glfwGetKey(window,'F') == GLFW_PRESS)   newSolverType = FEM_FULL; 
         if (glfwGetKey(window,'B') == GLFW_PRESS)   newSolverType = FEM_BAND; 
@@ -251,6 +209,10 @@ int main(int argc, char *argv[])
         if (glfwGetKey(window,'N') == GLFW_PRESS)   newRenumType  = FEM_NO; 
         if (glfwGetKey(window, 'X') == GLFW_PRESS) { mode = 3; }
         if (glfwGetKey(window, 'Y') == GLFW_PRESS) { mode = 4; }
+        if (glfwGetKey(window, 'K') == GLFW_PRESS) { mode = 5; }
+        if (glfwGetKey(window, 'L') == GLFW_PRESS) { mode = 6; }
+        if (glfwGetKey(window, 'M') == GLFW_PRESS) { mode = 7; }
+
         if(option == 1 && mode == 3) {
             glfemPlotField(theGeometry->theElements, forcesX);
             glfemPlotMesh(theGeometry->theElements); 
@@ -262,6 +224,25 @@ int main(int argc, char *argv[])
             glfemPlotMesh(theGeometry->theElements); 
             sprintf(theMessage, "Number of elements : %d ",theGeometry->theElements->nElem);
             glColor3f(1.0,0.0,0.0); glfemMessage(theMessage);
+        }
+        else if(option == 1 && mode == 5) {
+            glfemPlotField(theGeometry->theElements, sigmaYY);
+            glfemPlotMesh(theGeometry->theElements); 
+            sprintf(theMessage, "Number of elements : %d ",theGeometry->theElements->nElem);
+            glColor3f(1.0,0.0,0.0); glfemMessage(theMessage);
+        }
+        else if(option == 1 && mode == 6) {
+            glfemPlotField(theGeometry->theElements, sigmaXX);
+            glfemPlotMesh(theGeometry->theElements); 
+            sprintf(theMessage, "Number of elements : %d ",theGeometry->theElements->nElem);
+            glColor3f(1.0,0.0,0.0); glfemMessage(theMessage);
+        }
+        else if(option == 1 && mode == 7) {
+            glfemPlotField(theGeometry->theElements, sigmaXY);
+            glfemPlotMesh(theGeometry->theElements); 
+            sprintf(theMessage, "Number of elements : %d ",theGeometry->theElements->nElem);
+            glColor3f(1.0,0.0,0.0); glfemMessage(theMessage);
+        
         } else {
             glfemPlotField(theGeometry->theElements,normDisplacement);
             glfemPlotMesh(theGeometry->theElements); 
@@ -277,116 +258,7 @@ int main(int argc, char *argv[])
             
     glfwTerminate(); 
 
-//     int mode = 1;
-//     int domain = 0;
-//     int freezingButton = FALSE;
-//     double t, told = 0;
-//     char theMessage[MAXNAME + 5];
 
-//     GLFWwindow *window = glfemInit("EPL1110 : Project 2022-23 ");
-//     glfwMakeContextCurrent(window);
-//     // glfwSetScrollCallback(window, scroll_callback);
-//     // glfwSetMouseButtonCallback(window, mouse_button_callback);
-
-//     do {
-//         int w, h;
-//         glfwGetFramebufferSize(window, &w, &h);
-//         glfemReshapeWindows(theGeometry->theNodes, w, h);
-
-//         t = glfwGetTime();
-//         if (glfwGetKey(window, 'D') == GLFW_PRESS) { mode = 0; }
-//         if (glfwGetKey(window, 'V') == GLFW_PRESS) { mode = 1; }
-//         if (glfwGetKey(window, 'S') == GLFW_PRESS) { mode = 2; }
-//         if (glfwGetKey(window, 'X') == GLFW_PRESS) { mode = 3; }
-//         if (glfwGetKey(window, 'Y') == GLFW_PRESS) { mode = 4; }
-//         if (glfwGetKey(window, 'U') == GLFW_PRESS) { mode = 5; }
-//         if (glfwGetKey(window, 'I') == GLFW_PRESS) { mode = 6; }
-//         if (glfwGetKey(window, 'O') == GLFW_PRESS) { mode = 7; }
-//         if (glfwGetKey(window, 'P') == GLFW_PRESS) { mode = 8; }
-//         if (glfwGetKey(window, 'N') == GLFW_PRESS && freezingButton == FALSE)
-//         {
-//             domain++;
-//             freezingButton = TRUE;
-//             told = t;
-//         }
-
-//         if (t - told > 0.5) { freezingButton = FALSE; }
-//         if (mode == 1)
-//         {
-//             glfemPlotField(theGeometry->theElements, normDisplacement);
-//             glfemPlotMesh(theGeometry->theElements);
-//             sprintf(theMessage, "Number of elements : %d ", theGeometry->theElements->nElem);
-//             glColor3f(1.0, 0.0, 0.0);
-//             glfemMessage(theMessage);
-//         }
-//         else if (mode == 0)
-//         {
-//             domain = domain % theGeometry->nDomains;
-//             glfemPlotDomain(theGeometry->theDomains[domain]);
-//             sprintf(theMessage, "%s : %d ", theGeometry->theDomains[domain]->name, domain);
-//             glColor3f(1.0, 0.0, 0.0);
-//             glfemMessage(theMessage);
-//         } 
-//         else if (mode == 2)
-//         {
-//             glColor3f(1.0, 0.0, 0.0);
-//             glfemPlotSolver(theProblem->solver, theProblem->size, w, h);
-//         }
-//         else if (mode == 3)
-//         {
-//             glfemPlotField(theGeometry->theElements, forcesX);
-//             glfemPlotMesh(theGeometry->theElements); 
-//             sprintf(theMessage, "Number of elements : %d ",theGeometry->theElements->nElem);
-//             glColor3f(1.0,0.0,0.0); glfemMessage(theMessage);
-//         }
-//         else if (mode == 4)
-//         {
-//             glfemPlotField(theGeometry->theElements, forcesY);
-//             glfemPlotMesh(theGeometry->theElements); 
-//             sprintf(theMessage, "Number of elements : %d ",theGeometry->theElements->nElem);
-//             glColor3f(1.0,0.0,0.0); glfemMessage(theMessage);
-//         }
-//         // else if (mode == 5)
-//         // {
-//         //     glfemPlotField(theGeometry->theElements, sigmaXX);
-//         //     glfemPlotMesh(theGeometry->theElements); 
-//         //     sprintf(theMessage, "Number of elements : %d ",theGeometry->theElements->nElem);
-//         //     glColor3f(1.0,0.0,0.0); glfemMessage(theMessage);
-//         // }
-//         // else if (mode == 6)
-//         // {
-//         //     glfemPlotField(theGeometry->theElements, sigmaYY);
-//         //     glfemPlotMesh(theGeometry->theElements); 
-//         //     sprintf(theMessage, "Number of elements : %d ",theGeometry->theElements->nElem);
-//         //     glColor3f(1.0,0.0,0.0); glfemMessage(theMessage);
-//         // }
-//         // else if (mode == 7)
-//         // {
-//         //     glfemPlotField(theGeometry->theElements, sigmaXY);
-//         //     glfemPlotMesh(theGeometry->theElements); 
-//         //     sprintf(theMessage, "Number of elements : %d ",theGeometry->theElements->nElem);
-//         //     glColor3f(1.0,0.0,0.0); glfemMessage(theMessage);
-//         // }
-//         // else if (mode == 8)
-//         // {
-//         //     glfemPlotField(theGeometry->theElements, vonMises);
-//         //     glfemPlotMesh(theGeometry->theElements); 
-//         //     sprintf(theMessage, "Number of elements : %d ",theGeometry->theElements->nElem);
-//         //     glColor3f(1.0,0.0,0.0); glfemMessage(theMessage);
-//         // }
-//         else { printf("Mode %d not implemented\n", mode); }  
-
-//         glfwSwapBuffers(window);
-//         glfwPollEvents();
-//     } while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS && glfwWindowShouldClose(window) != 1);
-//     // Check if the ESC key was pressed or the window was closed
-
-//    free(normDisplacement);
-//     free(forcesX);
-//     free(forcesY);
-//     femElasticityFree(theProblem) ; 
-//     geoFinalize();
-//     glfwTerminate(); 
 
 
     

@@ -1215,7 +1215,9 @@ void femElasticityAssembleNeumann(femProblem *theProblem)
     double x[2], y[2], phi[2];
     int iBnd, iElem, iInteg, iEdge, i, j, d, map[2], mapU[2];
     
-    int nLocal = 2;
+    int nLocal = theSpace->n;
+    int *number = theNodes->number;
+
     double *B  = theSystem->B;
 
     for (iBnd = 0; iBnd < theProblem->nBoundaryConditions; iBnd++)
@@ -1243,10 +1245,11 @@ void femElasticityAssembleNeumann(femProblem *theProblem)
             for (j = 0; j < nLocal; j++)
             {
                 map[j] = theEdges->elem[iElem * nLocal + j];
-                mapU[j] = 2 * map[j] + shift;
                 x[j] = theNodes->X[map[j]];
                 y[j] = theNodes->Y[map[j]];
                 map[j] = theMesh->nodes->number[map[j]];
+                mapU[j] = nLocal * map[j] + shift;
+
 
             }
             

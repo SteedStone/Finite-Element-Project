@@ -16,11 +16,12 @@
      return 1;
  }
  int main(int argc, char *argv[]) {  
-    if (argc < 4) {
+    if (argc < 5) {
         printf("Usage: %s <type> <show_visualisation>\n", argv[0]);
         printf("type: 1 (TRIANGLE), 2 (HEXAGON)\n");
-        printf("show_visualisation: 0 (non), 1 (oui)\n");
+        printf("show_visualisation: 2 (non), 1 (oui)\n");
         printf("Type de maillage: 0 (Triangle) , 1 (Quadrilatère)\n");
+        printf("Grand problème: 0 (Non) , 1 (Oui)\n");
         return EXIT_FAILURE;
     }
     
@@ -28,6 +29,7 @@
     int show_visualisation_maillage = atoi(argv[2]);
     int type1 = atoi(argv[3]);
     int simple = 0;
+    int big = atoi(argv[4]);
      
  
  
@@ -43,10 +45,18 @@
          geoInitialize();
          theGeometry = geoGetGeometry();
          theGeometry->h = 11;
+         if (big) {
          theGeometry->NumberOfHexagonsInX = 9;
          theGeometry->NumberOfHexagonsInY = 5;
-         theGeometry->NumberOfTrianglesInX = 5;
-         theGeometry->NumberOfTrianglesInY = 3;
+         theGeometry->NumberOfTrianglesInX = 11;
+         theGeometry->NumberOfTrianglesInY = 7;
+         }
+            else {
+                theGeometry->NumberOfHexagonsInX = 3;
+                theGeometry->NumberOfHexagonsInY = 2;
+                theGeometry->NumberOfTrianglesInX = 5;
+                theGeometry->NumberOfTrianglesInY = 3;
+            }
          theGeometry->hexRadius = 9.0;
          theGeometry->MiddleX = (theGeometry->NumberOfHexagonsInX -1 ) * 1.5 * theGeometry->hexRadius + theGeometry->hexRadius - (-theGeometry->hexRadius) ; 
          theGeometry->MiddleY = theGeometry->NumberOfHexagonsInY * sqrt(3) * theGeometry->hexRadius - (-theGeometry->hexRadius*sqrt(3)/2) ;
@@ -66,14 +76,24 @@
         //     geoSetDomainName(124 , "Bottom");
         //  }
          if (theGeometry->hexa_triangles == 1) {
+            if (big) {
+                geoSetDomainName(181 , "Top"); // 0
+                geoSetDomainName(201 , "Bottom"); // 1
+            } else {
+                geoSetDomainName(25 , "Top"); 
+                geoSetDomainName(33 , "Bottom"); 
+            }
 
-        geoSetDomainName(25 , "Top"); // 298
-            geoSetDomainName(33 , "Bottom"); // 327
          
          } else {
+            if (big) {
             geoSetDomainName(549 , "Top"); // hexagone (9;5) = 549 , Hexagone(3;3) = 149 115
             geoSetDomainName(564 , "Bottom"); // hexagone (9;5) = 564 , Hexagone(3;3) = 158 124
-         }
+            } else {
+                geoSetDomainName(79 , "Top"); // hexagone (3;3) = 149 , Hexagone(3;3) = 149 115
+                geoSetDomainName(84 , "Bottom"); // hexagone (3;3) = 158 , Hexagone(3;3) = 158 124
+            }
+        }
          
      }
      else {
@@ -132,7 +152,7 @@
  
  
          int mode = 1; // Change mode by pressing "j", "k", "l"
-         int domain = 0;
+         int domain = 70;
          int freezingButton = FALSE;
          double t, told = 0;
          char theMessage[256];
