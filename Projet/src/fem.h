@@ -32,10 +32,11 @@
 
 
 typedef enum {FEM_TRIANGLE,FEM_QUAD,FEM_EDGE} femElementType;
-typedef enum {DIRICHLET_X,DIRICHLET_Y,NEUMANN_X,NEUMANN_Y} femBoundaryType;
+typedef enum {DIRICHLET_X,DIRICHLET_Y,NEUMANN_X,NEUMANN_Y,UNDEFINED=-1} femBoundaryType;
 typedef enum {PLANAR_STRESS,PLANAR_STRAIN,AXISYM} femElasticCase;
 typedef enum {FEM_FULL,FEM_BAND,FEM_ITER} femSolverType;
 typedef enum {FEM_NO,FEM_XNUM,FEM_YNUM} femRenumType;
+
 
 
 
@@ -130,15 +131,23 @@ typedef struct {
     femSolverType type;
     femFullSystem *local;
     void *solver;
+    int size ; 
 } femSolver;
 
 
+
 typedef struct {
-    femDomain* domain;
-    femBoundaryType type; 
-    double value;
+    femDomain *domain;
+    femBoundaryType type;
+    double value1;
+    double value2;
 } femBoundaryCondition;
 
+typedef struct {
+    femBoundaryType type;
+    double nx, ny;
+    double value1, value2;
+} femConstrainedNode;
 
 typedef struct {
     double E,nu,rho,g;
@@ -146,7 +155,6 @@ typedef struct {
     int planarStrainStress;
     int nBoundaryConditions;
     femBoundaryCondition **conditions;  
-    int *constrainedNodes; 
     double *soluce;
     double *residuals;
     femGeo *geometry;
@@ -155,6 +163,7 @@ typedef struct {
     femDiscrete *spaceEdge;
     femIntegration *ruleEdge;
     // femFullSystem *system;
+    femConstrainedNode *constrainedNodes;
 
     femSolver *solver;
     int size;
@@ -180,7 +189,7 @@ femProblem*         femElasticityCreate(femGeo* theGeometry,
     double E, double nu, double rho, double g, femElasticCase iCase , femSolverType solverType , femRenumType renumType);
 void                femElasticityFree(femProblem *theProblem);
 void                femElasticityPrint(femProblem *theProblem);
-void                femElasticityAddBoundaryCondition(femProblem *theProblem, char *nameDomain, femBoundaryType type, double value);
+void femElasticityAddBoundaryCondition(femProblem *theProblem, char *nameDomain, femBoundaryType type, double value1, double value2) ;
 void                femElasticityAssembleElements(femProblem *theProblem);
 void                femElasticityAssembleNeumann(femProblem *theProblem);
 double*             femElasticitySolve(femProblem *theProblem);
@@ -271,5 +280,19 @@ int                  femIterativeSolverConverged(femIterativeSolver *mySolver);
 
 void                 femSolverAssemble(femSolver* mySolver, double *Aloc, double *Bloc, double *Uloc,int *mapX, int *mapY, int nLoc) ;
 void                 femMeshRenumber(femMesh *theMesh, femRenumType renumType) ;
+void femSolverSystemConstrainXY(femSolver *mySolver, int node, double value)  ;
+void femBandSystemConstrain(femBandSystem *mySystem, int myNode, double myValue, int size) ;
+double femBandSystemGetA_Entry(femBandSystem *mySystem, int myRow, int myCol) ;
+int isInBand(int band, int myRow, int myCol) ; 
+double *femSolverGetB(femSolver *mySolver) ; 
+double **femSolverGetA(femSolver *mySolver) ;
+void femSolverGetResidual(femSolver *mySolver, double *residuals, double *theSoluce);
+void femFullSystemGetResidual(femFullSystem *mySystem, int size, double *residuals, double *theSoluce) ; 
+void femBandSystemGetResidual(femBandSystem *mySystem, int size, double *residuals, double *theSoluce) ;
+
+
+
+
+
 
 #endif

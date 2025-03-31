@@ -62,12 +62,11 @@ int main(int argc, char *argv[])
    
     // Initialisation du problème avec les conditions aux bords
     // ON remplit juste la structure theProblem avec les valeurs de E, nu, rho, g et le type de problème qu'on veut résoudre
-    femProblem* theProblem = femElasticityCreate(theGeometry,E,nu,rho,g,PLANAR_STRESS , FEM_FULL , FEM_NO);
+    femProblem* theProblem = femElasticityCreate(theGeometry,E,nu,rho,g,PLANAR_STRESS , FEM_FULL , FEM_YNUM);
     // femElasticityAddBoundaryCondition(theProblem,"Symmetry",DIRICHLET_X,0.0);
-    femElasticityAddBoundaryCondition(theProblem,"Bottom",DIRICHLET_X,0.0);
-    femElasticityAddBoundaryCondition(theProblem,"Bottom",DIRICHLET_Y,0.0);
+    femElasticityAddBoundaryCondition(theProblem,"Bottom",DIRICHLET_Y,0.0,0.0);
 
-    femElasticityAddBoundaryCondition(theProblem,"Top",NEUMANN_Y,-1e6);
+    femElasticityAddBoundaryCondition(theProblem,"Top",NEUMANN_Y,-1e6,-1e6);
     
     femElasticityPrint(theProblem);
     
@@ -81,6 +80,8 @@ int main(int argc, char *argv[])
     printf("fin de force") ;
 
     double *theForces = femElasticityForces(theProblem);
+
+
     
     
     double area = femElasticityIntegrate(theProblem, fun);   

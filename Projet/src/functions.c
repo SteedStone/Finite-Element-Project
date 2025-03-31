@@ -786,6 +786,43 @@ void femElasticitySigma(femProblem *theProblem, double *sigmaXX, double *sigmaYY
 }
 
 
+// void femElasticityApplyDirichlet(femProblem *theProblem, double FACTOR)
+// {
+//     femSolver *theSolver     = theProblem->solver;
+//     femGeo *theGeometry      = theProblem->geometry;
+//     femNodes *theNodes       = theGeometry->theNodes;
+
+//     int *number, renumberNode, iNode, Ux, Uy, size;
+//     double value, value_x, value_y, myValue_n, myValue_t, nx, ny, tx, ty;
+    
+//     number = theNodes->number;
+//     size   = theProblem->size;
+
+//     for (iNode = 0; iNode < theNodes->nNodes; iNode++)
+//     {
+        
+
+//         renumberNode = number[iNode];
+
+//         Ux = 2 * renumberNode;
+//         Uy = 2 * renumberNode + 1;
+
+//         if (type == DIRICHLET_X)
+//         {
+//             value = theConstrainedNode->value1;
+//             femSolverSystemConstrainXY(theSolver, Ux, value * FACTOR);
+//         }
+//         else if (type == DIRICHLET_Y)
+//         {
+//             value = theConstrainedNode->value1;
+//             femSolverSystemConstrainXY(theSolver, Uy, value * FACTOR);
+//         }
+        
+        
+//     }
+// }
+
+
 
 
 

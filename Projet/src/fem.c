@@ -9,6 +9,11 @@
 
 #include "fem.h"
 
+// Strip : BEGIN
+double **A_copy = NULL;
+double *B_copy  = NULL;
+// Strip : END
+
 femGeo theGeometry;
 
 femGeo *geoGetGeometry()                        { return &theGeometry; }
@@ -800,6 +805,48 @@ void  femFullSystemConstrain(femFullSystem *mySystem,
     B[myNode] = myValue;
 }
 
+int isInBand(int band, int myRow, int myCol) { return myCol >= myRow && myCol < myRow + band; }
+
+double femBandSystemGetA_Entry(femBandSystem *mySystem, int myRow, int myCol) { return (isInBand(mySystem->band, myRow, myCol)) ? A_copy[myRow][myCol] : 0.0; }
+
+void femBandSystemConstrain(femBandSystem *mySystem, int myNode, double myValue, int size)
+{
+    double **A, *B, A_entry;
+    int i, band;
+
+    A = mySystem->A;
+    B = mySystem->B;
+    band = mySystem->band;
+
+    for (i = 0; i < size; i++)
+    {
+        A_entry = (myNode >= i) ? femBandSystemGetA_Entry(mySystem, i, myNode) : femBandSystemGetA_Entry(mySystem, myNode, i);
+        if (A_entry != 0.0)
+        {
+            B_copy[i] -= myValue * A_entry;
+            if (myNode >= i) { A_copy[i][myNode] = 0; }
+        }
+    }
+    for (int i = 0; i < size; i++)
+    {
+        if (femBandSystemGetA_Entry(mySystem, myNode, i) != 0.0) { A_copy[myNode][i] = 0.0; }
+    }
+    
+    A_copy[myNode][myNode] = 1.0;
+    B_copy[myNode] = myValue;
+}
+
+
+void femSolverSystemConstrainXY(femSolver *mySolver, int node, double value) 
+{
+    switch (mySolver->type)
+    {
+        case FEM_FULL : femFullSystemConstrain((femFullSystem *) mySolver->solver, node, value); break;
+        case FEM_BAND : femBandSystemConstrain((femBandSystem *) mySolver->solver, node, value, mySolver->size); break;
+        default :       Error("Unexpected solver type");
+    }
+}
+
 
 femProblem *femElasticityCreate(femGeo* theGeometry, 
                   double E, double nu, double rho, double g, femElasticCase iCase  , femSolverType solverType , femRenumType renumType)
@@ -827,12 +874,18 @@ femProblem *femElasticityCreate(femGeo* theGeometry,
     theProblem->constrainedNodes = malloc(size*sizeof(int));
     theProblem->soluce = malloc(size*sizeof(double));
     theProblem->residuals = malloc(size*sizeof(double));
-    for (int i=0; i < size; i++) {
-        theProblem->constrainedNodes[i] = -1;
-        theProblem->soluce[i] = 0.0;
-        theProblem->residuals[i] = 0.0;}
+    int nNodes = theGeometry->theNodes->nNodes;
 
-
+    theProblem->constrainedNodes = (femConstrainedNode *) malloc(nNodes * sizeof(femConstrainedNode));
+    if (theProblem->constrainedNodes == NULL) { Error("Memory allocation error\n"); exit(EXIT_FAILURE); return NULL; }
+    for (int i = 0; i < nNodes; i++)
+    {
+        theProblem->constrainedNodes[i].type   = UNDEFINED;
+        theProblem->constrainedNodes[i].nx     = NAN;
+        theProblem->constrainedNodes[i].ny     = NAN;
+        theProblem->constrainedNodes[i].value2 = NAN;
+        theProblem->constrainedNodes[i].value2 = NAN;
+    }
     
     theProblem->geometry = theGeometry;  
     femMesh *theMesh = theProblem->geometry->theElements;        
@@ -888,34 +941,111 @@ void femElasticityFree(femProblem *theProblem)
     free(theProblem);
 }
     
-void femElasticityAddBoundaryCondition(femProblem *theProblem, char *nameDomain, femBoundaryType type, double value)
+void femElasticityAddBoundaryCondition(femProblem *theProblem, char *nameDomain, femBoundaryType type, double value1, double value2)
 {
     int iDomain = geoGetDomain(nameDomain);
-    if (iDomain == -1)  Error("Undefined domain :-(");
+    if (iDomain == -1) { Error("Undefined domain :-("); }
 
-    femBoundaryCondition* theBoundary = malloc(sizeof(femBoundaryCondition));
+    // This variable is only used for 'DIRICHLET_XY' and 'DIRICHLET_NT' boundary conditions. Otherwise it is ignored (set to NAN).
+
+    femBoundaryCondition *theBoundary = (femBoundaryCondition *) malloc(sizeof(femBoundaryCondition));
+    if (theBoundary == NULL) { Error("Memory allocation error\n"); exit(EXIT_FAILURE); return; }
     theBoundary->domain = theProblem->geometry->theDomains[iDomain];
-    theBoundary->value = value;
-    theBoundary->type = type;
+    theBoundary->value1 = value1;
+    theBoundary->value2 = value2;
+    theBoundary->type   = type;
     theProblem->nBoundaryConditions++;
-    int size = theProblem->nBoundaryConditions;
-    
+    int nBoundaryConditions = theProblem->nBoundaryConditions;
+
     if (theProblem->conditions == NULL)
-        theProblem->conditions = malloc(size*sizeof(femBoundaryCondition*));
-    else 
-        theProblem->conditions = realloc(theProblem->conditions, size*sizeof(femBoundaryCondition*));
-    theProblem->conditions[size-1] = theBoundary;
-    
-    int shift=-1;
-    if (type == DIRICHLET_X)  shift = 0;      
-    if (type == DIRICHLET_Y)  shift = 1;  
-    if (shift == -1) return; 
-    int *elem = theBoundary->domain->elem;
-    int nElem = theBoundary->domain->nElem;
-    for (int e=0; e<nElem; e++) {
-        for (int i=0; i<2; i++) {
-            int node = theBoundary->domain->mesh->elem[2*elem[e]+i];
-            theProblem->constrainedNodes[2*node+shift] = size-1; }}    
+    {
+        theProblem->conditions = (femBoundaryCondition **) malloc(nBoundaryConditions * sizeof(femBoundaryCondition *));
+        if (theProblem->conditions == NULL) { Error("Memory allocation error\n"); exit(EXIT_FAILURE); return; }
+    }
+
+    femNodes *theNodes = theProblem->geometry->theNodes;
+    if (type == DIRICHLET_X || type == DIRICHLET_Y )
+    {
+        // Ensure that there is only one Dirichlet boundary condition per domain
+        for (int i = 0; i < nBoundaryConditions - 1; i++)
+        {
+            if (theProblem->conditions[i]->domain != theBoundary->domain) { continue; }
+            femBoundaryType type_i = theProblem->conditions[i]->type;
+            if (type_i == DIRICHLET_X || type_i == DIRICHLET_Y )
+            {
+                printf("\nTrying to set a second Dirichlet boundary condition on domain \"%s\"", nameDomain);
+                Error("Only one Dirichlet boundary condition is allowed per domain");
+            }
+        }
+
+        femDomain *theDomain = theProblem->geometry->theDomains[iDomain];
+        int *elem = theDomain->elem;
+        int nElem = theDomain->nElem;
+        femConstrainedNode constrainedNode;
+        constrainedNode.type   = type;
+        constrainedNode.value1 = value1;
+        constrainedNode.value2 = value2;
+        constrainedNode.nx     = NAN;
+        constrainedNode.ny     = NAN;
+        if (type == DIRICHLET_X || type == DIRICHLET_Y)
+        {
+            for (int iElem = 0; iElem < nElem; iElem++)
+            {
+                for (int i = 0; i < theProblem->spaceEdge->n; i++)
+                {
+                    int node = theDomain->mesh->elem[theProblem->spaceEdge->n * elem[iElem] + i];
+                    theProblem->constrainedNodes[node] = constrainedNode;
+                }
+            }
+        }
+        else
+        {
+            // Need to compute normals
+            int nNodes = theNodes->nNodes;
+            double *NX = (double *) malloc(nNodes * sizeof(double));
+            double *NY = (double *) malloc(nNodes * sizeof(double));
+            if (NX == NULL) { Error("Memory allocation error\n"); exit(EXIT_FAILURE); return; }
+            if (NY == NULL) { Error("Memory allocation error\n"); exit(EXIT_FAILURE); return; }
+            for (int iElem = 0; iElem < nElem; iElem++)
+            {
+                int node0 = theDomain->mesh->elem[2 * elem[iElem] + 0];
+                int node1 = theDomain->mesh->elem[2 * elem[iElem] + 1];
+                NX[node0] = 0; NY[node0] = 0;
+                NX[node1] = 0; NY[node1] = 0;
+            }
+            for (int iElem = 0; iElem < nElem; iElem++)
+            {
+                int node0 = theDomain->mesh->elem[2 * elem[iElem] + 0];
+                int node1 = theDomain->mesh->elem[2 * elem[iElem] + 1];
+                double tx = theNodes->X[node1] - theNodes->X[node0];
+                double ty = theNodes->Y[node1] - theNodes->Y[node0];
+                double nx = ty;
+                double ny = -tx;
+                NX[node0] += nx; NY[node0] += ny;
+                NX[node1] += nx; NY[node1] += ny;
+            }
+
+            for (int iElem = 0; iElem < nElem; iElem++)
+            {
+                for (int i = 0; i < 2; i++)
+                {
+                    int node = theDomain->mesh->elem[2 * elem[iElem] + i];
+                    double nx = NX[node];
+                    double ny = NY[node];
+                    double norm = hypot(nx, ny);
+                    theProblem->constrainedNodes[node] = constrainedNode;
+                    theProblem->constrainedNodes[node].nx = nx / norm;
+                    theProblem->constrainedNodes[node].ny = ny / norm;
+                }
+            }
+            free(NX); NX = NULL;
+            free(NY); NY = NULL;
+        }
+    }
+
+    theProblem->conditions = (femBoundaryCondition **) realloc(theProblem->conditions, nBoundaryConditions * sizeof(femBoundaryCondition *));
+    if (theProblem->conditions == NULL) { Error("Memory allocation error\n"); exit(EXIT_FAILURE); return; }
+    theProblem->conditions[nBoundaryConditions - 1] = theBoundary;
 }
 
 void femElasticityPrint(femProblem *theProblem)  
@@ -934,12 +1064,13 @@ void femElasticityPrint(femProblem *theProblem)
     printf("   Boundary conditions : \n");
     for(int i=0; i < theProblem->nBoundaryConditions; i++) {
           femBoundaryCondition *theCondition = theProblem->conditions[i];
-          double value = theCondition->value;
-          printf("  %20s :",theCondition->domain->name);
-          if (theCondition->type==DIRICHLET_X)  printf(" imposing %9.2e as the horizontal displacement  \n",value);
-          if (theCondition->type==DIRICHLET_Y)  printf(" imposing %9.2e as the vertical displacement  \n",value); 
-          if (theCondition->type==NEUMANN_X)    printf(" imposing %9.2e as the horizontal force desnity \n",value); 
-          if (theCondition->type==NEUMANN_Y)    printf(" imposing %9.2e as the vertical force density \n",value);}
+        //   double value = theCondition->value;
+        //   printf("  %20s :",theCondition->domain->name);
+        //   if (theCondition->type==DIRICHLET_X)  printf(" imposing %9.2e as the horizontal displacement  \n",value);
+        //   if (theCondition->type==DIRICHLET_Y)  printf(" imposing %9.2e as the vertical displacement  \n",value); 
+        //   if (theCondition->type==NEUMANN_X)    printf(" imposing %9.2e as the horizontal force desnity \n",value); 
+        //   if (theCondition->type==NEUMANN_Y)    printf(" imposing %9.2e as the vertical force density \n",value);
+        }
     printf(" ======================================================================================= \n\n");
 }
 
@@ -1109,10 +1240,7 @@ void geoMeshGenerate() {
     }
 }
 
-// Strip : BEGIN
-double **A_copy = NULL;
-double *B_copy  = NULL;
-// Strip : END
+
 
 void femElasticityAssembleElements(femProblem *theProblem)
 {
@@ -1205,75 +1333,89 @@ void femElasticityAssembleElements(femProblem *theProblem)
 
 void femElasticityAssembleNeumann(femProblem *theProblem)
 {
-    femFullSystem  *theSystem   = theProblem->solver->solver;
-    femIntegration *theRule     = theProblem->ruleEdge;
-    femDiscrete    *theSpace    = theProblem->spaceEdge;
-    femGeo         *theGeometry = theProblem->geometry;
-    femNodes       *theNodes    = theGeometry->theNodes;
-    femMesh        *theEdges    = theGeometry->theEdges;
+    femSolver *theSolver     = theProblem->solver;
+    femIntegration *theRule  = theProblem->ruleEdge;
+    femDiscrete *theSpace    = theProblem->spaceEdge;
+    femGeo *theGeometry = theProblem->geometry;
+    femNodes *theNodes       = theGeometry->theNodes;
+    femMesh *theEdges        = theGeometry->theEdges;
 
-    double x[2], y[2], phi[2];
-    int iBnd, iElem, iInteg, iEdge, i, j, d, map[2], mapU[2];
-    
-    int nLocal = theSpace->n;
+    int nLocal  = theSpace->n;
     int *number = theNodes->number;
+    
+    double xLoc, x[nLocal], y[nLocal], phi[nLocal], tx, ty, nx, ny, norm_n, norm_t;
+    double **A, *B, value, dx, dy, length, jac, finalValue, xsi, weight, weightedJac;
+    int iBnd, iElem, iInteg, iEdge, i, j, shift, map[nLocal], mapU[nLocal];
 
-    double *B  = theSystem->B;
+    femBoundaryCondition *theCondition;
+    femBoundaryType type;
+    femDomain *domain;
+
+    A = femSolverGetA(theSolver);
+    B = femSolverGetB(theSolver);
 
     for (iBnd = 0; iBnd < theProblem->nBoundaryConditions; iBnd++)
     {
-        // Strip : BEGIN
-        femBoundaryCondition *theCondition = theProblem->conditions[iBnd];
-        femBoundaryType type = theCondition->type;
-        femDomain *domain = theCondition->domain;
-        double value = theCondition->value;
-        femMesh *theMesh = theProblem->geometry->theElements;
-
-
-        // Skip Dirichlet boundary conditions
-        if (type == DIRICHLET_X || type == DIRICHLET_Y) { continue; }
-
-        int shift = (type == NEUMANN_X) ? 0 : 1;
+        theCondition = theProblem->conditions[iBnd];
+        type = theCondition->type;
+        domain = theCondition->domain;
+        value = theCondition->value1 ;
         
-        // Iterate over the elements of the domain
+        shift = (type == NEUMANN_Y) ? 1 : 0;
+        if (type == DIRICHLET_X || type == DIRICHLET_Y ) { continue; }
+
         for (iEdge = 0; iEdge < domain->nElem; iEdge++)
         {
-            // Get the element index (mapping)
             iElem = domain->elem[iEdge];
 
-            // Mapping local nodes to global nodes
             for (j = 0; j < nLocal; j++)
             {
                 map[j] = theEdges->elem[iElem * nLocal + j];
                 x[j] = theNodes->X[map[j]];
                 y[j] = theNodes->Y[map[j]];
-                map[j] = theMesh->nodes->number[map[j]];
+                map[j] = number[map[j]];
                 mapU[j] = nLocal * map[j] + shift;
-
-
             }
-            
-            // Compute the constant Jacobian
-            double dx = x[1] - x[0];
-            double dy = y[1] - y[0];
-            double length = sqrt(dx * dx + dy * dy);
-            double jac = length / 2;
 
-            // Iterate over the integration points
+            dx = x[1] - x[0]; dy = y[1] - y[0];
+            length = sqrt(dx * dx + dy * dy);
+            jac = length / 2.0;
+
+            // Animation
+            finalValue = value;
+            
             for (iInteg = 0; iInteg < theRule->n; iInteg++)
             {
-                // Get the integration point coordinates and weight
-                double xsi    = theRule->xsi[iInteg];
-                double weight = theRule->weight[iInteg];
+                xsi    = theRule->xsi[iInteg];
+                weight = theRule->weight[iInteg];
 
-                // Compute the shape functions
+                weightedJac = jac * weight;
+
                 femDiscretePhi(theSpace, xsi, phi);
 
-                // Compute the forces and add them to the load vector
-                for (i = 0; i < theSpace->n; i++) { B[mapU[i]] += phi[i] * value * jac * weight; }
+                if (theProblem->planarStrainStress == PLANAR_STRAIN || theProblem->planarStrainStress == PLANAR_STRESS)
+                {
+                    if (type == NEUMANN_X || type == NEUMANN_Y)
+                    {
+                        for (i = 0; i < nLocal; i++) { B[mapU[i]] += phi[i] * finalValue * weightedJac; }
+                    }
+                    
+                    
+                }
+                else if (theProblem->planarStrainStress == AXISYM)
+                {
+                    xLoc = 0.0;
+                    for (i = 0; i < nLocal; i++) { xLoc += phi[i] * x[i]; }
+
+                    if (type == NEUMANN_X || type == NEUMANN_Y)
+                    {
+                        for (i = 0; i < nLocal; i++) { B[mapU[i]] += phi[i] * finalValue * weightedJac * xLoc; }
+                    }
+                    
+                }
+                else { Error("Unexpected planarStrainStress value !"); }
             }
         }
-        // Strip : END
     }
 }
 
@@ -1281,6 +1423,8 @@ void femElasticityAssembleNeumann(femProblem *theProblem)
 double *femElasticitySolve(femProblem *theProblem)
 {
     femFullSystem *theSystem = theProblem->solver->solver;
+    femSolver * theSolver = theProblem->solver ;
+
     // printf("Solving the system...\n");
     // printf("Size of the system: %d\n", theSystem->size);
 
@@ -1317,15 +1461,36 @@ double *femElasticitySolve(femProblem *theProblem)
         for (int j = 0; j < size; j++) { A_copy[i][j] = theSystem->A[i][j]; }
         B_copy[i] = theSystem->B[i];
     }
+    // A_copy = femSolverGetA(theSolver) ; 
+    // B_copy = femSolverGetB(theSolver) ;
+    femGeo *theGeometr = theProblem->geometry;
+    femNodes *theNode       = theGeometr->theNodes;
 
+    int *number, renumberNode, iNode, Ux, Uy;
+    double value, value_x, value_y, myValue_n, myValue_t, nx, ny, tx, ty;
+    
+    number = theNode->number;
     // Apply Dirichlet boundary conditions (costraints the nodes)
-    int *theConstrainedNodes = theProblem->constrainedNodes;
-    for (int i = 0; i < size; i++)
+    for (iNode = 0; iNode < theNode->nNodes; iNode++)
     {
-        if (theConstrainedNodes[i] != -1)
+        femConstrainedNode *theConstrainedNode = &theProblem->constrainedNodes[iNode];
+        if (theConstrainedNode->type == UNDEFINED) { continue; }
+        femBoundaryType type = theConstrainedNode->type;
+
+        renumberNode = number[iNode];
+
+        Ux = 2 * renumberNode;
+        Uy = 2 * renumberNode + 1;
+
+        if (type == DIRICHLET_X)
         {
-            double value = theProblem->conditions[theConstrainedNodes[i]]->value;
-            femFullSystemConstrain(theSystem, i, value);
+            value = theConstrainedNode->value1;
+            femSolverSystemConstrainXY(theSolver, Ux, value );
+        }
+        else if (type == DIRICHLET_Y)
+        {
+            value = theConstrainedNode->value1;
+            femSolverSystemConstrainXY(theSolver, Uy, value );
         }
     }
 
@@ -1333,8 +1498,6 @@ double *femElasticitySolve(femProblem *theProblem)
     // femFullSystemEliminate(theProblem->solver);
     femSolverEliminate(theProblem->solver);
     // memcpy(theProblem->soluce, theSystem->B, theSystem->size * sizeof(double));
-    femNodes *theNodes = theProblem->geometry->theNodes;
-    int *number = theNodes->number;
 
     for (int i = 0; i < theProblem->size/2; i++){
         theProblem->soluce[2*i] += theSystem->B[2*number[i]+0];
@@ -1345,6 +1508,27 @@ double *femElasticitySolve(femProblem *theProblem)
     return theProblem->soluce;
 }
 // Strip : END
+
+double **femSolverGetA(femSolver *mySolver)
+{
+    switch (mySolver->type)
+    {  
+        case FEM_FULL : return ((femFullSystem *) mySolver->solver)->A;
+        case FEM_BAND : return ((femBandSystem *) mySolver->solver)->A;
+        default :       Error("Unexpected solver type");
+    }
+}
+
+
+double *femSolverGetB(femSolver *mySolver)
+{
+    switch (mySolver->type)
+    {
+        case FEM_FULL : return ((femFullSystem *) mySolver->solver)->B;
+        case FEM_BAND : return ((femBandSystem *) mySolver->solver)->B;
+        default :       Error("Unexpected solver type");
+    }
+}
 
 double *femSolverEliminate(femSolver *mySolver)
 {
@@ -1361,6 +1545,7 @@ double *femElasticityForces(femProblem *theProblem)
 {
     double *residuals = theProblem->residuals;
     double *soluce    = theProblem->soluce;
+    femSolver *theSolver = theProblem->solver ; 
     int size = theProblem->size;
 
     // Allocate memory for residuals if not already done
@@ -1373,11 +1558,11 @@ double *femElasticityForces(femProblem *theProblem)
     Compute residuals: R = A * U - B where A and B are the system matrix
     and load vector before applying Dirichlet boundary conditions.
     */
-    for (int i = 0; i < size; i++)
-    {
-        for (int j = 0; j < size; j++) { residuals[i] += A_copy[i][j] * soluce[j]; }
-        residuals[i] -= B_copy[i];
-    }
+    
+    femSolverGetResidual(theSolver, residuals, soluce);
+
+
+    
 
     // Free memory allocated for the copy of the stiffness matrix A and the load vector B
     for (int i = 0; i < size; i++) { free(A_copy[i]); A_copy[i] = NULL;}
@@ -1388,7 +1573,45 @@ double *femElasticityForces(femProblem *theProblem)
     return residuals;
 }
 // Strip : END
+void femSolverGetResidual(femSolver *mySolver, double *residuals, double *theSoluce)
+{
+    switch (mySolver->type)
+    {
+        case FEM_FULL : femFullSystemGetResidual((femFullSystem *) mySolver->solver, mySolver->size, residuals, theSoluce); break;
+        case FEM_BAND : femBandSystemGetResidual((femBandSystem *) mySolver->solver, mySolver->size, residuals, theSoluce); break;
+        default :       Error("Unexpected solver type");
+    }
+}
 
+void femFullSystemGetResidual(femFullSystem *mySystem, int size, double *residuals, double *theSoluce)
+{
+    for (int i = 0; i < size; i++)
+    {
+        for (int j = 0; j < size; j++) { residuals[i] += A_copy[i][j] * theSoluce[j]; }
+        residuals[i] -= B_copy[i];
+    }
+}
+
+void femBandSystemGetResidual(femBandSystem *mySystem, int size, double *residuals, double *theSoluce)
+{
+    double **A, *B, A_ij;
+    int band, start, end, i, j;
+
+    
+    band = mySystem->band;
+
+    for (i = 0; i < size; i++)
+    {
+        start = (i - band > 0) ? i - band : 0;
+        end = (i + band < size) ? i + band : size;
+        for (j = start; j < end; j++)
+        {
+            A_ij = (j >= i) ? femBandSystemGetA_Entry(mySystem, i, j) : femBandSystemGetA_Entry(mySystem, j, i);
+            residuals[i] += A_ij * theSoluce[j];
+        }
+        residuals[i] -= B[i];
+    }
+}
 
 
 femSolver *femSolverCreate(int sizeLoc)
@@ -1403,6 +1626,7 @@ femSolver *femSolverFullCreate(int size, int sizeLoc)
     femSolver *mySolver = femSolverCreate(sizeLoc);
     mySolver->type = FEM_FULL;
     mySolver->solver = (femSolver *)femFullSystemCreate(size);
+    mySolver->size = size;
     return(mySolver);
 }
 femSolver *femSolverBandCreate(int size, int sizeLoc, int band)
@@ -1410,6 +1634,7 @@ femSolver *femSolverBandCreate(int size, int sizeLoc, int band)
     femSolver *mySolver = femSolverCreate(sizeLoc);
     mySolver->type = FEM_BAND;
     mySolver->solver = (femSolver *)femBandSystemCreate(size,band);
+    mySolver->size = size;
     return(mySolver);
 }
 
@@ -1418,6 +1643,7 @@ femSolver *femSolverIterativeCreate(int size, int sizeLoc)
     femSolver *mySolver = femSolverCreate(sizeLoc);
     mySolver->type = FEM_ITER;
     mySolver->solver = (femSolver *)femIterativeSolverCreate(size);
+    mySolver->size = size;
     return(mySolver);
 }
 void femFullSystemAssemble(femFullSystem *mySystem, 
@@ -1754,6 +1980,10 @@ femIterativeSolver *femIterativeSolverCreate(int size)
     mySolver->X = mySolver->R + size*3;       
     mySolver->size = size;
     femIterativeSolverInit(mySolver);
+    if (!mySolver->R ) {
+        fprintf(stderr, "Erreur d'allocation des vecteurs du solveur\n");
+        exit(EXIT_FAILURE);
+    }
     return(mySolver);
 }
 
