@@ -59,14 +59,17 @@ int main(int argc, char *argv[])
     double nu  = 0.3;
     double rho = 7.85e3;  
     double g   = 9.81;
-   
+    
+    
     // Initialisation du problème avec les conditions aux bords
     // ON remplit juste la structure theProblem avec les valeurs de E, nu, rho, g et le type de problème qu'on veut résoudre
-    femProblem* theProblem = femElasticityCreate(theGeometry,E,nu,rho,g,PLANAR_STRESS , FEM_FULL , FEM_YNUM);
+    femProblem* theProblem = femElasticityCreate(theGeometry,E,nu,rho,g,PLANAR_STRESS , FEM_FULL , FEM_NO);
     // femElasticityAddBoundaryCondition(theProblem,"Symmetry",DIRICHLET_X,0.0);
-    femElasticityAddBoundaryCondition(theProblem,"Bottom",DIRICHLET_Y,0.0,0.0);
+    femElasticityAddBoundaryCondition(theProblem,"Bottom",DIRICHLET_Y,0.0);
+    femElasticityAddBoundaryCondition(theProblem,"Bottom",DIRICHLET_X,0.0);
 
-    femElasticityAddBoundaryCondition(theProblem,"Top",NEUMANN_Y,-1e6,-1e6);
+
+    femElasticityAddBoundaryCondition(theProblem,"Top",NEUMANN_Y,-1e6);
     
     femElasticityPrint(theProblem);
     
@@ -77,9 +80,10 @@ int main(int argc, char *argv[])
     
 
     double *theSoluce = femElasticitySolve(theProblem);
-    printf("fin de force") ;
 
     double *theForces = femElasticityForces(theProblem);
+
+    
 
 
     
@@ -109,10 +113,14 @@ int main(int argc, char *argv[])
         theNodes->Y[i] += theSoluce[2*i+1]*deformationFactor;
         normDisplacement[i] = sqrt(theSoluce[2*i+0]*theSoluce[2*i+0] + 
                                 theSoluce[2*i+1]*theSoluce[2*i+1]);
-        forcesX[i] = theForces[2*i+0];
-        forcesY[i] = theForces[2*i+1]; }
+        forcesX[i] = theForces[2 * i + 0];
+        forcesY[i] = theForces[2 * i + 1];
+         }
+    int nNodes = theNodes->nNodes;
+
     
     
+    // N'oublie pas de libérer le tableau inverse
 
     double hMin = femMin(normDisplacement,theNodes->nNodes);  
     double hMax = femMax(normDisplacement,theNodes->nNodes);  
@@ -131,7 +139,6 @@ int main(int argc, char *argv[])
     printf(" ==== Global vertical force         : %14.7e [N] \n",theGlobalForce[1]);
     printf(" ==== Weight                        : %14.7e [N] \n", area * rho * g);
     
-    int nNodes = theNodes->nNodes;
     double *sigmaXX = (double *) malloc(nNodes * sizeof(double));
     double *sigmaYY = (double *) malloc(nNodes * sizeof(double));
     double *sigmaXY = (double *) malloc(nNodes * sizeof(double));

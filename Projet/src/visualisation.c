@@ -117,12 +117,12 @@
         printf("Simulation avec force Top = %.1e N\n", F_top);
 
         // Créer le problème FEM pour cette valeur de force
-        femProblem* theProblem = femElasticityCreate(theGeometry, E, nu, rho, g, PLANAR_STRESS, FEM_FULL, FEM_NO);
+        femProblem* theProblem = femElasticityCreate(theGeometry, E, nu, rho, g, PLANAR_STRESS, FEM_FULL, FEM_XNUM);
         // Conditions aux limites :
-        femElasticityAddBoundaryCondition(theProblem, "Bottom", DIRICHLET_X, 0.0 ,0.0);
-        femElasticityAddBoundaryCondition(theProblem, "Bottom", DIRICHLET_Y, 0.0,0.0);
+        femElasticityAddBoundaryCondition(theProblem, "Bottom", DIRICHLET_X, 0.0 );
+        femElasticityAddBoundaryCondition(theProblem, "Bottom", DIRICHLET_Y, 0.0);
         // Force appliquée sur le bord supérieur (négative pour une force vers le bas)
-        femElasticityAddBoundaryCondition(theProblem, "Top", NEUMANN_Y, -F_top , -F_top);
+        femElasticityAddBoundaryCondition(theProblem, "Top", NEUMANN_Y, -F_top );
 
         femElasticityPrint(theProblem);
 
