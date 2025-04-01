@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
     
     // Initialisation du problème avec les conditions aux bords
     // ON remplit juste la structure theProblem avec les valeurs de E, nu, rho, g et le type de problème qu'on veut résoudre
-    femProblem* theProblem = femElasticityCreate(theGeometry,E,nu,rho,g,PLANAR_STRESS , FEM_FULL , FEM_NO);
+    femProblem* theProblem = femElasticityCreate(theGeometry,E,nu,rho,g,PLANAR_STRESS , FEM_BAND , FEM_YNUM);
     // femElasticityAddBoundaryCondition(theProblem,"Symmetry",DIRICHLET_X,0.0);
     femElasticityAddBoundaryCondition(theProblem,"Bottom",DIRICHLET_Y,0.0);
     femElasticityAddBoundaryCondition(theProblem,"Bottom",DIRICHLET_X,0.0);
@@ -109,12 +109,12 @@ int main(int argc, char *argv[])
     femMesh *theMesh = theProblem->geometry->theElements;
     int *number = theMesh->nodes->number;
     for (int i=0; i<theNodes->nNodes; i++){
-        theNodes->X[i] += theSoluce[2*i+0]*deformationFactor;
-        theNodes->Y[i] += theSoluce[2*i+1]*deformationFactor;
-        normDisplacement[i] = sqrt(theSoluce[2*i+0]*theSoluce[2*i+0] + 
-                                theSoluce[2*i+1]*theSoluce[2*i+1]);
-        forcesX[i] = theForces[2 * i + 0];
-        forcesY[i] = theForces[2 * i + 1];
+        theNodes->X[i] += theSoluce[2*number[i]+0]*deformationFactor;
+        theNodes->Y[i] += theSoluce[2*number[i]+1]*deformationFactor;
+        normDisplacement[i] = sqrt(theSoluce[2*number[i]+0]*theSoluce[2*number[i]+0] + 
+                                theSoluce[2*number[i]+1]*theSoluce[2*number[i]+1]);
+        forcesX[i] = theForces[2 * number[i] + 0];
+        forcesY[i] = theForces[2 * number[i] + 1];
          }
     int nNodes = theNodes->nNodes;
 

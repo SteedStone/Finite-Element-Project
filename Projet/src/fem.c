@@ -806,7 +806,7 @@ void _e1c0_dphidx(double xsi, double *dphidxsi)
         return value;
     
     }
-    
+
      double *femElasticitySolve(femProblem *theProblem) {
          femFullSystem *theSystem = theProblem->solver->solver;
          femSolver *theSolver = theProblem->solver;
@@ -841,8 +841,9 @@ void _e1c0_dphidx(double xsi, double *dphidxsi)
          }
          femSolverEliminate(theProblem->solver);
          for (int i = 0; i < theProblem->size / 2; i++) {
-             theProblem->soluce[2 * i] += theSystem->B[2 * number[i] + 0];
-             theProblem->soluce[2 * i + 1] += theSystem->B[2 * number[i] + 1];
+        
+             theProblem->soluce[2 * i] += theSystem->B[2 * i + 0];
+             theProblem->soluce[2 * i + 1] += theSystem->B[2 * i + 1];
          }
          return theProblem->soluce;
      }
