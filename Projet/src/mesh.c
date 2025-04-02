@@ -87,7 +87,7 @@
          
          } else {
             if (big) {
-            geoSetDomainName(549 , "Top"); // hexagone (9;5) = 549 , Hexagone(3;3) = 149 115
+            geoSetDomainName(547 , "Top"); // hexagone (9;5) = 549 , Hexagone(3;3) = 149 115
             geoSetDomainName(564 , "Bottom"); // hexagone (9;5) = 564 , Hexagone(3;3) = 158 124
             } else {
                 geoSetDomainName(79 , "Top"); // hexagone (3;3) = 149 , Hexagone(3;3) = 149 115
@@ -152,7 +152,7 @@
  
  
          int mode = 1; // Change mode by pressing "j", "k", "l"
-         int domain = 70;
+         int domain = 530;
          int freezingButton = FALSE;
          double t, told = 0;
          char theMessage[256];

@@ -639,6 +639,7 @@ void femElasticitySigma(femProblem *theProblem, double *sigmaXX, double *sigmaYY
     int iElem, iInteg, iEdge, i, j, map[nLocal], nNodes;
 
     nNodes    = theNodes->nNodes;
+    int* number = theNodes->number;
     theSoluce = theProblem->soluce;    
     theSolver = femSolverFullCreate(nNodes , theProblem->sizeLoc);
 
@@ -668,8 +669,9 @@ void femElasticitySigma(femProblem *theProblem, double *sigmaXX, double *sigmaYY
             map[i] = theMesh->elem[iElem * nLocal + i];
             x[i] = theNodes->X[map[i]];
             y[i] = theNodes->Y[map[i]];
-            u[i] = theSoluce[2 * map[i]];
-            v[i] = theSoluce[2 * map[i] + 1];
+            u[i] = theSoluce[2 * map[number[i]]];
+            v[i] = theSoluce[2 * map[number[i]] + 1];
+
         }
 
         for (iInteg = 0; iInteg < theRule->n; iInteg++)

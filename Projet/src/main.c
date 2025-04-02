@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
 
 
    
-    double deformationFactor = 300.0; // 5000.0 pour hexa et 300 pour triangle
+    double deformationFactor = 5000.0; // 5000.0 pour hexa et 300 pour triangle
     
     femMesh *theMesh = theProblem->geometry->theElements;
     int *number = theMesh->nodes->number;
@@ -220,7 +220,7 @@ int main(int argc, char *argv[])
         if (glfwGetKey(window, 'K') == GLFW_PRESS) { mode = 5; }
         if (glfwGetKey(window, 'L') == GLFW_PRESS) { mode = 6; }
         if (glfwGetKey(window, 'M') == GLFW_PRESS) { mode = 7; }
-        if (glfwGetKey(window, 'T') == GLFW_PRESS) {glfemPlotFailureNodes(theGeometry->theNodes, sigmaXX, sigmaYY, sigmaXY, 1); }
+        if (glfwGetKey(window, 'T') == GLFW_PRESS) {glfemPlotFailureNodes(theGeometry->theNodes, sigmaXX, sigmaYY, sigmaXY, 230e6); }
 
         if(option == 1 && mode == 3) {
             glfemPlotField(theGeometry->theElements, forcesX);

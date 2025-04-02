@@ -1759,7 +1759,7 @@ double *femIterativeSolverEliminate(femIterativeSolver *mySolver)
 
 void glfemPlotFailureNodes(femNodes *nodes, double *sigmaXX, double *sigmaYY, double *sigmaXY, double sigma_max){
     glColor3f(1.0, 0.0, 0.0); 
-    glLineWidth(5);
+    glLineWidth(1);
     // Taille de la croix (en unités d'écran)
     double crossSize = 0.002;
 
