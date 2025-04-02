@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
     
     // Initialisation du problème avec les conditions aux bords
     // ON remplit juste la structure theProblem avec les valeurs de E, nu, rho, g et le type de problème qu'on veut résoudre
-    femProblem* theProblem = femElasticityCreate(theGeometry,E,nu,rho,g,PLANAR_STRESS , FEM_BAND , FEM_YNUM);
+    femProblem* theProblem = femElasticityCreate(theGeometry,E,nu,rho,g,PLANAR_STRESS , FEM_BAND , FEM_NO);
     // femElasticityAddBoundaryCondition(theProblem,"Symmetry",DIRICHLET_X,0.0);
     femElasticityAddBoundaryCondition(theProblem,"Bottom",DIRICHLET_Y,0.0);
     femElasticityAddBoundaryCondition(theProblem,"Bottom",DIRICHLET_X,0.0);
@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
 
 
    
-    double deformationFactor = 5000.0; // 5000.0 pour hexa et 300 pour triangle
+    double deformationFactor = 300.0; // 5000.0 pour hexa et 300 pour triangle
     
     femMesh *theMesh = theProblem->geometry->theElements;
     int *number = theMesh->nodes->number;
@@ -189,9 +189,9 @@ int main(int argc, char *argv[])
             renumType = newRenumType;
             femElasticityFree(theProblem);
             theProblem = femElasticityCreate(theGeometry,E,nu,rho,g,PLANAR_STRESS , solverType , renumType);
-            // femElasticityAddBoundaryCondition(theProblem,"Bottom",DIRICHLET_X,0.0);
-            // femElasticityAddBoundaryCondition(theProblem,"Bottom",DIRICHLET_Y,0.0);
-            // femElasticityAddBoundaryCondition(theProblem,"Top",NEUMANN_Y,-1e6);
+            femElasticityAddBoundaryCondition(theProblem,"Bottom",DIRICHLET_X,0.0);
+            femElasticityAddBoundaryCondition(theProblem,"Bottom",DIRICHLET_Y,0.0);
+            femElasticityAddBoundaryCondition(theProblem,"Top",NEUMANN_Y,-1e6);
             theMesh = theProblem->geometry->theElements;
             clock_t tic = clock();
             do {
@@ -220,6 +220,7 @@ int main(int argc, char *argv[])
         if (glfwGetKey(window, 'K') == GLFW_PRESS) { mode = 5; }
         if (glfwGetKey(window, 'L') == GLFW_PRESS) { mode = 6; }
         if (glfwGetKey(window, 'M') == GLFW_PRESS) { mode = 7; }
+        if (glfwGetKey(window, 'T') == GLFW_PRESS) {glfemPlotFailureNodes(theGeometry->theNodes, sigmaXX, sigmaYY, sigmaXY, 1); }
 
         if(option == 1 && mode == 3) {
             glfemPlotField(theGeometry->theElements, forcesX);

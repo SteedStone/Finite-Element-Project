@@ -102,9 +102,9 @@
      glfwMakeContextCurrent(window);
  
      // Variation de la force sur le bord supérieur de 1e3 N à 5e3 N
-     double F_top_start = 1e5;
-     double F_top_end   = 1e6;
-     double F_top_step  = 2e4; // incréments de 200 N
+     double F_top_start = 100000;
+     double F_top_end   = 200000;
+     double F_top_step  = 20000; // incréments de 200 N
      int frameCounter = 0;
      
     double *stressValues = malloc(theNodes->nNodes * sizeof(double));
@@ -117,7 +117,7 @@
         printf("Simulation avec force Top = %.1e N\n", F_top);
 
         // Créer le problème FEM pour cette valeur de force
-        femProblem* theProblem = femElasticityCreate(theGeometry, E, nu, rho, g, PLANAR_STRESS, FEM_FULL, FEM_XNUM);
+        femProblem* theProblem = femElasticityCreate(theGeometry, E, nu, rho, g, PLANAR_STRESS, FEM_BAND, FEM_XNUM);
         // Conditions aux limites :
         femElasticityAddBoundaryCondition(theProblem, "Bottom", DIRICHLET_X, 0.0 );
         femElasticityAddBoundaryCondition(theProblem, "Bottom", DIRICHLET_Y, 0.0);
@@ -128,17 +128,40 @@
 
         // Résoudre le problème pour obtenir la déformation
         double *theSoluce = femElasticitySolve(theProblem);
-        double *theForces = femElasticityForces(theProblem);
 
-        // Mettre à jour les positions des nœuds en repartant des positions initiales
-        for (int j = 0; j < theNodes->nNodes; j++) {
-            theNodes->X[j] = X0[j] + deformation_factor * theSoluce[2*j + 0];
-            theNodes->Y[j] = Y0[j] + deformation_factor * theSoluce[2*j + 1];
-            normDisplacement[j] = sqrt(theSoluce[2*j + 0] * theSoluce[2*j + 0] +
-                                        theSoluce[2*j + 1] * theSoluce[2*j + 1]);
-            forcesX[j] = theForces[2*j + 0];
-            forcesY[j] = theForces[2*j + 1];
-        }
+    double *theForces = femElasticityForces(theProblem);
+
+    
+
+
+    
+    
+    double area = femElasticityIntegrate(theProblem, fun);   
+
+    //
+    //  -4- Deformation du maillage pour le plot final
+    //      Creation du champ de la norme du deplacement
+    //
+    int normal = 0;
+
+
+    
+
+
+   
+    double deformationFactor = 300.0; // 5000.0 pour hexa et 300 pour triangle
+    
+    femMesh *theMesh = theProblem->geometry->theElements;
+    int *number = theMesh->nodes->number;
+    for (int i=0; i<theNodes->nNodes; i++){
+        theNodes->X[i] += theSoluce[2*number[i]+0]*deformationFactor;
+        theNodes->Y[i] += theSoluce[2*number[i]+1]*deformationFactor;
+        normDisplacement[i] = sqrt(theSoluce[2*number[i]+0]*theSoluce[2*number[i]+0] + 
+                                theSoluce[2*number[i]+1]*theSoluce[2*number[i]+1]);
+        forcesX[i] = theForces[2 * number[i] + 0];
+        forcesY[i] = theForces[2 * number[i] + 1];
+         }
+    int nNodes = theNodes->nNodes;
 
         // -------- Calcul de la déformation et contrainte pour toutes les lignes --------
         // On parcourt chaque élément, et pour chaque côté (ligne) de l'élément, on calcule

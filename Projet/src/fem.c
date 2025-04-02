@@ -72,9 +72,16 @@ void geoMeshGenerate() {
 
 
     femGeo* theGeometry = geoGetGeometry();
+    int numHexY = theGeometry->NumberOfHexagonsInY;
+        double hexRadius = theGeometry->hexRadius;  // Rayon de l'hexagone
     if(theGeometry->hexa_triangles == 1) {
+        
+        double distance = hexRadius * 1.1; // Distance entre les lignes
+
+        theGeometry->h = numHexY * distance - hexRadius ; 
         trianglePlot();
     } else if(theGeometry->hexa_triangles == 2) {
+        theGeometry->h = numHexY * sqrt(3) * hexRadius+ hexRadius/3 ;
         HexagonPlot();
     }else {
 
@@ -1746,5 +1753,41 @@ double *femIterativeSolverEliminate(femIterativeSolver *mySolver)
  
 
  
+#include <GL/gl.h> 
+#include <math.h> 
+#include "fem.h"
+
+void glfemPlotFailureNodes(femNodes *nodes, double *sigmaXX, double *sigmaYY, double *sigmaXY, double sigma_max){
+    glColor3f(1.0, 0.0, 0.0); 
+    glLineWidth(5);
+    // Taille de la croix (en unités d'écran)
+    double crossSize = 0.002;
+
+    glBegin(GL_LINES);
+    for (int i = 0; i < nodes->nNodes; i++) {
+        // Calcul de la contrainte équivalente (critère de von Mises)
+        double sxx = sigmaXX[i];
+        double syy = sigmaYY[i];
+        double sxy = sigmaXY[i];
+        double vonMises = sqrt(sxx * sxx - sxx * syy + syy * syy + 3.0 * sxy * sxy);
+
+        // Si la contrainte dépasse la valeur critique, tracer une croix
+        if (vonMises > sigma_max) {
+            double x = nodes->X[i];
+            double y = nodes->Y[i];
+
+            // Tracer la première diagonale
+            glVertex2d(x - crossSize, y - crossSize);
+            glVertex2d(x + crossSize, y + crossSize);
+
+            // Tracer la seconde diagonale
+            glVertex2d(x - crossSize, y + crossSize);
+            glVertex2d(x + crossSize, y - crossSize);
+        }
+    }
+    glEnd();
+
+}
+
 
  #endif

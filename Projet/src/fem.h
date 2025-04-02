@@ -311,6 +311,9 @@
  void                femErrorGmsh(int test, int line, char *file);
  void                femWarning(char *text, int line, char *file);
  
+
+ void glfemPlotFailureNodes(femNodes *nodes, double *sigmaXX, double *sigmaYY, double *sigmaXY, double sigma_max);
+
  
  #endif
  

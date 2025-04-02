@@ -4,6 +4,9 @@
 CMakeFiles/myMesh.dir/src/fem.c.o: src/fem.c \
   gmsh/gmsh-4.13.1-Linux64-sdk/include/gmshc.h \
   src/fem.h \
+  /usr/include/GL/gl.h \
+  /usr/include/GL/glext.h \
+  /usr/include/KHR/khrplatform.h \
   /usr/include/alloca.h \
   /usr/include/bits/atomic_wide_counter.h \
   /usr/include/bits/byteswap.h \
@@ -30,6 +33,8 @@ CMakeFiles/myMesh.dir/src/fem.c.o: src/fem.c \
   /usr/include/bits/pthreadtypes.h \
   /usr/include/bits/select.h \
   /usr/include/bits/stdint-intn.h \
+  /usr/include/bits/stdint-least.h \
+  /usr/include/bits/stdint-uintn.h \
   /usr/include/bits/stdio_lim.h \
   /usr/include/bits/stdlib-float.h \
   /usr/include/bits/struct_mutex.h \
@@ -59,6 +64,7 @@ CMakeFiles/myMesh.dir/src/fem.c.o: src/fem.c \
   /usr/include/bits/uintn-identity.h \
   /usr/include/bits/waitflags.h \
   /usr/include/bits/waitstatus.h \
+  /usr/include/bits/wchar.h \
   /usr/include/bits/wordsize.h \
   /usr/include/endian.h \
   /usr/include/features-time64.h \
@@ -69,6 +75,7 @@ CMakeFiles/myMesh.dir/src/fem.c.o: src/fem.c \
   /usr/include/linux/limits.h \
   /usr/include/math.h \
   /usr/include/stdc-predef.h \
+  /usr/include/stdint.h \
   /usr/include/stdio.h \
   /usr/include/stdlib.h \
   /usr/include/string.h \
@@ -79,6 +86,7 @@ CMakeFiles/myMesh.dir/src/fem.c.o: src/fem.c \
   /usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include/limits.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include/stdarg.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include/stddef.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include/stdint.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include/syslimits.h
 
 CMakeFiles/myMesh.dir/src/functions.c.o: src/functions.c \
@@ -434,23 +442,15 @@ CMakeFiles/myMesh.dir/src/glfem.c.o:
 
 /usr/include/bits/types/cookie_io_functions_t.h:
 
-/usr/include/endian.h:
-
 /usr/include/bits/stdint-uintn.h:
 
-CMakeFiles/myMesh.dir/src/mesh.c.o:
-
-/usr/include/bits/types/clockid_t.h:
-
-/usr/include/bits/atomic_wide_counter.h:
+/usr/include/endian.h:
 
 /usr/include/bits/stdio_lim.h:
 
 /usr/include/bits/types/__mbstate_t.h:
 
 src/functions.c:
-
-/usr/include/bits/wordsize.h:
 
 /usr/include/bits/math-vector.h:
 
@@ -476,19 +476,15 @@ src/fem.c:
 
 /usr/include/bits/types/sigset_t.h:
 
-/usr/include/bits/pthread_stack_min-dynamic.h:
+/usr/include/bits/stdint-intn.h:
 
-/usr/include/bits/fp-fast.h:
+/usr/include/bits/types/__fpos64_t.h:
 
-/usr/include/bits/posix1_lim.h:
+/usr/lib/libOpenGL.so.0:
 
-/usr/lib/libc.so:
+glfw/src/libglfw3.a:
 
-/usr/include/bits/types/__locale_t.h:
-
-/usr/include/bits/types/FILE.h:
-
-/usr/include/bits/flt-eval-method.h:
+/usr/include/bits/select.h:
 
 /usr/include/bits/floatn.h:
 
@@ -510,15 +506,13 @@ src/fem.c:
 
 /usr/include/bits/libm-simd-decl-stubs.h:
 
-/usr/include/bits/waitflags.h:
-
 /usr/include/bits/types/__sigset_t.h:
 
 /usr/include/bits/endian.h:
 
-/usr/include/bits/waitstatus.h:
+/usr/lib/libGL.so:
 
-/usr/include/bits/timesize.h:
+/usr/include/bits/stdint-least.h:
 
 /usr/include/alloca.h:
 
@@ -528,19 +522,21 @@ src/fem.c:
 
 src/fem.h:
 
-/usr/lib/libfreetype.so.6:
+/usr/include/GL/gl.h:
 
-/usr/include/bits/uintn-identity.h:
+/usr/include/bits/long-double.h:
 
-/usr/lib/libXau.so.6:
+CMakeFiles/myMesh.dir/src/mesh.c.o:
+
+/usr/include/bits/types/clockid_t.h:
+
+/usr/include/bits/atomic_wide_counter.h:
 
 /usr/include/bits/pthreadtypes.h:
 
-/usr/lib/Scrt1.o:
-
-/usr/include/bits/types/timer_t.h:
-
 /usr/include/stdio.h:
+
+/usr/include/GL/glext.h:
 
 /usr/include/bits/libc-header-start.h:
 
@@ -548,21 +544,31 @@ src/fem.h:
 
 /usr/include/bits/pthread_stack_min.h:
 
-/usr/include/bits/types/__fpos64_t.h:
+src/glfem.h:
 
-/usr/lib/libOpenGL.so.0:
+/usr/lib/libX11.so:
 
-glfw/src/libglfw3.a:
+/usr/include/bits/types/__locale_t.h:
 
-/usr/include/bits/select.h:
+/usr/include/bits/types/FILE.h:
+
+/usr/include/bits/flt-eval-method.h:
+
+/usr/include/bits/fp-fast.h:
+
+/usr/include/bits/posix1_lim.h:
+
+/usr/lib/libc.so:
+
+/usr/include/bits/pthread_stack_min-dynamic.h:
+
+/usr/include/bits/types/timer_t.h:
+
+/usr/lib/Scrt1.o:
 
 /usr/include/bits/fp-logb.h:
 
 glfw/include/GLFW/glfw3.h:
-
-/usr/include/bits/long-double.h:
-
-/usr/include/GL/gl.h:
 
 /usr/include/bits/types/__fpos_t.h:
 
@@ -580,11 +586,23 @@ gmsh/gmsh-4.13.1-Linux64-sdk/include/gmshc.h:
 
 /usr/include/stdc-predef.h:
 
-/usr/include/bits/stdint-intn.h:
+/usr/lib/libfreetype.so.6:
 
-/usr/lib/libX11.so:
+/usr/lib/libXau.so.6:
 
-src/glfem.h:
+/usr/include/bits/uintn-identity.h:
+
+/usr/include/bits/waitflags.h:
+
+/usr/include/bits/timesize.h:
+
+/usr/include/bits/waitstatus.h:
+
+/usr/include/bits/wchar.h:
+
+/usr/lib/libbrotlicommon.so.1:
+
+/usr/include/bits/wordsize.h:
 
 /usr/include/features-time64.h:
 
@@ -602,6 +620,10 @@ src/glfem.h:
 
 /usr/include/math.h:
 
+/usr/include/linux/limits.h:
+
+/usr/include/stdint.h:
+
 /usr/include/stdlib.h:
 
 /usr/include/strings.h:
@@ -610,17 +632,15 @@ src/glfem.h:
 
 /usr/include/sys/types.h:
 
-/usr/include/bits/typesizes.h:
-
 /usr/lib/crti.o:
+
+/usr/include/bits/typesizes.h:
 
 /usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include/limits.h:
 
 /usr/lib/libbrotlidec.so.1:
 
 /usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include/stdarg.h:
-
-/usr/include/GL/glext.h:
 
 /usr/include/sys/cdefs.h:
 
@@ -629,18 +649,6 @@ src/glfem.c:
 /usr/include/bits/types.h:
 
 /usr/include/GL/glu.h:
-
-/usr/lib/libGL.so:
-
-/usr/include/bits/stdint-least.h:
-
-/usr/include/bits/wchar.h:
-
-/usr/lib/libbrotlicommon.so.1:
-
-/usr/include/linux/limits.h:
-
-/usr/include/stdint.h:
 
 src/mesh.c:
 

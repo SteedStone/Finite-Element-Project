@@ -38,7 +38,7 @@ double geoSize(double x, double y) {
         double numHexX = theGeometry->NumberOfHexagonsInX;
         double numHexY = theGeometry->NumberOfHexagonsInY;
         h_max = theGeometry->h;       
-        h_min = h_max * 0.1;  // Ajuste ce facteur pour un effet plus visible
+        h_min = h_max * 0.01;  // Ajuste ce facteur pour un effet plus visible
         y_min =-hexRadius*sqrt(3)/2 - hexRadius/3;  
         y_max = numHexY * sqrt(3) * hexRadius+ hexRadius/3;  
     }
@@ -57,8 +57,8 @@ double geoSize(double x, double y) {
     double t = (y - y_min) / (y_max - y_min);
     t = fmax(0.0, fmin(1.0, t)); // S'assurer que t reste dans [0,1]
     
-    // double h = h_min + (h_max - h_min) * pow(1 - t, 3); 
-    double h = h_min + (h_max - h_min) * (1 - t);      
+    double h = h_min + (h_max - h_min) * pow(1 - t, 3); 
+    // double h = h_min + (h_max - h_min) * (1 - t);      
     //  printf("geoSize called: x=%.2f, y=%.2f -> h=%.5f\n", x, y, h); // 🔴 DEBUG
     return h;
 
@@ -786,43 +786,7 @@ void femElasticitySigma(femProblem *theProblem, double *sigmaXX, double *sigmaYY
 }
 
 
-// void femElasticityApplyDirichlet(femProblem *theProblem, double FACTOR)
-// {
-//     femSolver *theSolver     = theProblem->solver;
-//     femGeo *theGeometry      = theProblem->geometry;
-//     femNodes *theNodes       = theGeometry->theNodes;
-
-//     int *number, renumberNode, iNode, Ux, Uy, size;
-//     double value, value_x, value_y, myValue_n, myValue_t, nx, ny, tx, ty;
-    
-//     number = theNodes->number;
-//     size   = theProblem->size;
-
-//     for (iNode = 0; iNode < theNodes->nNodes; iNode++)
-//     {
-        
-
-//         renumberNode = number[iNode];
-
-//         Ux = 2 * renumberNode;
-//         Uy = 2 * renumberNode + 1;
-
-//         if (type == DIRICHLET_X)
-//         {
-//             value = theConstrainedNode->value1;
-//             femSolverSystemConstrainXY(theSolver, Ux, value * FACTOR);
-//         }
-//         else if (type == DIRICHLET_Y)
-//         {
-//             value = theConstrainedNode->value1;
-//             femSolverSystemConstrainXY(theSolver, Uy, value * FACTOR);
-//         }
-        
-        
-//     }
-// }
-
-
+ 
 
 
 

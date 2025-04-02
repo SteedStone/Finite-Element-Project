@@ -44,12 +44,12 @@
      if(!simple){
          geoInitialize();
          theGeometry = geoGetGeometry();
-         theGeometry->h = 11;
          if (big) {
          theGeometry->NumberOfHexagonsInX = 9;
          theGeometry->NumberOfHexagonsInY = 5;
          theGeometry->NumberOfTrianglesInX = 11;
          theGeometry->NumberOfTrianglesInY = 7;
+         
          }
             else {
                 theGeometry->NumberOfHexagonsInX = 3;
@@ -57,7 +57,7 @@
                 theGeometry->NumberOfTrianglesInX = 5;
                 theGeometry->NumberOfTrianglesInY = 3;
             }
-         theGeometry->hexRadius = 9.0;
+         theGeometry->hexRadius = 0.01;
          theGeometry->MiddleX = (theGeometry->NumberOfHexagonsInX -1 ) * 1.5 * theGeometry->hexRadius + theGeometry->hexRadius - (-theGeometry->hexRadius) ; 
          theGeometry->MiddleY = theGeometry->NumberOfHexagonsInY * sqrt(3) * theGeometry->hexRadius - (-theGeometry->hexRadius*sqrt(3)/2) ;
          theGeometry->elementType = type1;
