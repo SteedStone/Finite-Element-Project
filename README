@@ -51,6 +51,11 @@ In Matrix mode :
 In Geometry mode : 
 - ```X```: Show the forces in X 
 - ```Y```: Show the forces in Y
+- ```K```: Show the Sigma in X
+- ```L```: Show the Sigma in Y
+- ```T```: Show the Node that "break"
+
+
 
 
 ### myVisualisation : 
