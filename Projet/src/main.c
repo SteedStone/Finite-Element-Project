@@ -55,21 +55,103 @@ int main(int argc, char *argv[])
     
 
     
-    double E   = 211.e9;
-    double nu  = 0.3;
-    double rho = 7.85e3;  
-    double g   = 9.81;
+    FILE *fp = fopen("data/problem.txt", "r");
+    if(fp == NULL) {
+        perror("Erreur lors de l'ouverture du fichier problem.txt");
+        return EXIT_FAILURE;
+    }
     
+    char ligne[256];
+    double E = 0.0, nu = 0.0, rho = 0.0, g = 0.0, deformationFactor = 0.0, SigmaMax = 0.0;
+    int problemCase = PLANAR_STRESS; // Valeur par défaut
+    char problemType[50] = {0};      // Pour stocker la chaîne lue
+
+    // Lecture du fichier ligne par ligne
+    while(fgets(ligne, sizeof(ligne), fp) != NULL) {
+        if(strstr(ligne, "Type of problem") != NULL) {
+            // Exemple de ligne : "Type of problem    :  Planar stresses"
+            // La directive %[^\n] permet de récupérer toute la chaîne jusqu'au retour à la ligne.
+            sscanf(ligne, "Type of problem    : %49[^\n]", problemType);
+        }
+        else if(strstr(ligne, "Young modulus") != NULL) {
+            sscanf(ligne, "Young modulus      : %le", &E);
+        }
+        else if(strstr(ligne, "Poisson ratio") != NULL) {
+            sscanf(ligne, "Poisson ratio      : %le", &nu);
+        }
+        else if(strstr(ligne, "Mass density") != NULL) {
+            sscanf(ligne, "Mass density       : %le", &rho);
+        }
+        else if(strstr(ligne, "Gravity") != NULL) {
+            sscanf(ligne, "Gravity            : %le", &g);
+        }
+        else if(strstr(ligne, "Deformation Factor") != NULL) {
+            sscanf(ligne, "Deformation Factor : %le", &deformationFactor);
+        }
+        else if(strstr(ligne, "Sigma Max (rupture)") != NULL) {
+            sscanf(ligne, "Sigma Max (rupture): %le", &SigmaMax);
+        }
+    }
+    fclose(fp);
+    
+    // Traitement du type de problème pour définir la variable problemCase
+    if(strstr(problemType, "stresses") != NULL) {
+        problemCase = PLANAR_STRESS;
+    }
+    else if(strstr(problemType, "strains") != NULL) {
+        problemCase = PLANAR_STRAIN;
+    }
+
+    else {
+        // Si le type n'est pas reconnu, on garde la valeur par défaut
+        problemCase = PLANAR_STRESS;
+    }
+    
+    // Affichage des valeurs lues
+    printf("Type of problem    : %s\n", problemType);
+    printf("Young modulus      : %le\n", E);
+    printf("Poisson ratio      : %le\n", nu);
+    printf("Mass density       : %le\n", rho);
+    printf("Gravity            : %le\n", g);
+    printf("Deformation Factor : %le\n", deformationFactor);
+    printf("Sigma Max (rupture): %le\n", SigmaMax);
+    
+    // Exemple d'utilisation avec la fonction femElasticityCreate :
+    // femProblem* theProblem = femElasticityCreate(theGeometry, E, nu, rho, g, problemCase, FEM_BAND, FEM_NO);
+    
+
+
+
     
     // Initialisation du problème avec les conditions aux bords
     // ON remplit juste la structure theProblem avec les valeurs de E, nu, rho, g et le type de problème qu'on veut résoudre
     femProblem* theProblem = femElasticityCreate(theGeometry,E,nu,rho,g,PLANAR_STRESS , FEM_BAND , FEM_NO);
     // femElasticityAddBoundaryCondition(theProblem,"Symmetry",DIRICHLET_X,0.0);
-    femElasticityAddBoundaryCondition(theProblem,"Bottom",DIRICHLET_Y,0.0);
-    femElasticityAddBoundaryCondition(theProblem,"Bottom",DIRICHLET_X,0.0);
+    // femElasticityAddBoundaryCondition(theProblem,"Bottom",DIRICHLET_Y,0.0);
+    // femElasticityAddBoundaryCondition(theProblem,"Bottom",DIRICHLET_X,0.0);
 
 
-    femElasticityAddBoundaryCondition(theProblem,"Top",NEUMANN_Y,-1e6);
+    // femElasticityAddBoundaryCondition(theProblem,"Top",NEUMANN_Y,-1e6);
+    fp = fopen("data/problem.txt", "r");
+    while(fgets(ligne, sizeof(ligne), fp) != NULL) {
+        if(strstr(ligne, "Boundary condition") != NULL) {
+            char typeBC[20];
+            double valeur;
+            char nomDomaine[20];
+            // Exemple de format : "Boundary condition :  Dirichlet-X      =  0.0000000e+00 : Bottom"
+            sscanf(ligne, "Boundary condition : %s = %le : %s", typeBC, &valeur, nomDomaine);
+            // Selon le type, vous appellerez la fonction correspondante
+            if(strcmp(typeBC, "Dirichlet-X") == 0)
+                femElasticityAddBoundaryCondition(theProblem, nomDomaine, DIRICHLET_X, valeur);
+            else if(strcmp(typeBC, "Dirichlet-Y") == 0)
+                femElasticityAddBoundaryCondition(theProblem, nomDomaine, DIRICHLET_Y, valeur);
+            else if(strcmp(typeBC, "Neumann-Y") == 0)
+                femElasticityAddBoundaryCondition(theProblem, nomDomaine, NEUMANN_Y, valeur);
+            // Ajoutez les autres cas si nécessaire.
+        }
+    }
+    fclose(fp);
+
     
     femElasticityPrint(theProblem);
     
@@ -104,7 +186,7 @@ int main(int argc, char *argv[])
 
 
    
-    double deformationFactor = 5000.0; // 5000.0 pour hexa et 300 pour triangle
+
     
     femMesh *theMesh = theProblem->geometry->theElements;
     int *number = theMesh->nodes->number;
@@ -220,7 +302,7 @@ int main(int argc, char *argv[])
         if (glfwGetKey(window, 'K') == GLFW_PRESS) { mode = 5; }
         if (glfwGetKey(window, 'L') == GLFW_PRESS) { mode = 6; }
         if (glfwGetKey(window, 'M') == GLFW_PRESS) { mode = 7; }
-        if (glfwGetKey(window, 'T') == GLFW_PRESS) {glfemPlotFailureNodes(theGeometry->theNodes, sigmaXX, sigmaYY, sigmaXY, 230e6); }
+        if (glfwGetKey(window, 'T') == GLFW_PRESS) {glfemPlotFailureNodes(theGeometry->theNodes, sigmaXX, sigmaYY, sigmaXY, SigmaMax); }
 
         if(option == 1 && mode == 3) {
             glfemPlotField(theGeometry->theElements, forcesX);

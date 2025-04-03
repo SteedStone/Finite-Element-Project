@@ -1,18 +1,22 @@
 /*
- *  main.c
- *  Library for EPL1110 : Finite Elements for dummies
- *  Utilisation de l'API de GMSH pour créer un maillage
+ *  main_visualization.c
+ *  Visualisation avec itération sur la force appliquée et affichage de la rupture
+ *  Utilisation de l'API de GMSH pour créer un maillage et de la fonction glfemPlotFailureNodes pour visualiser les ruptures
  *
  *  Copyright (C) 2023 UCL-IMMC : Vincent Legat
  *  All rights reserved.
  */
 
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
+ #include <math.h>
+ #include <time.h>
  #include "glfem.h"
  #define STB_IMAGE_WRITE_IMPLEMENTATION
  #include "stb_image_write.h"
- #define TRIANGLE 1
- #define HEXAGON 2
  
+ // Fonction de base pour une intégration (ici constante)
  double fun(double x, double y)
  {
      return 1;
@@ -23,7 +27,7 @@
      int width, height;
      glfwGetFramebufferSize(window, &width, &height);
  
-     // Debug
+     // Debug (optionnel)
      printf("Framebuffer size: %d x %d\n", width, height);
      GLint viewport[4];
      glGetIntegerv(GL_VIEWPORT, viewport);
@@ -48,7 +52,7 @@
          }
      }
  
-     // Sauvegarder l'image dans le dossier "frame" (assure-toi que ce dossier existe)
+     // Sauvegarder l'image dans le dossier "frame" (vérifiez que ce dossier existe)
      char filename[100];
      sprintf(filename, "frame/frame_%d.png", frame);
      stbi_write_png(filename, width, height, 3, flippedPixels, width * 3);
@@ -59,12 +63,8 @@
  
  int main(int argc, char *argv[])
  {
-     printf("\n\n    V : Mesh and size mesh field \n");
-     printf("    D : Domains \n");
-     printf("    N : Next domain highlighted\n");
- 
      if (argc < 2) {
-         fprintf(stderr, "Usage: %s <path_to_file>\n", argv[0]);
+         fprintf(stderr, "Usage: %s <path_to_mesh_file>\n", argv[0]);
          return EXIT_FAILURE;
      }
      char *file_path = argv[1];
@@ -74,173 +74,153 @@
      femGeo* theGeometry = geoGetGeometry();
      geoMeshRead(file_path);
  
-     // Propriétés du matériau et gravité
-     double E   = 211.e9;
-     double nu  = 0.3;
-     double rho = 7.85e3;
-     double g   = 9.81;
-     double deformation_factor = 1e3;  // Ajuste cette valeur selon la visualisation désirée
-
-     // Stocker les coordonnées initiales des nœuds
+     // --- Lecture des paramètres depuis "data/problem.txt" ---
+     FILE *fp = fopen("data/problem.txt", "r");
+     if(fp == NULL) {
+         perror("Erreur lors de l'ouverture du fichier problem.txt");
+         return EXIT_FAILURE;
+     }
+     char ligne[256];
+     double E = 211.e9, nu = 0.3, rho = 7.85e3, g = 9.81, deformation_factor = 1e3;
+     double SigmaMax = 230e6; 
+     char problemType[50] = {0};
+ 
+     while(fgets(ligne, sizeof(ligne), fp) != NULL) {
+         if(strstr(ligne, "Type of problem") != NULL) {
+             sscanf(ligne, "Type of problem    : %49[^\n]", problemType);
+         }
+         else if(strstr(ligne, "Young modulus") != NULL) {
+             sscanf(ligne, "Young modulus      : %le", &E);
+         }
+         else if(strstr(ligne, "Poisson ratio") != NULL) {
+             sscanf(ligne, "Poisson ratio      : %le", &nu);
+         }
+         else if(strstr(ligne, "Mass density") != NULL) {
+             sscanf(ligne, "Mass density       : %le", &rho);
+         }
+         else if(strstr(ligne, "Gravity") != NULL) {
+             sscanf(ligne, "Gravity            : %le", &g);
+         }
+         else if(strstr(ligne, "Deformation Factor") != NULL) {
+             sscanf(ligne, "Deformation Factor : %le", &deformation_factor);
+         }
+         else if(strstr(ligne, "Sigma Max (rupture)") != NULL) {
+             sscanf(ligne, "Sigma Max (rupture)          : %le", &SigmaMax);
+         }
+     }
+     fclose(fp);
+ 
+     printf("Paramètres lus depuis problem.txt :\n");
+     printf("  Type of problem    : %s\n", problemType);
+     printf("  Young modulus      : %le\n", E);
+     printf("  Poisson ratio      : %le\n", nu);
+     printf("  Mass density       : %le\n", rho);
+     printf("  Gravity            : %le\n", g);
+     printf("  Deformation Factor : %le\n", deformation_factor);
+     printf("  Sigma max (rupture): %le\n", SigmaMax);
+ 
+     // Sauvegarder les positions initiales des nœuds
      femNodes *theNodes = theGeometry->theNodes;
-     double *X0 = malloc(sizeof(double) * theNodes->nNodes);
-     double *Y0 = malloc(sizeof(double) * theNodes->nNodes);
-     for (int j = 0; j < theNodes->nNodes; j++) {
-         X0[j] = theNodes->X[j];
-         Y0[j] = theNodes->Y[j];
+     double *X0 = malloc(theNodes->nNodes * sizeof(double));
+     double *Y0 = malloc(theNodes->nNodes * sizeof(double));
+     for (int i = 0; i < theNodes->nNodes; i++){
+         X0[i] = theNodes->X[i];
+         Y0[i] = theNodes->Y[i];
      }
  
-     // Allocation pour les champs de déformation et forces (affichage)
+     // Allocation des champs pour la visualisation
      double *normDisplacement = malloc(theNodes->nNodes * sizeof(double));
      double *forcesX = malloc(theNodes->nNodes * sizeof(double));
      double *forcesY = malloc(theNodes->nNodes * sizeof(double));
+     double *sigmaXX = malloc(theNodes->nNodes * sizeof(double));
+     double *sigmaYY = malloc(theNodes->nNodes * sizeof(double));
+     double *sigmaXY = malloc(theNodes->nNodes * sizeof(double));
+     if(sigmaXX == NULL || sigmaYY == NULL || sigmaXY == NULL) {
+         fprintf(stderr, "Erreur d'allocation des tableaux de contraintes\n");
+         exit(EXIT_FAILURE);
+     }
  
-     // Création de la fenêtre GLFW avec une résolution plus grande
+     // Création de la fenêtre GLFW
      glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
-     GLFWwindow* window = glfemInit("EPL1110 : Recovering forces on constrained nodes");
+     GLFWwindow* window = glfemInit("Visualisation et rupture (FEM)");
      glfwSetWindowSize(window, 1024, 768);
      glfwMakeContextCurrent(window);
  
-     // Variation de la force sur le bord supérieur de 1e3 N à 5e3 N
-     double F_top_start = 100000;
-     double F_top_end   = 200000;
-     double F_top_step  = 20000; // incréments de 200 N
+     // --- Itération sur la force appliquée ---
+     // Définir les valeurs de la force sur le bord supérieur
+     double F_top_start = 1e4, F_top_end = 1e5, F_top_step = 1e4;
      int frameCounter = 0;
-     
-    double *stressValues = malloc(theNodes->nNodes * sizeof(double));
-    for (int j = 0; j < theNodes->nNodes; j++) {
-        stressValues[j] = 0.0; // Initialisation
-    }
-
-        // Boucle d'animation pour chaque valeur de force
-    for (double F_top = F_top_start; F_top <= F_top_end; F_top += F_top_step) {
-        printf("Simulation avec force Top = %.1e N\n", F_top);
-
-        // Créer le problème FEM pour cette valeur de force
-        femProblem* theProblem = femElasticityCreate(theGeometry, E, nu, rho, g, PLANAR_STRESS, FEM_BAND, FEM_XNUM);
-        // Conditions aux limites :
-        femElasticityAddBoundaryCondition(theProblem, "Bottom", DIRICHLET_X, 0.0 );
-        femElasticityAddBoundaryCondition(theProblem, "Bottom", DIRICHLET_Y, 0.0);
-        // Force appliquée sur le bord supérieur (négative pour une force vers le bas)
-        femElasticityAddBoundaryCondition(theProblem, "Top", NEUMANN_Y, -F_top );
-
-        femElasticityPrint(theProblem);
-
-        // Résoudre le problème pour obtenir la déformation
-        double *theSoluce = femElasticitySolve(theProblem);
-
-    double *theForces = femElasticityForces(theProblem);
-
-    
-
-
-    
-    
-    double area = femElasticityIntegrate(theProblem, fun);   
-
-    //
-    //  -4- Deformation du maillage pour le plot final
-    //      Creation du champ de la norme du deplacement
-    //
-    int normal = 0;
-
-
-    
-
-
-   
-    double deformationFactor = 300.0; // 5000.0 pour hexa et 300 pour triangle
-    
-    femMesh *theMesh = theProblem->geometry->theElements;
-    int *number = theMesh->nodes->number;
-    for (int i=0; i<theNodes->nNodes; i++){
-        theNodes->X[i] += theSoluce[2*number[i]+0]*deformationFactor;
-        theNodes->Y[i] += theSoluce[2*number[i]+1]*deformationFactor;
-        normDisplacement[i] = sqrt(theSoluce[2*number[i]+0]*theSoluce[2*number[i]+0] + 
-                                theSoluce[2*number[i]+1]*theSoluce[2*number[i]+1]);
-        forcesX[i] = theForces[2 * number[i] + 0];
-        forcesY[i] = theForces[2 * number[i] + 1];
+     for (double F_top = F_top_start; F_top <= F_top_end; F_top += F_top_step) {
+         printf("Simulation avec Force Top = %.1e N\n", F_top);
+         
+         // Création du problème FEM pour cette itération
+         femProblem* theProblem = femElasticityCreate(theGeometry, E, nu, rho, g, PLANAR_STRESS, FEM_FULL, FEM_NO);
+         // Ajout des conditions aux limites (lues dans le fichier ou codées ici)
+         femElasticityAddBoundaryCondition(theProblem, "Bottom", DIRICHLET_X, 0.0);
+         femElasticityAddBoundaryCondition(theProblem, "Bottom", DIRICHLET_Y, 0.0);
+         // Appliquer une force verticale sur le bord "Top" (négative pour une force dirigée vers le bas)
+         femElasticityAddBoundaryCondition(theProblem, "Top", NEUMANN_Y, -F_top);
+ 
+         // Résolution du problème
+         double *theSoluce = femElasticitySolve(theProblem);
+         double *theForces = femElasticityForces(theProblem);
+ 
+         // Mise à jour des positions des nœuds (en se basant sur les positions initiales)
+         for (int i = 0; i < theNodes->nNodes; i++){
+             theNodes->X[i] = X0[i] + deformation_factor * theSoluce[2*i + 0];
+             theNodes->Y[i] = Y0[i] + deformation_factor * theSoluce[2*i + 1];
+             normDisplacement[i] = sqrt(theSoluce[2*i + 0]*theSoluce[2*i + 0] +
+                                        theSoluce[2*i + 1]*theSoluce[2*i + 1]);
+             forcesX[i] = theForces[2*i + 0];
+             forcesY[i] = theForces[2*i + 1];
          }
-    int nNodes = theNodes->nNodes;
-
-        // -------- Calcul de la déformation et contrainte pour toutes les lignes --------
-        // On parcourt chaque élément, et pour chaque côté (ligne) de l'élément, on calcule
-        // L0 (longueur initiale) et L (longueur déformée)
-        int nElem = theGeometry->theElements->nElem;
-        int nLocal = theGeometry->theElements->nLocalNode;
-        // Pour chaque élément, pour chaque côté (de k à (k+1)%nLocal)
-        for (int iElem = 0; iElem < nElem; iElem++) {
-            int *elem = &(theGeometry->theElements->elem[iElem * nLocal]);
-            for (int k = 0; k < nLocal; k++) {
-                int node1 = elem[k];
-                int node2 = elem[(k + 1) % nLocal];
-                double L0 = sqrt((X0[node2] - X0[node1]) * (X0[node2] - X0[node1]) +
-                                 (Y0[node2] - Y0[node1]) * (Y0[node2] - Y0[node1]));
-                double L = sqrt((theNodes->X[node2] - theNodes->X[node1]) * (theNodes->X[node2] - theNodes->X[node1]) +
-                                (theNodes->Y[node2] - theNodes->Y[node1]) * (theNodes->Y[node2] - theNodes->Y[node1]));
-                double strain = (L - L0) / L0;
-                double stress = E * strain;  // loi de Hooke
-                // Ajouter la contrainte aux nœuds (moyenne des contributions des éléments voisins)
-                stressValues[node1] += stress;
-                stressValues[node2] += stress;
-
-
-                // Afficher l'information pour cette ligne
-                printf("Element %d, ligne entre noeuds %d et %d : L0 = %e, L = %e, strain = %e, stress = %e Pa\n",
-                       iElem, node1, node2, L0, L, strain, stress);
-                if (stress > 300e20) {
-                    printf("  ⚠️  Risque de rupture sur cette ligne !\n");
-                }
-            }
-        }
-        // -------- Fin calcul contraintes --------
-        for (int j = 0; j < theNodes->nNodes; j++) {
-            stressValues[j] /= theNodes->nNodes;  // Normalisation par le nombre de contributions
-        }
-        
-        int w, h;
-        glfwGetFramebufferSize(window, &w, &h);
-        glfemReshapeWindows(theGeometry->theNodes, w, h);
-
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glfemPlotField(theGeometry->theElements, stressValues);
-
-        glfemPlotMesh(theGeometry->theElements);
-        glFlush();
-        glFinish();
-
-        captureFrame(frameCounter, window);
-        frameCounter++;
-
-        glfwSwapBuffers(window);
-        glfwPollEvents();
-
-        // Ne pas appeler free sur theSoluce et theForces si c'est géré par femElasticityFree
-        femElasticityFree(theProblem);
-    }
-
-    // Affichage final (optionnel)
-    double hMin = femMin(normDisplacement, theNodes->nNodes);
-    double hMax = femMax(normDisplacement, theNodes->nNodes);
-    printf(" ==== Minimum displacement          : %14.7e [m] \n", hMin);
-    printf(" ==== Maximum displacement          : %14.7e [m] \n", hMax);
-
-    double theGlobalForce[2] = {0, 0};
-    for (int i = 0; i < theGeometry->theNodes->nNodes; i++) {
-        theGlobalForce[0] += forcesX[i];
-        theGlobalForce[1] += forcesY[i];
-    }
-    printf(" ==== Global horizontal force       : %14.7e [N] \n", theGlobalForce[0]);
-    printf(" ==== Global vertical force         : %14.7e [N] \n", theGlobalForce[1]);
-
-    free(normDisplacement);
-    free(forcesX);
-    free(forcesY);
-    free(X0);
-    free(Y0);
-    geoFinalize();
-    glfwTerminate();
-
-    exit(EXIT_SUCCESS);
-    return 0;
-}
+ 
+         // Calcul des contraintes nodales via l'API FEM
+         femElasticitySigma(theProblem, sigmaXX, sigmaYY, sigmaXY);
+ 
+         // Redimensionnement de la fenêtre
+         int w, h;
+         glfwGetFramebufferSize(window, &w, &h);
+         glfemReshapeWindows(theNodes, w, h);
+ 
+         // Effacer le tampon d'affichage
+         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+ 
+         // Afficher un champ (par exemple, le champ de déplacement)
+         glfemPlotField(theGeometry->theElements, normDisplacement);
+         glfemPlotMesh(theGeometry->theElements);
+ 
+         // Affichage des nœuds en rupture via la fonction glfemPlotFailureNodes
+         glfemPlotFailureNodes(theNodes, sigmaXX, sigmaYY, sigmaXY, SigmaMax);
+ 
+         // Afficher un message indiquant la force appliquée
+         char theMessage[256];
+         sprintf(theMessage, "Force Top: %.1e N", F_top);
+         glColor3f(1.0, 0.0, 0.0);
+         glfemMessage(theMessage);
+ 
+         // Mise à jour de l'affichage et capture de la frame
+         glfwSwapBuffers(window);
+         glfwPollEvents();
+         captureFrame(frameCounter, window);
+         frameCounter++;
+ 
+         // Libération des ressources associées au problème courant
+         femElasticityFree(theProblem);
+     }
+ 
+     // Libération des ressources et nettoyage
+     free(normDisplacement);
+     free(forcesX);
+     free(forcesY);
+     free(X0);
+     free(Y0);
+     free(sigmaXX);
+     free(sigmaYY);
+     free(sigmaXY);
+     geoFinalize();
+     glfwTerminate();
+ 
+     return EXIT_SUCCESS;
+ }
+ 
