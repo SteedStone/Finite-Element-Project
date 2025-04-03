@@ -28,12 +28,14 @@ int main(int argc, char *argv[])
 
     
 
-    if (argc < 2) {
-        fprintf(stderr, "Usage: %s <path_to_file>\n", argv[0]);
+    if (argc < 3) {
+        fprintf(stderr, "Usage: %s <path_to_mesh> <path_to_problem>\n", argv[0]);
         return EXIT_FAILURE;
     }
 
-    char *file_path = argv[1];
+    char *file_mesh = argv[1];
+    char *file_problem = argv[2];
+
     
 
 
@@ -51,11 +53,11 @@ int main(int argc, char *argv[])
     
     
 
-    geoMeshRead(file_path);
+    geoMeshRead(file_mesh);
     
 
     
-    FILE *fp = fopen("data/problem.txt", "r");
+    FILE *fp = fopen(file_problem, "r");
     if(fp == NULL) {
         perror("Erreur lors de l'ouverture du fichier problem.txt");
         return EXIT_FAILURE;
@@ -132,7 +134,7 @@ int main(int argc, char *argv[])
 
 
     // femElasticityAddBoundaryCondition(theProblem,"Top",NEUMANN_Y,-1e6);
-    fp = fopen("data/problem.txt", "r");
+    fp = fopen(file_problem, "r");
     while(fgets(ligne, sizeof(ligne), fp) != NULL) {
         if(strstr(ligne, "Boundary condition") != NULL) {
             char typeBC[20];

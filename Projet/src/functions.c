@@ -30,7 +30,7 @@ double geoSize(double x, double y) {
         
         double distance = hexRadius * 1.1; // Distance entre les lignes
         h_max = theGeometry->h;       
-        h_min = h_max * 0.1;  // Ajuste ce facteur pour un effet plus visible
+        h_min = h_max * 0.01;  // Ajuste ce facteur pour un effet plus visible
         y_min =0;
         y_max = numHexY * distance - hexRadius;  
     } else {
@@ -789,6 +789,3 @@ void femElasticitySigma(femProblem *theProblem, double *sigmaXX, double *sigmaYY
 
 
  
-
-
-
