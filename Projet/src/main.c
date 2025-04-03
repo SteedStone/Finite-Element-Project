@@ -28,12 +28,14 @@ int main(int argc, char *argv[])
 
     
 
-    if (argc < 2) {
-        fprintf(stderr, "Usage: %s <path_to_file>\n", argv[0]);
+    if (argc < 3) {
+        fprintf(stderr, "Usage: %s <path_to_mesh> <path_to_problem>\n", argv[0]);
         return EXIT_FAILURE;
     }
 
-    char *file_path = argv[1];
+    char *mesh_path = argv[1];
+    char *problem_path = argv[2];
+
     
 
 
@@ -51,11 +53,11 @@ int main(int argc, char *argv[])
     
     
 
-    geoMeshRead(file_path);
+    geoMeshRead(mesh_path);
     
 
     
-    FILE *fp = fopen("data/problem.txt", "r");
+    FILE *fp = fopen(problem_path, "r");
     if(fp == NULL) {
         perror("Erreur lors de l'ouverture du fichier problem.txt");
         return EXIT_FAILURE;
@@ -125,7 +127,7 @@ int main(int argc, char *argv[])
     
     // Initialisation du problème avec les conditions aux bords
     // ON remplit juste la structure theProblem avec les valeurs de E, nu, rho, g et le type de problème qu'on veut résoudre
-    femProblem* theProblem = femElasticityCreate(theGeometry,E,nu,rho,g,PLANAR_STRESS , FEM_BAND , FEM_NO);
+    femProblem* theProblem = femElasticityCreate(theGeometry,E,nu,rho,g,PLANAR_STRESS , FEM_BAND , FEM_YNUM);
     // femElasticityAddBoundaryCondition(theProblem,"Symmetry",DIRICHLET_X,0.0);
     // femElasticityAddBoundaryCondition(theProblem,"Bottom",DIRICHLET_Y,0.0);
     // femElasticityAddBoundaryCondition(theProblem,"Bottom",DIRICHLET_X,0.0);

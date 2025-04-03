@@ -152,7 +152,7 @@
  
  
          int mode = 1; // Change mode by pressing "j", "k", "l"
-         int domain = 530;
+         int domain = 1;
          int freezingButton = FALSE;
          double t, told = 0;
          char theMessage[256];
