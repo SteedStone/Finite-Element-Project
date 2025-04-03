@@ -2,11 +2,11 @@ Type of problem    :  Planar strains
 Young modulus      :  2.0000000e+11  
 Poisson ratio      :  3.0000000e-01  
 Mass density       :  7.8500000e+03  
-Sigma Max (rupture):  230e6
+Sigma Max (rupture):  300e6
 Gravity            :  9.8100000e+00  
-Deformation Factor :  13000.0
+Deformation Factor :  20000.0
 
 
 Boundary condition :  Dirichlet-X      =  0.0000000e+00 : Bottom
 Boundary condition :  Dirichlet-Y      =  0.0000000e+00 : Bottom
-Boundary condition :  Neumann-Y        = -4.0000000e+04 : Top
+Boundary condition :  Neumann-Y        = -3.0000000e+03 : Top

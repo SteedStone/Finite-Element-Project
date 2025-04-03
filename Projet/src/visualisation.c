@@ -148,13 +148,13 @@
  
      // --- Itération sur la force appliquée ---
      // Définir les valeurs de la force sur le bord supérieur
-     double F_top_start = 1e4, F_top_end = 1e5, F_top_step = 1e4;
+     double F_top_start =3e3, F_top_end = 1e4, F_top_step = 5e2;
      int frameCounter = 0;
      for (double F_top = F_top_start; F_top <= F_top_end; F_top += F_top_step) {
          printf("Simulation avec Force Top = %.1e N\n", F_top);
          
          // Création du problème FEM pour cette itération
-         femProblem* theProblem = femElasticityCreate(theGeometry, E, nu, rho, g, PLANAR_STRESS, FEM_FULL, FEM_NO);
+         femProblem* theProblem = femElasticityCreate(theGeometry, E, nu, rho, g, PLANAR_STRESS, FEM_BAND, FEM_XNUM);
          // Ajout des conditions aux limites (lues dans le fichier ou codées ici)
          femElasticityAddBoundaryCondition(theProblem, "Bottom", DIRICHLET_X, 0.0);
          femElasticityAddBoundaryCondition(theProblem, "Bottom", DIRICHLET_Y, 0.0);
@@ -166,13 +166,15 @@
          double *theForces = femElasticityForces(theProblem);
  
          // Mise à jour des positions des nœuds (en se basant sur les positions initiales)
-         for (int i = 0; i < theNodes->nNodes; i++){
-             theNodes->X[i] = X0[i] + deformation_factor * theSoluce[2*i + 0];
-             theNodes->Y[i] = Y0[i] + deformation_factor * theSoluce[2*i + 1];
-             normDisplacement[i] = sqrt(theSoluce[2*i + 0]*theSoluce[2*i + 0] +
-                                        theSoluce[2*i + 1]*theSoluce[2*i + 1]);
-             forcesX[i] = theForces[2*i + 0];
-             forcesY[i] = theForces[2*i + 1];
+         femMesh *theMesh = theProblem->geometry->theElements;
+        int *number = theMesh->nodes->number;
+        for (int i=0; i<theNodes->nNodes; i++){
+        theNodes->X[i] += theSoluce[2*number[i]+0]*deformation_factor;
+        theNodes->Y[i] += theSoluce[2*number[i]+1]*deformation_factor;
+        normDisplacement[i] = sqrt(theSoluce[2*number[i]+0]*theSoluce[2*number[i]+0] + 
+                                theSoluce[2*number[i]+1]*theSoluce[2*number[i]+1]);
+        forcesX[i] = theForces[2 * number[i] + 0];
+        forcesY[i] = theForces[2 * number[i] + 1];
          }
  
          // Calcul des contraintes nodales via l'API FEM
