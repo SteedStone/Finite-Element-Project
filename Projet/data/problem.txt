@@ -9,4 +9,4 @@ Deformation Factor :  13000.0
 
 Boundary condition :  Dirichlet-X      =  0.0000000e+00 : Bottom
 Boundary condition :  Dirichlet-Y      =  0.0000000e+00 : Bottom
-Boundary condition :  Neumann-Y        = -4.0000000e+04 : Top
+Boundary condition :  Neumann-Y        = -4.0000000e+05 : Top

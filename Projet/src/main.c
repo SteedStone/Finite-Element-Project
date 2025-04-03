@@ -125,7 +125,7 @@ int main(int argc, char *argv[])
     
     // Initialisation du problème avec les conditions aux bords
     // ON remplit juste la structure theProblem avec les valeurs de E, nu, rho, g et le type de problème qu'on veut résoudre
-    femProblem* theProblem = femElasticityCreate(theGeometry,E,nu,rho,g,PLANAR_STRESS , FEM_BAND , FEM_NO);
+    femProblem* theProblem = femElasticityCreate(theGeometry,E,nu,rho,g,PLANAR_STRESS , FEM_BAND , FEM_YNUM);
     // femElasticityAddBoundaryCondition(theProblem,"Symmetry",DIRICHLET_X,0.0);
     // femElasticityAddBoundaryCondition(theProblem,"Bottom",DIRICHLET_Y,0.0);
     // femElasticityAddBoundaryCondition(theProblem,"Bottom",DIRICHLET_X,0.0);
