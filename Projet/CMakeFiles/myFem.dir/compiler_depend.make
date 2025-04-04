@@ -342,8 +342,12 @@ CMakeFiles/myFem.dir/src/main.c.o: src/main.c \
   /usr/include/time.h \
   /usr/include/x86_64-linux-gnu/bits/time.h \
   /usr/include/x86_64-linux-gnu/bits/types/struct_tm.h \
-  /usr/include/x86_64-linux-gnu/bits/types/struct_itimerspec.h
+  /usr/include/x86_64-linux-gnu/bits/types/struct_itimerspec.h \
+  /usr/include/GL/glut.h \
+  /usr/include/GL/freeglut_std.h
 
+
+/usr/include/GL/glut.h:
 
 /usr/include/x86_64-linux-gnu/bits/time.h:
 
@@ -376,6 +380,8 @@ gmsh/gmsh-4.13.1-Linux64-sdk/include/gmshc.h:
 /usr/include/x86_64-linux-gnu/bits/types/locale_t.h:
 
 /usr/include/x86_64-linux-gnu/bits/mathcalls-helper-functions.h:
+
+/usr/include/GL/freeglut_std.h:
 
 /usr/include/stdint.h:
 

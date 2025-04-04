@@ -12,6 +12,7 @@ set(GMSH_MINOR 1)
 find_package(OpenGL REQUIRED)
 include_directories(${OPENGL_INCLUDE_DIR})
 
+
 # GLFW
 add_subdirectory(glfw)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/glfw/include)

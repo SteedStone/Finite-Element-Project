@@ -12,10 +12,14 @@
 #define TRIANGLE 1 
 #define HEXAGON 2
 #include <time.h>
+
 double fun(double x, double y) 
 {
     return 1;
 }
+
+
+ 
 
 
 
@@ -291,6 +295,7 @@ int main(int argc, char *argv[])
             glfemPlotMesh(theGeometry->theElements); 
             sprintf(theMessage, "Number of elements : %d ",theGeometry->theElements->nElem);
             glColor3f(1.0,0.0,0.0); glfemMessage(theMessage);
+
         }
         else if(option == 1 && mode == 4) {
             glfemPlotField(theGeometry->theElements, forcesY);
@@ -340,5 +345,3 @@ int main(int argc, char *argv[])
     exit(EXIT_SUCCESS);
     return 0;  
 }
-
- 
