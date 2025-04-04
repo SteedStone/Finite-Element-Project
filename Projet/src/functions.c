@@ -8,14 +8,7 @@ void chk(int ierr) {
         exit(1);
     }
 }
-// double hermiteInterpolation(double d, double dStar, double h0, double hStar) {
-//     if (d <= 0) return h0;
-//     if (d >= dStar) return hStar;
-//     double t = d / dStar;
-//     double t2 = t * t;
-//     double t3 = t2 * t;
-//     return h0 * (2 * t3 - 3 * t2 + 1) + hStar * (3 * t2 - 2 * t3);
-// }
+
 
 double geoSize(double x, double y) {
     femGeo* theGeometry = geoGetGeometry();
@@ -30,15 +23,15 @@ double geoSize(double x, double y) {
         
         double distance = hexRadius * 1.1; // Distance entre les lignes
         h_max = theGeometry->h;       
-        h_min = h_max * 0.01;  // Ajuste ce facteur pour un effet plus visible
+        h_min = h_max * 0.1;
         y_min =0;
         y_max = numHexY * distance - hexRadius;  
     } else {
         double hexRadius = theGeometry->hexRadius;
         double numHexX = theGeometry->NumberOfHexagonsInX;
         double numHexY = theGeometry->NumberOfHexagonsInY;
-        h_max = theGeometry->h;       
-        h_min = h_max * 0.01;  // Ajuste ce facteur pour un effet plus visible
+        h_max = theGeometry->h*0.1;       
+        h_min = h_max * 0.3; 
         y_min =-hexRadius*sqrt(3)/2 - hexRadius/3;  
         y_max = numHexY * sqrt(3) * hexRadius+ hexRadius/3;  
     }
@@ -47,19 +40,16 @@ double geoSize(double x, double y) {
     
     
     
-    // Éviter une division par zéro
 
     if (y_max == y_min) {
         return h_max;
     }
 
-    // Progression linéaire de la taille de maille entre h_min et h_max
+
     double t = (y - y_min) / (y_max - y_min);
-    t = fmax(0.0, fmin(1.0, t)); // S'assurer que t reste dans [0,1]
-    
+    t = fmax(0.0, fmin(1.0, t)); 
     double h = h_min + (h_max - h_min) * pow(1 - t, 3); 
-    // double h = h_min + (h_max - h_min) * (1 - t);      
-    //  printf("geoSize called: x=%.2f, y=%.2f -> h=%.5f\n", x, y, h); // 🔴 DEBUG
+
     return h;
 
 
@@ -70,8 +60,6 @@ void trianglePlot() {
 
     int ierr;
 
-    // gmshModelAdd("TriangleModel",  &ierr); // Créer un modèle pour les triangles
-    // ErrorGmsh(ierr);
 
 
     femGeo* theGeometry = geoGetGeometry();
@@ -79,7 +67,6 @@ void trianglePlot() {
     int numHexX = theGeometry->NumberOfTrianglesInX;
     int numHexY = theGeometry->NumberOfTrianglesInY;
 
-    // Définition des tailles de maillage variables
     double meshSizeMin = 0.07;  // Taille de maille en haut (fine)
     double meshSizeMax = 0.3;   // Taille de maille en bas (grossière)
     double distance = hexRadius * 1.1; // Distance entre les lignes
@@ -92,7 +79,6 @@ void trianglePlot() {
             double x = i * 1.3 * hexRadius;
             double y = j * distance - hexRadius;
 
-            // Calcul dynamique du meshSize en fonction de la hauteur
             double meshSize = meshSizeMax - (meshSizeMax - meshSizeMin) * ((double)j / numHexY);
 
             int innerPoints[3];
@@ -162,43 +148,30 @@ void trianglePlot() {
 
     
 
-    // gmshModelMeshGenerate(2, &ierr);
-    // ErrorGmsh(ierr);
-
-    // gmshFltkRun(&ierr);
-    // ErrorGmsh(ierr);
 }
 
 
 
 void HexagonPlot(){
 
-//
-//  -1- Construction de la g�om�trie avec OpenCascade
-//      On cr�e le rectangle
-//      On cr�e les deux cercles
-//      On soustrait les cercles du rectangle :-)
-//
 
     int ierr;
 
-    // gmshModelAdd("HexagonModel",  &ierr);
-    // ErrorGmsh(ierr);
     
     femGeo* theGeometry = geoGetGeometry();
 
-    double hexRadius = theGeometry->hexRadius;  // Rayon de l'hexagone
-    int numHexX = theGeometry->NumberOfHexagonsInX;  // Nombre d'hexagones en largeur
-    int numHexY = theGeometry->NumberOfHexagonsInY;  // Nombre d'hexagones en hauteur
-    double meshSizeMin = 0.07;  // Taille de maille en haut (fine)
-    double meshSizeMax = 0.3;   // Taille de maille en bas (grossière)
+    double hexRadius = theGeometry->hexRadius; 
+    int numHexX = theGeometry->NumberOfHexagonsInX; 
+    int numHexY = theGeometry->NumberOfHexagonsInY;  
+    double meshSizeMin = 0.07; 
+    double meshSizeMax = 0.3;   
     double f = 0.81;
 
-    int mainWireTags[1000]; // Contient tous les hexagones extérieurs
-    int innerWireTags[1000]; // Contient les petits hexagones à soustraire
-    int trianglecoteTags[1000]; // Contient les triangles à soustraire
-    int quadrilatereTags[1000]; // Contient les quadrilateres à soustraire
-    int losangeTags[1000]; // Contient les losanges à soustraire
+    int mainWireTags[1000]; 
+    int innerWireTags[1000];
+    int trianglecoteTags[1000]; 
+    int quadrilatereTags[1000]; 
+    int losangeTags[1000];
     
 
     int wireCount = 0, innerWireCount = 0, triangleWireCount = 0, quadrilatereWireCount = 0, losangeWireCount = 0;
@@ -428,19 +401,13 @@ void HexagonPlot(){
         }
     }
 
-    // Création d'un grand rectangle englobant la structure
     int rectPoints[4];
     rectPoints[0] = gmshModelOccAddPoint(-hexRadius, -hexRadius*sqrt(3)/2 - hexRadius/3, 0, meshSizeMax, -1, &ierr);
     rectPoints[1] = gmshModelOccAddPoint((numHexX -1)* 1.5* hexRadius + hexRadius, -hexRadius*sqrt(3)/2 - hexRadius/3, 0, meshSizeMax, -1, &ierr);
     rectPoints[2] = gmshModelOccAddPoint((numHexX -1)* 1.5* hexRadius + hexRadius, numHexY * sqrt(3) * hexRadius+ hexRadius/3, 0, meshSizeMin, -1, &ierr);
     rectPoints[3] = gmshModelOccAddPoint(-hexRadius, numHexY * sqrt(3) * hexRadius+ hexRadius/3, 0, meshSizeMin, -1, &ierr);
 
-    // int newRectPoints[4];
-    // newRectPoints[0] = gmshModelOccAddPoint(-hexRadius, -hexRadius*sqrt(3)/2 , 0, meshSizeMax, -1, &ierr);
-    // newRectPoints[1] = gmshModelOccAddPoint((numHexX -1)* 1.5* hexRadius + hexRadius, -hexRadius*sqrt(3)/2 , 0, meshSizeMax, -1, &ierr);
-    // newRectPoints[2] = gmshModelOccAddPoint((numHexX -1 ) * 1.5 * hexRadius + hexRadius, numHexY * sqrt(3) * hexRadius, 0, meshSizeMin, -1, &ierr);
-    // newRectPoints[3] = gmshModelOccAddPoint(-hexRadius, numHexY * sqrt(3) * hexRadius, 0, meshSizeMin, -1, &ierr);
-    
+
 
     int rectLines[4];
     for (int k = 0; k < 4; k++) {
@@ -448,11 +415,7 @@ void HexagonPlot(){
         ErrorGmsh(ierr);
     }
 
-    // int newRectLines[4];
-    // for (int k = 0; k < 4; k++) {
-    //     newRectLines[k] = gmshModelOccAddLine(newRectPoints[k], newRectPoints[(k + 1) % 4], -1, &ierr);
-    //     ErrorGmsh(ierr);
-    // }
+
 
 
     int rectWire = gmshModelOccAddWire(rectLines, 4, -1, 1, &ierr);
@@ -534,9 +497,7 @@ void HexagonPlot(){
     ErrorGmsh(ierr);
 
   
-    // // Affichage dans Gmsh
-    // gmshFltkRun(&ierr);
-    // ErrorGmsh(ierr);
+
 
 
 
@@ -595,8 +556,7 @@ void femFindBoundaryNodes(femGeo *theProblem, double targetY, double epsilon , c
     for (int i = 0; i < size; i++)
     {
         if (map[i] == 1 && fabs(theProblem->theNodes->Y[i] - targetY) < epsilon ) {
-            // printf("TArgetY: %f\n", targetY);
-            // printf("Node %d: %f\n", i, theProblem->theNodes->Y[i]);
+
             theFilteredBoundary->elem[index++] = i; 
         }
     }
@@ -669,9 +629,10 @@ void femElasticitySigma(femProblem *theProblem, double *sigmaXX, double *sigmaYY
             map[i] = theMesh->elem[iElem * nLocal + i];
             x[i] = theNodes->X[map[i]];
             y[i] = theNodes->Y[map[i]];
-            u[i] = theSoluce[2 * map[number[i]]];
-            v[i] = theSoluce[2 * map[number[i]] + 1];
-
+            // u[i] = theSoluce[2 * map[number[i]]];
+            // v[i] = theSoluce[2 * map[number[i]] + 1];
+            u[i] = theSoluce[2 * map[i]];
+            v[i] = theSoluce[2 * map[i] + 1];
         }
 
         for (iInteg = 0; iInteg < theRule->n; iInteg++)

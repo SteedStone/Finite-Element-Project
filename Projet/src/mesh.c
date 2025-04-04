@@ -32,10 +32,7 @@
     int big = atoi(argv[4]);
      
  
- 
-     // On va devoir avoir un gros rectangle de lx = 2 et ly = 0.5
-     // Puis deux petits cercles au bout de chaque côté du rectangle de rayon 0.1 et 0.2 
-     // et enfin deux rectangle dans les cercles. 
+
   
     
        
@@ -63,18 +60,9 @@
          theGeometry->elementType = type1;
          theGeometry->hexa_triangles = type ;
          
-         // Appel nos fonctions pour créer notre maillage avec soit les hexagones soit les triangles avec la librairie gsmh 
          geoMeshGenerate();
-         // On remplit la structure TheGeometry avec les noeuds, edges ect depuis gsmh vers notre programme 
          geoMeshImport();
-         // On trouve créer les différents domaines ou on va venir appliquer nos forces celon si on apllique sur les hexagones ou les triangles.
-        //  if (theGeometry->hexa_triangles == 1) {
-        //      femFindBoundaryNodes(theGeometry, 0 , 10e-6 , "Bottom"); // numéro 
-        //      femFindBoundaryNodes(theGeometry, 90 , 10e-6 , "Top");
-        //  } else {
-        //     geoSetDomainName(117 , "Top");
-        //     geoSetDomainName(124 , "Bottom");
-        //  }
+
          if (theGeometry->hexa_triangles == 1) {
             if (big) {
                 geoSetDomainName(181 , "Top"); // 0
@@ -138,7 +126,6 @@
  //
  //  -3- Visualisation du maillage
  //  
-     // On a rajouté une option pour voir si on veut l'afficher ou pas 
      if(show_visualisation_maillage) {
          double *meshSizeField = malloc(theGeometry->theNodes->nNodes*sizeof(double));
          femNodes *theNodes = theGeometry->theNodes;
@@ -170,7 +157,6 @@
              glfemReshapeWindows(theGeometry->theNodes,w,h);
  
              t = glfwGetTime();  
-         //    glfemChangeState(&mode, theMeshes->nMesh);
              if (glfwGetKey(window,'D') == GLFW_PRESS) { mode = 0;}
              if (glfwGetKey(window,'V') == GLFW_PRESS) { mode = 1;}
              if (glfwGetKey(window,'N') == GLFW_PRESS && freezingButton == FALSE) { domain++; freezingButton = TRUE; told = t;}
@@ -209,7 +195,6 @@
          } while( glfwGetKey(window,GLFW_KEY_ESCAPE) != GLFW_PRESS &&
                      glfwWindowShouldClose(window) != 1 );
                  
-         // Check if the ESC key was pressed or the window was closed
  
          free(meshSizeField);  
      }

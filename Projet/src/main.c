@@ -39,10 +39,6 @@ int main(int argc, char *argv[])
     
 
 
-    // On va devoir avoir un gros rectangle de lx = 2 et ly = 0.5
-    // Puis deux petits cercles au bout de chaque côté du rectangle de rayon 0.1 et 0.2 
-    // et enfin deux rectangle dans les cercles. 
- 
    
       
     int ierr;
@@ -71,8 +67,7 @@ int main(int argc, char *argv[])
     // Lecture du fichier ligne par ligne
     while(fgets(ligne, sizeof(ligne), fp) != NULL) {
         if(strstr(ligne, "Type of problem") != NULL) {
-            // Exemple de ligne : "Type of problem    :  Planar stresses"
-            // La directive %[^\n] permet de récupérer toute la chaîne jusqu'au retour à la ligne.
+
             sscanf(ligne, "Type of problem    : %49[^\n]", problemType);
         }
         else if(strstr(ligne, "Young modulus") != NULL) {
@@ -105,7 +100,6 @@ int main(int argc, char *argv[])
     }
 
     else {
-        // Si le type n'est pas reconnu, on garde la valeur par défaut
         problemCase = PLANAR_STRESS;
     }
     
@@ -118,22 +112,15 @@ int main(int argc, char *argv[])
     printf("Deformation Factor : %le\n", deformationFactor);
     printf("Sigma Max (rupture): %le\n", SigmaMax);
     
-    // Exemple d'utilisation avec la fonction femElasticityCreate :
-    // femProblem* theProblem = femElasticityCreate(theGeometry, E, nu, rho, g, problemCase, FEM_BAND, FEM_NO);
     
 
 
 
-    
-    // Initialisation du problème avec les conditions aux bords
-    // ON remplit juste la structure theProblem avec les valeurs de E, nu, rho, g et le type de problème qu'on veut résoudre
-    femProblem* theProblem = femElasticityCreate(theGeometry,E,nu,rho,g,PLANAR_STRESS , FEM_BAND , FEM_YNUM);
-    // femElasticityAddBoundaryCondition(theProblem,"Symmetry",DIRICHLET_X,0.0);
-    // femElasticityAddBoundaryCondition(theProblem,"Bottom",DIRICHLET_Y,0.0);
-    // femElasticityAddBoundaryCondition(theProblem,"Bottom",DIRICHLET_X,0.0);
+
+    femProblem* theProblem = femElasticityCreate(theGeometry,E,nu,rho,g,PLANAR_STRESS , FEM_FULL , FEM_NO);
 
 
-    // femElasticityAddBoundaryCondition(theProblem,"Top",NEUMANN_Y,-1e6);
+
     fp = fopen(file_problem, "r");
     while(fgets(ligne, sizeof(ligne), fp) != NULL) {
         if(strstr(ligne, "Boundary condition") != NULL) {
@@ -156,10 +143,7 @@ int main(int argc, char *argv[])
 
     
     femElasticityPrint(theProblem);
-    
-    // femFullSystemPrint(theProblem->solver->solver);
-    // printf("Taille system %d" , theProblem->size);
-    
+
     //  -3- Resolution du probleme et calcul des forces
     
 
@@ -204,7 +188,6 @@ int main(int argc, char *argv[])
 
     
     
-    // N'oublie pas de libérer le tableau inverse
 
     double hMin = femMin(normDisplacement,theNodes->nNodes);  
     double hMax = femMax(normDisplacement,theNodes->nNodes);  
@@ -244,15 +227,14 @@ int main(int argc, char *argv[])
 
     GLFWwindow* window = glfemInit("LEPL1110 : Band Solver ");
     glfwMakeContextCurrent(window);
-    glPointSize(4.0f);                 // Par exemple, un point de 4 pixels
-    glEnable(GL_POINT_SMOOTH);         // Active l’anticrénelage pour les points
+    glPointSize(4.0f);                
+    glEnable(GL_POINT_SMOOTH);         
     glHint(GL_POINT_SMOOTH_HINT, GL_NICEST); 
     
     do 
     {
         int testConvergence;
         char theMessage[256];
-        // sprintf(theMessage, "Max : %.4f ",femMax(theProblem->soluce,theProblem->size));
         int w,h;
         glfwGetFramebufferSize(window,&w,&h);
         glfemReshapeWindows(theGeometry->theNodes,w,h);
@@ -289,13 +271,11 @@ int main(int argc, char *argv[])
                 case FEM_XNUM : printf("    Renumbering along the x-direction\n"); break;
                 case FEM_YNUM : printf("    Renumbering along the y-direction\n"); break;
                 default : break; }
-            // printf("    Maximum value : %.4f\n", femMax(theProblem->soluce,theProblem->size));
             fflush(stdout); }
         if (glfwGetKey(window,'V') == GLFW_PRESS)   {option = 1;mode = 8;}
         if (glfwGetKey(window,'S') == GLFW_PRESS)   option = 0;
         if (glfwGetKey(window,'F') == GLFW_PRESS)   newSolverType = FEM_FULL; 
         if (glfwGetKey(window,'B') == GLFW_PRESS)   newSolverType = FEM_BAND; 
-        // if (glfwGetKey(window,'I') == GLFW_PRESS)   newSolverType = FEM_ITER; 
         if (glfwGetKey(window,'X') == GLFW_PRESS)   newRenumType  = FEM_XNUM; 
         if (glfwGetKey(window,'Y') == GLFW_PRESS)   newRenumType  = FEM_YNUM; 
         if (glfwGetKey(window,'N') == GLFW_PRESS)   newRenumType  = FEM_NO; 
@@ -347,7 +327,6 @@ int main(int argc, char *argv[])
     } while( glfwGetKey(window,GLFW_KEY_ESCAPE) != GLFW_PRESS &&
             glfwWindowShouldClose(window) != 1 );
             
-    // Check if the ESC key was pressed or the window was closed
             
     glfwTerminate(); 
 

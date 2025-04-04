@@ -163,9 +163,7 @@ void geoMeshImport()
     gmshFree(xyz);
     gmshFree(trash);
     printf("Geo     : Importing %d nodes \n",theGeometry.theNodes->nNodes);
-       
-    /* Importing elements */
-    /* Pas super joli : a ameliorer pour eviter la triple copie */
+    
         
     size_t nElem, *elem;
     gmshModelMeshGetElementsByType(1,&elem,&nElem,
@@ -1556,7 +1554,6 @@ int femSolverConverged(femSolver *mySolver)
     switch (mySolver->type) {
         case FEM_FULL : testConvergence = 1; break;
         case FEM_BAND : testConvergence = 1; break;
-        // case FEM_ITER : testConvergence = femIterativeSolverConverged((femIterativeSolver *)mySolver->solver); break;
         default : Error("Unexpected solver type"); }
     return(testConvergence);
 }
@@ -1637,24 +1634,20 @@ void femIterativeSolverAssemble(femIterativeSolver* mySolver,
                                 int nLoc)
 {
     int i, j;
-    int localSize = nLoc * 2; // taille du système local (x et y)
+    int localSize = nLoc * 2; 
     
     for (i = 0; i < nLoc; i++) {
-        int myRowX = mapX[i];  // indice global pour la DOF x du nœud i
-        int myRowY = mapY[i];  // indice global pour la DOF y du nœud i
+        int myRowX = mapX[i]; 
+        int myRowY = mapY[i]; 
         
-        // Assembler les contributions du vecteur bloc (Bloc) pour les deux composantes
-        mySolver->R[myRowX] -= Bloc[2 * i];     // contribution en x
-        mySolver->R[myRowY] -= Bloc[2 * i + 1];   // contribution en y
+        mySolver->R[myRowX] -= Bloc[2 * i];     
+        mySolver->R[myRowY] -= Bloc[2 * i + 1];   
         
-        // Boucle sur les nœuds locaux pour assembler la matrice locale (Aloc)
         for (j = 0; j < nLoc; j++) {
-            // Contribution de la ligne associée à la composante x du nœud i
             mySolver->R[myRowX] += 
                 Aloc[(2 * i) * localSize + (2 * j)]     * Uloc[2 * j]     +
                 Aloc[(2 * i) * localSize + (2 * j + 1)] * Uloc[2 * j + 1];
             
-            // Contribution de la ligne associée à la composante y du nœud i
             mySolver->R[myRowY] += 
                 Aloc[(2 * i + 1) * localSize + (2 * j)]     * Uloc[2 * j]     +
                 Aloc[(2 * i + 1) * localSize + (2 * j + 1)] * Uloc[2 * j + 1];
@@ -1752,41 +1745,28 @@ double *femIterativeSolverEliminate(femIterativeSolver *mySolver)
 
  
 
- 
 #include <GL/gl.h> 
 #include <math.h> 
 #include "fem.h"
 
-void glfemPlotFailureNodes(femNodes *nodes, double *sigmaXX, double *sigmaYY, double *sigmaXY, double sigma_max){
+void glfemPlotFailureNodes(femNodes *nodes, double *sigmaXX, double *sigmaYY, double *sigmaXY, double sigma_max) {
     glColor3f(1.0, 0.0, 0.0); 
-    glLineWidth(1);
-    // Taille de la croix (en unités d'écran)
-    double crossSize = 0.002;
+    glPointSize(10.0);  
 
-    glBegin(GL_LINES);
+    glBegin(GL_POINTS);
     for (int i = 0; i < nodes->nNodes; i++) {
-        // Calcul de la contrainte équivalente (critère de von Mises)
         double sxx = sigmaXX[i];
         double syy = sigmaYY[i];
         double sxy = sigmaXY[i];
         double vonMises = sqrt(sxx * sxx - sxx * syy + syy * syy + 3.0 * sxy * sxy);
 
-        // Si la contrainte dépasse la valeur critique, tracer une croix
         if (vonMises > sigma_max) {
             double x = nodes->X[i];
             double y = nodes->Y[i];
-
-            // Tracer la première diagonale
-            glVertex2d(x - crossSize, y - crossSize);
-            glVertex2d(x + crossSize, y + crossSize);
-
-            // Tracer la seconde diagonale
-            glVertex2d(x - crossSize, y + crossSize);
-            glVertex2d(x + crossSize, y - crossSize);
+            glVertex2d(x, y);
         }
     }
     glEnd();
-
 }
 
 

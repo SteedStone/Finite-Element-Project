@@ -22,12 +22,10 @@
      return 1;
  }
  
- // Capture le contenu du framebuffer et sauvegarde une image PNG
  void captureFrame(int frame, GLFWwindow* window) {
      int width, height;
      glfwGetFramebufferSize(window, &width, &height);
  
-     // Debug (optionnel)
      printf("Framebuffer size: %d x %d\n", width, height);
      GLint viewport[4];
      glGetIntegerv(GL_VIEWPORT, viewport);
@@ -36,11 +34,9 @@
      glfwGetWindowSize(window, &winWidth, &winHeight);
      printf("Window size: %d x %d\n", winWidth, winHeight);
  
-     // Allouer la mémoire pour récupérer les pixels
      unsigned char* pixels = (unsigned char*)malloc(3 * width * height);
      glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, pixels);
  
-     // Inverser l'image verticalement
      unsigned char* flippedPixels = (unsigned char*)malloc(3 * width * height);
      for (int y = 0; y < height; y++) {
          for (int x = 0; x < width; x++) {
@@ -52,7 +48,6 @@
          }
      }
  
-     // Sauvegarder l'image dans le dossier "frame" (vérifiez que ce dossier existe)
      char filename[100];
      sprintf(filename, "frame/frame_%d.png", frame);
      stbi_write_png(filename, width, height, 3, flippedPixels, width * 3);
@@ -69,12 +64,10 @@
      }
      char *file_path = argv[1];
  
-     // Initialisation de la géométrie et lecture du maillage
      geoInitialize();
      femGeo* theGeometry = geoGetGeometry();
      geoMeshRead(file_path);
  
-     // --- Lecture des paramètres depuis "data/problem.txt" ---
      FILE *fp = fopen("data/problem.txt", "r");
      if(fp == NULL) {
          perror("Erreur lors de l'ouverture du fichier problem.txt");
@@ -119,7 +112,6 @@
      printf("  Deformation Factor : %le\n", deformation_factor);
      printf("  Sigma max (rupture): %le\n", SigmaMax);
  
-     // Sauvegarder les positions initiales des nœuds
      femNodes *theNodes = theGeometry->theNodes;
      double *X0 = malloc(theNodes->nNodes * sizeof(double));
      double *Y0 = malloc(theNodes->nNodes * sizeof(double));
@@ -128,7 +120,6 @@
          Y0[i] = theNodes->Y[i];
      }
  
-     // Allocation des champs pour la visualisation
      double *normDisplacement = malloc(theNodes->nNodes * sizeof(double));
      double *forcesX = malloc(theNodes->nNodes * sizeof(double));
      double *forcesY = malloc(theNodes->nNodes * sizeof(double));
@@ -140,32 +131,24 @@
          exit(EXIT_FAILURE);
      }
  
-     // Création de la fenêtre GLFW
      glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
      GLFWwindow* window = glfemInit("Visualisation et rupture (FEM)");
      glfwSetWindowSize(window, 1024, 768);
      glfwMakeContextCurrent(window);
  
-     // --- Itération sur la force appliquée ---
-     // Définir les valeurs de la force sur le bord supérieur
-     double F_top_start = 1e4, F_top_end = 1e5, F_top_step = 1e4;
+     double F_top_start = (0.1e4)*4*4, F_top_end = (5e4)*4*4, F_top_step = (0.1e4)*4*4;
      int frameCounter = 0;
      for (double F_top = F_top_start; F_top <= F_top_end; F_top += F_top_step) {
          printf("Simulation avec Force Top = %.1e N\n", F_top);
          
-         // Création du problème FEM pour cette itération
          femProblem* theProblem = femElasticityCreate(theGeometry, E, nu, rho, g, PLANAR_STRESS, FEM_BAND, FEM_YNUM);
-         // Ajout des conditions aux limites (lues dans le fichier ou codées ici)
          femElasticityAddBoundaryCondition(theProblem, "Bottom", DIRICHLET_X, 0.0);
          femElasticityAddBoundaryCondition(theProblem, "Bottom", DIRICHLET_Y, 0.0);
-         // Appliquer une force verticale sur le bord "Top" (négative pour une force dirigée vers le bas)
          femElasticityAddBoundaryCondition(theProblem, "Top", NEUMANN_Y, -F_top);
  
-         // Résolution du problème
          double *theSoluce = femElasticitySolve(theProblem);
          double *theForces = femElasticityForces(theProblem);
  
-         // Mise à jour des positions des nœuds (en se basant sur les positions initiales)
          femMesh *theMesh = theProblem->geometry->theElements;
         int *number = theMesh->nodes->number;
         for (int i=0; i<theNodes->nNodes; i++){
@@ -177,41 +160,33 @@
         forcesY[i] = theForces[2 * number[i] + 1];
          }
  
-         // Calcul des contraintes nodales via l'API FEM
          femElasticitySigma(theProblem, sigmaXX, sigmaYY, sigmaXY);
  
-         // Redimensionnement de la fenêtre
          int w, h;
          glfwGetFramebufferSize(window, &w, &h);
          glfemReshapeWindows(theNodes, w, h);
  
-         // Effacer le tampon d'affichage
          glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
  
-         // Afficher un champ (par exemple, le champ de déplacement)
          glfemPlotField(theGeometry->theElements, normDisplacement);
          glfemPlotMesh(theGeometry->theElements);
  
-         // Affichage des nœuds en rupture via la fonction glfemPlotFailureNodes
          glfemPlotFailureNodes(theNodes, sigmaXX, sigmaYY, sigmaXY, SigmaMax);
  
-         // Afficher un message indiquant la force appliquée
          char theMessage[256];
          sprintf(theMessage, "Force Top: %.1e N", F_top);
          glColor3f(1.0, 0.0, 0.0);
-         glfemMessage(theMessage);
+         glfemDrawMessage(20, 375, theMessage);
+
  
-         // Mise à jour de l'affichage et capture de la frame
          glfwSwapBuffers(window);
          glfwPollEvents();
          captureFrame(frameCounter, window);
          frameCounter++;
  
-         // Libération des ressources associées au problème courant
          femElasticityFree(theProblem);
      }
  
-     // Libération des ressources et nettoyage
      free(normDisplacement);
      free(forcesX);
      free(forcesY);
