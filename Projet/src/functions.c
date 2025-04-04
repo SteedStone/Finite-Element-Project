@@ -613,7 +613,7 @@ void femElasticitySigma(femProblem *theProblem, double *sigmaXX, double *sigmaYY
     } 
     
     
-
+// ok
     B2 = (double *) malloc(nNodes * sizeof(double));
     B3 = (double *) malloc(nNodes * sizeof(double));
 
