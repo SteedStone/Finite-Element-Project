@@ -24,6 +24,7 @@ make
 - ```myVisualisation``` : Create a animation of the force acting on the structures.
 
 ### myMesh : 
+
 Option :  
 - Type de cartons (```1``` : Triangle ```2``` : Hexagone)
 - Viualiser la forme (```1``` : Oui ```2``` : Non)
